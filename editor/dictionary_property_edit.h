@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  editor_name_dialog.cpp                                               */
+/*  dictionary_property_edit.h                                           */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -27,65 +27,36 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+#ifndef DICTIONARY_PROPERTY_EDIT_H
+#define DICTIONARY_PROPERTY_EDIT_H
 
-#include "editor_name_dialog.h"
-#include "object_type_db.h"
-#include "os/keyboard.h"
+#include "scene/main/node.h"
 
-void EditorNameDialog::_line_input_event(const InputEvent &p_event) {
+class DictionaryPropertyEdit : public Reference {
+	OBJ_TYPE(DictionaryPropertyEdit, Reference);
 
-	if (p_event.type == InputEvent::KEY) {
+	ObjectID obj;
+	StringName property;
 
-		if (!p_event.key.pressed)
-			return;
+	void _notif_change();
+	void _notif_changev(const String &p_v);
+	void _set_key(const int p_idx, const Variant &p_new_key);
+	void _set_value(const Variant &p_key, const Variant &p_value);
 
-		switch (p_event.key.scancode) {
-			case KEY_ENTER:
-			case KEY_RETURN: {
+	Variant get_dictionary() const;
 
-				if (get_hide_on_ok())
-					hide();
-				ok_pressed();
-				accept_event();
-			} break;
-			case KEY_ESCAPE: {
+protected:
+	static void _bind_methods();
+	bool _set(const StringName &p_name, const Variant &p_value);
+	bool _get(const StringName &p_name, Variant &r_ret) const;
+	void _get_property_list(List<PropertyInfo> *p_list) const;
 
-				hide();
-				accept_event();
-			} break;
-		}
-	}
-}
+public:
+	void edit(Object *p_obj, const StringName &p_prop);
 
-void EditorNameDialog::_post_popup() {
+	Node *get_node();
 
-	ConfirmationDialog::_post_popup();
-	name->clear();
-	name->grab_focus();
-}
+	DictionaryPropertyEdit();
+};
 
-void EditorNameDialog::ok_pressed() {
-
-	if (name->get_text() != "") {
-		emit_signal("name_confirmed", name->get_text());
-	}
-}
-
-void EditorNameDialog::_bind_methods() {
-
-	ObjectTypeDB::bind_method("_line_input_event", &EditorNameDialog::_line_input_event);
-
-	ADD_SIGNAL(MethodInfo("name_confirmed", PropertyInfo(Variant::STRING, "name")));
-}
-
-EditorNameDialog::EditorNameDialog() {
-	makevb = memnew(VBoxContainer);
-	makevb->set_margin(MARGIN_TOP, 5);
-	makevb->set_anchor_and_margin(MARGIN_LEFT, ANCHOR_BEGIN, 5);
-	makevb->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 5);
-	add_child(makevb);
-
-	name = memnew(LineEdit);
-	makevb->add_child(name);
-	name->connect("input_event", this, "_line_input_event");
-}
+#endif // DICTIONARY_PROPERTY_EDIT_H
