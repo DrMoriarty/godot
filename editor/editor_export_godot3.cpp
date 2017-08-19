@@ -192,8 +192,8 @@ static const char *prop_renames[][2] = {
 	{ "focus_neighbour/top", "focus_neighbour_top" },
 	{ "focus/ignore_mouse", "focus_ignore_mouse" },
 	{ "focus/stop_mouse", "focus_stop_mouse" },
-	{ "size_flags/horizontal", "size_flags_horizontal" },
-	{ "size_flags/vertical", "size_flags_vertical" },
+	{ "size_flags/horizontal", "size_flags_horizontal" }, // TODO: Fix enum order got inverted Expand,Fill -> Fill,Expand
+	{ "size_flags/vertical", "size_flags_vertical" }, // TODO: Fix enum order got inverted Expand,Fill -> Fill,Expand
 	{ "size_flags/stretch_ratio", "size_flags_stretch_ratio" },
 	{ "theme/theme", "theme" },
 	{ "visibility/visible", "visible" },
@@ -363,31 +363,19 @@ static const char *prop_renames[][2] = {
 	{ "playback/process_mode", "playback_process_mode" },
 	{ "playback/default_blend_time", "playback_default_blend_time" },
 	{ "root/root", "root_node" },
-	{ "playback/process_mode", "playback_process_mode" },
 	{ "stream/stream", "stream" },
-	{ "stream/play", "play" },
+	{ "stream/play", "playing" },
 	{ "stream/loop", "loop" },
 	{ "stream/volume_db", "volume_db" },
+	{ "stream/autoplay", "autoplay" },
+	{ "stream/paused", "paused" },
+	{ "stream/loop_restart_time", "loop_restart_time" },
+	{ "stream/buffering_ms", "buffering_ms" },
 	{ "stream/pitch_scale", "pitch_scale" },
 	{ "stream/tempo_scale", "tempo_scale" },
-	{ "stream/autoplay", "autoplay" },
-	{ "stream/paused", "paused" },
-	{ "stream/stream", "stream" },
-	{ "stream/play", "play" },
-	{ "stream/loop", "loop" },
-	{ "stream/volume_db", "volume_db" },
-	{ "stream/autoplay", "autoplay" },
-	{ "stream/paused", "paused" },
-	{ "stream/loop_restart_time", "loop_restart_time" },
-	{ "stream/buffering_ms", "buffering_ms" },
-	{ "stream/stream", "stream" },
-	{ "stream/play", "play" },
-	{ "stream/loop", "loop" },
-	{ "stream/volume_db", "volume_db" },
-	{ "stream/autoplay", "autoplay" },
-	{ "stream/paused", "paused" },
-	{ "stream/loop_restart_time", "loop_restart_time" },
-	{ "stream/buffering_ms", "buffering_ms" },
+	{ "stream/audio_track", "audio_track" },
+	{ "stream/autoplay", "stream_autoplay" },
+	{ "stream/paused", "stream_paused" },
 	{ "window/title", "window_title" },
 	{ "dialog/text", "dialog_text" },
 	{ "dialog/hide_on_ok", "dialog_hide_on_ok" },
@@ -416,7 +404,6 @@ static const char *prop_renames[][2] = {
 	{ "velocity/angular", "angular_velocity" },
 	{ "damp_override_linear", "linear_damp" },
 	{ "damp_override_angular", "angular_damp" },
-	{ "playback/process_mode", "playback_process_mode" },
 	{ "bbcode/enabled", "bbcode_enabled" },
 	{ "bbcode/bbcode", "bbcode_text" },
 	{ "scroll/horizontal", "scroll_horizontal" },
@@ -442,11 +429,6 @@ static const char *prop_renames[][2] = {
 	{ "radial_fill/initial_angle", "radial_initial_angle" },
 	{ "radial_fill/fill_degrees", "radial_fill_degrees" },
 	{ "radial_fill/center_offset", "radial_center_offset" },
-	{ "stream/audio_track", "audio_track" },
-	{ "stream/stream", "stream" },
-	{ "stream/volume_db", "volume_db" },
-	{ "stream/autoplay", "stream_autoplay" },
-	{ "stream/paused", "stream_paused" },
 	{ "font/size", "size" },
 	{ "extra_spacing/top", "extra_spacing_top" },
 	{ "extra_spacing/bottom", "extra_spacing_bottom" },
@@ -476,19 +458,20 @@ static const char *prop_renames[][2] = {
 	{ "cell/center_z", "cell_center_z" },
 	{ "cell/scale", "cell_scale" },
 	{ "region", "region_enabled" },
+	{ "rect/min_size", "rect_min_size" },
+	{ "rect/rotation", "rect_rotation" },
+	{ "rect/scale", "rect_scale" },
+	{ "process/pause_mode", "pause_mode" },
 	{ NULL, NULL }
 };
 
 static const char *type_renames[][2] = {
-	{ "SpatialPlayer", "Spatial" },
-	{ "SpatialSamplePlayer", "Spatial" },
-	{ "SpatialStreamPlayer", "Spatial" },
-	{ "Particles", "Spatial" },
+	{ "StreamPlayer", "AudioStreamPlayer" },
+	{ "SpatialSamplePlayer", "AudioStreamPlayer3D" },
+	{ "SpatialStreamPlayer", "AudioStreamPlayer3D" },
 	{ "SamplePlayer", "Node" },
-	{ "SamplePlayer2D", "Node2D" },
+	{ "SamplePlayer2D", "AudioStreamPlayer2D" },
 	{ "SoundPlayer2D", "Node2D" },
-	{ "StreamPlayer2D", "Node2D" },
-	{ "Particles2D", "Node2D" },
 	{ "SampleLibrary", "Resource" },
 	{ "TextureFrame", "TextureRect" },
 	{ "Patch9Frame", "NinePatchRect" },
@@ -496,7 +479,7 @@ static const char *type_renames[][2] = {
 	{ "ColorRamp", "Gradient" },
 	{ "CanvasItemShader", "Shader" },
 	{ "CanvasItemMaterial", "ShaderMaterial" },
-	{ "TestCube", "MeshInstance" },
+	{ "TestCube", "MeshInstance" }, // TODO: Handle assignment of CubeMesh + default material?
 	{ NULL, NULL }
 };
 
@@ -1182,7 +1165,7 @@ Error EditorExportGodot3::_get_property_as_text(const Variant &p_variant, String
 		} break;
 		case Variant::REAL_ARRAY: {
 
-			p_string += ("PoolFloatArray( ");
+			p_string += ("PoolRealArray( ");
 			DVector<real_t> data = p_variant;
 			int len = data.size();
 			DVector<real_t>::Read r = data.read();
@@ -1993,7 +1976,7 @@ Error EditorExportGodot3::export_godot3(const String &p_path) {
 	List<String> files;
 	_find_files(EditorFileSystem::get_singleton()->get_filesystem(), &files);
 
-	EditorProgress progress("exporting", "Exporting Godot 3.0", files.size());
+	EditorProgress progress("exporting", "Exporting the project to Godot 3.0", files.size());
 
 	//find XML resources
 

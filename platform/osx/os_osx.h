@@ -103,15 +103,12 @@ public:
 	CursorShape cursor_shape;
 	MouseMode mouse_mode;
 
+	String title;
 	bool minimized;
 	bool maximized;
 	bool zoomed;
 
-	Vector<Rect2> screens;
-	Vector<int> screen_dpi;
-
 	Size2 window_size;
-	int current_screen;
 	Rect2 restore_rect;
 
 	float _mouse_scale(float p_scale) {
@@ -120,6 +117,8 @@ public:
 		else
 			return 1.0;
 	}
+
+	void _update_window();
 
 	float display_scale;
 
@@ -141,6 +140,8 @@ public:
 	void wm_minimized(bool p_minimized);
 
 	virtual String get_name();
+
+	virtual void print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type = ERR_ERROR);
 
 	virtual void alert(const String &p_alert, const String &p_title = "ALERT!");
 
@@ -204,6 +205,9 @@ public:
 	virtual bool is_window_maximized() const;
 	virtual void request_attention();
 	virtual String get_joy_guid(int p_device) const;
+
+	virtual void set_borderless_window(int p_borderless);
+	virtual bool get_borderless_window();
 
 	void run();
 
