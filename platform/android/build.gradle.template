@@ -37,6 +37,7 @@ android {
 	packagingOptions {
 		exclude 'META-INF/LICENSE'
 		exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
 	}
 	defaultConfig {
 		$$GRADLE_DEFAULT_CONFIG$$

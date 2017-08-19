@@ -19,7 +19,8 @@ android_files = [
     'android_native_app_glue.c',
     'java_glue.cpp',
     'cpu-features.c',
-    'java_class_wrapper.cpp'
+    'java_class_wrapper.cpp',
+    '../../modules/hockeyapp/android/java_interface.cpp'
 ]
 
 # env.Depends('#core/math/vector3.h', 'vector3_psp.h')
