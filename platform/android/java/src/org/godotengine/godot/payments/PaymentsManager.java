@@ -105,18 +105,18 @@ public class PaymentsManager {
 
 			@Override
 			protected void error(String message) {
-				godotPaymentV3.callbackFail();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackFail();
 
 			}
 
 			@Override
 			protected void canceled() {
-				godotPaymentV3.callbackCancel();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackCancel();
 			}
 
 			@Override
 			protected void alreadyOwned() {
-				godotPaymentV3.callbackAlreadyOwned(sku);
+				if(godotPaymentV3 != null) godotPaymentV3.callbackAlreadyOwned(sku);
 			}
 
 		}.purchase(sku, transactionId);
@@ -128,20 +128,20 @@ public class PaymentsManager {
 
 			@Override
 			protected void success(String sku, String receipt, String signature, String token) {
-				godotPaymentV3.callbackSuccessProductMassConsumed(receipt, signature, sku);
+				if(godotPaymentV3 != null) godotPaymentV3.callbackSuccessProductMassConsumed(receipt, signature, sku);
 			}
 
 			@Override
 			protected void error(String message) {
 				Log.d("godot", "consumeUnconsumedPurchases :" + message);
-				godotPaymentV3.callbackFailConsume();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackFailConsume();
 
 			}
 
 			@Override
 			protected void notRequired() {
 				Log.d("godot", "callbackSuccessNoUnconsumedPurchases :");
-				godotPaymentV3.callbackSuccessNoUnconsumedPurchases();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackSuccessNoUnconsumedPurchases();
 
 			}
 		}.consumeItAll();
@@ -162,7 +162,7 @@ public class PaymentsManager {
 					final ArrayList<String> mySignatures = bundle.getStringArrayList("INAPP_DATA_SIGNATURE_LIST");
 
 					if (myPurchases == null || myPurchases.size() == 0) {
-						godotPaymentV3.callbackPurchased("", "", "");
+						if(godotPaymentV3 != null) godotPaymentV3.callbackPurchased("", "", "");
 						return;
 					}
 
@@ -180,7 +180,7 @@ public class PaymentsManager {
 							pc.setConsumableFlag("block", sku, true);
 							pc.setConsumableValue("token", sku, token);
 
-							godotPaymentV3.callbackPurchased(receipt, signature, sku);
+							if(godotPaymentV3 != null) godotPaymentV3.callbackPurchased(receipt, signature, sku);
 						} catch (JSONException e) {
 						}
 					}
@@ -198,7 +198,7 @@ public class PaymentsManager {
 
 			@Override
 			protected void success(final String sku, final String signature, final String ticket) {
-				godotPaymentV3.callbackSuccess(ticket, signature, sku);
+				if(godotPaymentV3 != null) godotPaymentV3.callbackSuccess(ticket, signature, sku);
 
 				if (auto_consume) {
 					new ConsumeTask(mService, activity) {
@@ -209,7 +209,7 @@ public class PaymentsManager {
 
 						@Override
 						protected void error(String message) {
-							godotPaymentV3.callbackFail();
+							if(godotPaymentV3 != null) godotPaymentV3.callbackFail();
 
 						}
 					}.consume(sku);
@@ -218,12 +218,12 @@ public class PaymentsManager {
 
 			@Override
 			protected void error(String message) {
-				godotPaymentV3.callbackFail();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackFail();
 			}
 
 			@Override
 			protected void canceled() {
-				godotPaymentV3.callbackCancel();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackCancel();
 			}
 		}.handlePurchaseRequest(resultCode, data);
 	}
@@ -239,12 +239,12 @@ public class PaymentsManager {
 
 					@Override
 					protected void success(String ticket) {
-						godotPaymentV3.callbackSuccess(ticket, null, sku);
+						if(godotPaymentV3 != null) godotPaymentV3.callbackSuccess(ticket, null, sku);
 					}
 
 					@Override
 					protected void error(String message) {
-						godotPaymentV3.callbackFail();
+						if(godotPaymentV3 != null) godotPaymentV3.callbackFail();
 					}
 				}.consume(sku);
 
@@ -252,12 +252,12 @@ public class PaymentsManager {
 
 			@Override
 			protected void error(String message) {
-				godotPaymentV3.callbackFail();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackFail();
 			}
 
 			@Override
 			protected void canceled() {
-				godotPaymentV3.callbackCancel();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackCancel();
 			}
 		}.validatePurchase(sku);
 	}
@@ -271,12 +271,12 @@ public class PaymentsManager {
 
 			@Override
 			protected void success(String ticket) {
-				godotPaymentV3.callbackSuccessProductMassConsumed(ticket, "", sku);
+				if(godotPaymentV3 != null) godotPaymentV3.callbackSuccessProductMassConsumed(ticket, "", sku);
 			}
 
 			@Override
 			protected void error(String message) {
-				godotPaymentV3.callbackFailConsume();
+				if(godotPaymentV3 != null) godotPaymentV3.callbackFailConsume();
 			}
 		}.consume(sku);
 	}
@@ -365,9 +365,9 @@ public class PaymentsManager {
 						if (!skuDetails.containsKey("DETAILS_LIST")) {
 							int response = getResponseCodeFromBundle(skuDetails);
 							if (response != BILLING_RESPONSE_RESULT_OK) {
-								godotPaymentV3.errorSkuDetail(getResponseDesc(response));
+								if(godotPaymentV3 != null) godotPaymentV3.errorSkuDetail(getResponseDesc(response));
 							} else {
-								godotPaymentV3.errorSkuDetail("No error but no detail list.");
+								if(godotPaymentV3 != null) godotPaymentV3.errorSkuDetail("No error but no detail list.");
 							}
 							return;
 						}
@@ -376,14 +376,14 @@ public class PaymentsManager {
 
 						for (String thisResponse : responseList) {
 							Log.d("godot", "response = "+thisResponse);
-							godotPaymentV3.addSkuDetail(thisResponse);
+							if(godotPaymentV3 != null) godotPaymentV3.addSkuDetail(thisResponse);
 						}
 					} catch (RemoteException e) {
 						e.printStackTrace();
-						godotPaymentV3.errorSkuDetail("RemoteException error!");
+						if(godotPaymentV3 != null) godotPaymentV3.errorSkuDetail("RemoteException error!");
 					}
 				}
-				godotPaymentV3.completeSkuDetail();
+				if(godotPaymentV3 != null) godotPaymentV3.completeSkuDetail();
 			}
 		})).start();
 	}
