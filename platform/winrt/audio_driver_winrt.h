@@ -3,7 +3,7 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
@@ -34,7 +34,6 @@
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
 
-#include <mmreg.h>
 #include <mmsystem.h>
 #include <windows.h>
 #include <wrl/client.h>
