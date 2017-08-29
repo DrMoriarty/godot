@@ -35,6 +35,7 @@
 #include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
 #include "viewport.h"
+#include "core/os/os.h"
 
 VARIANT_ENUM_CAST(Node::PauseMode);
 
@@ -1971,7 +1972,12 @@ void Node::print_stray_nodes() {
 
 void Node::queue_delete() {
 
-	ERR_FAIL_COND(!is_inside_tree());
+	//ERR_FAIL_COND(!is_inside_tree());
+	if(!is_inside_tree()) {
+        // this check also exists when compile a release build
+		WARN_PRINTS("Delete the node outside the scene tree. Name: " + String(get_name()) + " filename: " + String(get_filename()));
+		return;
+	}
 	get_tree()->queue_delete(this);
 }
 
