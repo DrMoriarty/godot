@@ -237,7 +237,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		String id;
 		String name;
 		String description;
-		int release;
+		int api_level;
 	};
 
 	Vector<Device> devices;
@@ -1495,7 +1495,7 @@ void EditorExportPlatformAndroid::_device_poll_thread(void *ud) {
 						if (ea->devices[j].id == ldevices[i]) {
 							d.description = ea->devices[j].description;
 							d.name = ea->devices[j].name;
-							d.release = ea->devices[j].release;
+							d.api_level = ea->devices[j].api_level;
 						}
 					}
 
@@ -1516,7 +1516,7 @@ void EditorExportPlatformAndroid::_device_poll_thread(void *ud) {
 						String vendor;
 						String device;
 						d.description + "Device ID: " + d.id + "\n";
-						d.release = 0;
+						d.api_level = 0;
 						for (int j = 0; j < props.size(); j++) {
 
 							String p = props[j];
@@ -1527,9 +1527,9 @@ void EditorExportPlatformAndroid::_device_poll_thread(void *ud) {
 							} else if (p.begins_with("ro.build.display.id=")) {
 								d.description += "Build: " + p.get_slice("=", 1).strip_edges() + "\n";
 							} else if (p.begins_with("ro.build.version.release=")) {
-								const String release_str = p.get_slice("=", 1).strip_edges();
-								d.description += "Release: " + release_str + "\n";
-								d.release = release_str.to_int();
+								d.description += "Release: " + p.get_slice("=", 1).strip_edges() + "\n";
+							} else if (p.begins_with("ro.build.version.sdk=")) {
+								d.api_level = p.get_slice("=", 1).to_int();
 							} else if (p.begins_with("ro.product.cpu.abi=")) {
 								d.description += "CPU: " + p.get_slice("=", 1).strip_edges() + "\n";
 							} else if (p.begins_with("ro.product.manufacturer=")) {
@@ -1596,11 +1596,11 @@ Error EditorExportPlatformAndroid::run(int p_device, int p_flags) {
 	//export_temp
 	ep.step("Exporting APK", 0);
 
-	bool use_adb_over_usb = bool(EDITOR_DEF("android/use_remote_debug_over_adb", true));
+	const bool use_remote = (p_flags & EXPORT_REMOTE_DEBUG) || (p_flags & EXPORT_DUMB_CLIENT);
+	const bool use_reverse = devices[p_device].api_level >= 21;
 
-	if (use_adb_over_usb) {
+	if (use_reverse)
 		p_flags |= EXPORT_REMOTE_DEBUG_LOCALHOST;
-	}
 
 	String export_to = EditorSettings::get_singleton()->get_settings_path() + "/tmp/tmpexport.apk";
 	Error err = export_project(export_to, true, p_flags);
@@ -1649,37 +1649,54 @@ Error EditorExportPlatformAndroid::run(int p_device, int p_flags) {
 		return ERR_CANT_CREATE;
 	}
 
-	if (use_adb_over_usb) {
+	if (use_remote) {
+		if (use_reverse) {
 
-		args.clear();
-		args.push_back("-s");
-		args.push_back(devices[p_device].id);
-		args.push_back("reverse");
-		args.push_back("--remove-all");
-		err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
+			static const char *const msg = "** Device API >= 21; debugging over USB **";
+			EditorNode::get_singleton()->get_log()->add_message(msg);
+			print_line(String(msg).to_upper());
 
-		int dbg_port = (int)EditorSettings::get_singleton()->get("network/debug_port");
-		args.clear();
-		args.push_back("-s");
-		args.push_back(devices[p_device].id);
-		args.push_back("reverse");
-		args.push_back("tcp:" + itos(dbg_port));
-		args.push_back("tcp:" + itos(dbg_port));
+			args.clear();
+			args.push_back("-s");
+			args.push_back(devices[p_device].id);
+			args.push_back("reverse");
+			args.push_back("--remove-all");
+			err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
 
-		err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
-		print_line("Reverse result: " + itos(rv));
+			if (p_flags & EXPORT_REMOTE_DEBUG) {
 
-		int fs_port = EditorSettings::get_singleton()->get("file_server/port");
+				int dbg_port = (int)EditorSettings::get_singleton()->get("network/debug_port");
+				args.clear();
+				args.push_back("-s");
+				args.push_back(devices[p_device].id);
+				args.push_back("reverse");
+				args.push_back("tcp:" + itos(dbg_port));
+				args.push_back("tcp:" + itos(dbg_port));
 
-		args.clear();
-		args.push_back("-s");
-		args.push_back(devices[p_device].id);
-		args.push_back("reverse");
-		args.push_back("tcp:" + itos(fs_port));
-		args.push_back("tcp:" + itos(fs_port));
+				err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
+				print_line("Reverse result: " + itos(rv));
+			}
 
-		err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
-		print_line("Reverse result2: " + itos(rv));
+			if (p_flags & EXPORT_DUMB_CLIENT) {
+
+				int fs_port = EditorSettings::get_singleton()->get("file_server/port");
+
+				args.clear();
+				args.push_back("-s");
+				args.push_back(devices[p_device].id);
+				args.push_back("reverse");
+				args.push_back("tcp:" + itos(fs_port));
+				args.push_back("tcp:" + itos(fs_port));
+
+				err = OS::get_singleton()->execute(adb, args, true, NULL, NULL, &rv);
+				print_line("Reverse result2: " + itos(rv));
+			}
+		} else {
+
+			static const char *const msg = "** Device API < 21; debugging over Wi-Fi **";
+			EditorNode::get_singleton()->get_log()->add_message(msg);
+			print_line(String(msg).to_upper());
+		}
 	}
 
 	ep.step("Running on Device..", 3);
@@ -1689,7 +1706,7 @@ Error EditorExportPlatformAndroid::run(int p_device, int p_flags) {
 	args.push_back("shell");
 	args.push_back("am");
 	args.push_back("start");
-	if (bool(EDITOR_DEF("android/force_system_user", false)) && devices[p_device].release >= 17) { // Multi-user introduced in Android 17
+	if (bool(EDITOR_DEF("android/force_system_user", false)) && devices[p_device].api_level >= 17) { // Multi-user introduced in Android 17
 		args.push_back("--user");
 		args.push_back("0");
 	}
@@ -1847,7 +1864,6 @@ void register_android_exporter() {
 	//EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING,"android/release_keystore",PROPERTY_HINT_GLOBAL_FILE,"*.keystore"));
 	EDITOR_DEF("android/force_system_user", false);
 	EDITOR_DEF("android/timestamping_authority_url", "");
-	EDITOR_DEF("android/use_remote_debug_over_adb", false);
 	EDITOR_DEF("android/shutdown_adb_on_exit", true);
 
 	Ref<EditorExportPlatformAndroid> exporter = Ref<EditorExportPlatformAndroid>(memnew(EditorExportPlatformAndroid));
