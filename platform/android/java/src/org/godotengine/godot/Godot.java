@@ -61,8 +61,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.godotengine.godot.payments.PaymentsManager;
-
 import java.io.IOException;
 
 import android.provider.Settings.Secure;
@@ -241,12 +239,8 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 	};
 	public ResultCallback result_callback;
 
-	private PaymentsManager mPaymentsManager = null;
-
 	@Override protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-		if(requestCode == PaymentsManager.REQUEST_CODE_FOR_PURCHASE){
-			mPaymentsManager.processPurchaseResponse(resultCode, data);
-		}else if (result_callback != null) {
+		if (result_callback != null) {
 			result_callback.callback(requestCode, resultCode, data);
 			result_callback = null;
 		};
@@ -416,7 +410,6 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 
 		result_callback = null;
 
-		mPaymentsManager = PaymentsManager.createManager(this).initService();
 		godot_initialized=true;
 
 	}
@@ -594,7 +587,6 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 
 	@Override protected void onDestroy(){
 		
-		if(mPaymentsManager != null ) mPaymentsManager.destroy();
 		for(int i=0;i<singleton_count;i++) {
 			singletons[i].onMainDestroy();
 		}
@@ -869,15 +861,6 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		// TODO Auto-generated method stub
 		
 	}
-
-	public PaymentsManager getPaymentsManager() {
-		return mPaymentsManager;
-	}
-
-//	public void setPaymentsManager(PaymentsManager mPaymentsManager) {
-//		this.mPaymentsManager = mPaymentsManager;
-//	};
-
 
 	// Audio
 

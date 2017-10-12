@@ -41,7 +41,7 @@ android {
 	}
 	defaultConfig {
 		$$GRADLE_DEFAULT_CONFIG$$
-        minSdkVersion 15
+        minSdkVersion 17
 	}
 	// Both signing and zip-aligning will be done at export time
 	buildTypes.all { buildType ->
