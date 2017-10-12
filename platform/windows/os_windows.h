@@ -31,6 +31,7 @@
 #define OS_WINDOWS_H
 
 #include "context_gl_win.h"
+#include "crash_handler_win.h"
 #include "os/input.h"
 #include "os/os.h"
 #include "servers/physics/physics_server_sw.h"
@@ -39,6 +40,7 @@
 
 #include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "drivers/unix/ip_unix.h"
+#include "drivers/wasapi/audio_driver_wasapi.h"
 #include "servers/audio/audio_server_sw.h"
 #include "servers/audio/sample_manager_sw.h"
 #include "servers/physics_2d/physics_2d_server_sw.h"
@@ -129,9 +131,14 @@ class OS_Windows : public OS {
 	InputDefault *input;
 	joystick_windows *joystick;
 
+#ifdef WASAPI_ENABLED
+	AudioDriverWASAPI driver_wasapi;
+#endif
 #ifdef RTAUDIO_ENABLED
 	AudioDriverRtAudio driver_rtaudio;
 #endif
+
+	CrashHandler crash_handler;
 
 	void _drag_event(int p_x, int p_y, int idx);
 	void _touch_event(bool p_pressed, int p_x, int p_y, int idx);
@@ -234,7 +241,7 @@ public:
 	virtual void delay_usec(uint32_t p_usec) const;
 	virtual uint64_t get_ticks_usec() const;
 
-	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL);
+	virtual Error execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id = NULL, String *r_pipe = NULL, int *r_exitcode = NULL, bool read_stderr = false);
 	virtual Error kill(const ProcessID &p_pid);
 	virtual int get_process_ID() const;
 
@@ -272,6 +279,9 @@ public:
 
 	virtual void set_use_vsync(bool p_enable);
 	virtual bool is_vsync_enabled() const;
+
+	void disable_crash_handler();
+	bool is_disable_crash_handler() const;
 
 	OS_Windows(HINSTANCE _hInstance);
 	~OS_Windows();

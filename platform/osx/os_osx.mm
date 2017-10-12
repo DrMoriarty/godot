@@ -842,6 +842,8 @@ OS::VideoMode OS_OSX::get_default_video_mode() const {
 
 void OS_OSX::initialize_core() {
 
+	crash_handler.initialize();
+
 	OS_Unix::initialize_core();
 
 	DirAccess::make_default<DirAccessOSX>(DirAccess::ACCESS_RESOURCES);
@@ -1795,6 +1797,19 @@ String OS_OSX::get_joy_guid(int p_device) const {
 	return input->get_joy_guid_remapped(p_device);
 }
 
+Error OS_OSX::move_path_to_trash(String p_dir) {
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSURL *url = [NSURL fileURLWithPath:@(p_dir.utf8().get_data())];
+	NSError *err;
+
+	if (![fm trashItemAtURL:url resultingItemURL:nil error:&err]) {
+		ERR_PRINTS("trashItemAtURL error: " + String(err.localizedDescription.UTF8String));
+		return FAILED;
+	}
+
+	return OK;
+}
+
 OS_OSX *OS_OSX::singleton = NULL;
 
 OS_OSX::OS_OSX() {
@@ -1887,4 +1902,12 @@ OS_OSX::OS_OSX() {
 	window_size = Vector2(1024, 600);
 	zoomed = false;
 	display_scale = 1.0;
+}
+
+void OS_OSX::disable_crash_handler() {
+	crash_handler.disable();
+}
+
+bool OS_OSX::is_disable_crash_handler() const {
+	return crash_handler.is_disabled();
 }

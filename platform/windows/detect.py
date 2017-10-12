@@ -240,7 +240,7 @@ def configure(env):
 
         elif (env["target"] == "debug"):
 
-            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od'])
+            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od', '/EHsc'])
             env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
             env.Append(LINKFLAGS=['/DEBUG'])
 
@@ -250,6 +250,7 @@ def configure(env):
         env.Append(CCFLAGS=['/I' + os.getenv("WindowsSdkDir") + "/Include"])
         env.Append(CCFLAGS=['/DWINDOWS_ENABLED'])
         env.Append(CCFLAGS=['/DRTAUDIO_ENABLED'])
+        env.Append(CCFLAGS=['/DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['/DWIN32'])
         env.Append(CCFLAGS=['/DTYPED_METHOD_BIND'])
 
@@ -362,8 +363,9 @@ def configure(env):
 
         env.Append(CCFLAGS=['-DWINDOWS_ENABLED', '-mwindows'])
         env.Append(CPPFLAGS=['-DRTAUDIO_ENABLED'])
+        env.Append(CPPFLAGS=['-DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['-DGLES2_ENABLED'])
-        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid'])
+        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid', 'ksuser'])
 
         # if (env["bits"]=="32"):
         # env.Append(LIBS=['gcc_s'])

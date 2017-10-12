@@ -29,6 +29,7 @@
 /*************************************************************************/
 #include "editor_export_godot3.h"
 
+#include "drivers/nrex/regex.h"
 #include "editor_node.h"
 #include "io/resource_format_binary.h"
 #include "io/resource_format_xml.h"
@@ -36,7 +37,11 @@
 
 static const char *globals_renames[][2] = {
 	/* [application] */
-	// no change
+	{ "application/main_scene", "application/run/main_scene" },
+	{ "application/main_loop_type", "application/run/main_loop_type" },
+	{ "application/disable_stdout", "application/run/disable_stdout" },
+	{ "application/disable_stderr", "application/run/disable_stderr" },
+	{ "application/frame_delay_msec", "application/run/frame_delay_msec" },
 
 	/* [debug] */
 	{ "debug/profiler_max_functions", "debug/profiler/max_functions" },
@@ -1275,7 +1280,7 @@ void EditorExportGodot3::_save_text(const String &p_path, ExportData &resource) 
 
 	for (Map<int, ExportData::Dependency>::Element *E = resource.dependencies.front(); E; E = E->next()) {
 
-		f->store_line("[ext_resource path=\"" + E->get().path + "\" type=\"" + E->get().type + "\" id=" + itos(E->key()) + "]");
+		f->store_line("[ext_resource path=\"" + resource_replace_map[E->get().path] + "\" type=\"" + E->get().type + "\" id=" + itos(E->key()) + "]");
 	}
 
 	for (int i = 0; i < resource.resources.size(); i++) {
@@ -1875,7 +1880,7 @@ void EditorExportGodot3::_save_binary(const String &p_path, ExportData &resource
 	for (Map<int, ExportData::Dependency>::Element *E = resource.dependencies.front(); E; E = E->next()) {
 
 		save_unicode_string(E->get().type, f.operator->());
-		save_unicode_string(E->get().path, f.operator->());
+		save_unicode_string(resource_replace_map[E->get().path], f.operator->());
 	}
 
 	// save internal resource table
@@ -1947,6 +1952,11 @@ void EditorExportGodot3::_save_config(const String &p_path) {
 		}
 	}
 
+	String str = "{\n\"flags/filter\": " + String(GLOBAL_DEF("image_loader/filter", true) ? "true" : "false");
+	str += ",\n\"flags/mipmaps\": " + String(GLOBAL_DEF("image_loader/gen_mipmaps", true) ? "true" : "false");
+	str += "\n}";
+	new_cfg.set_value("importer_defaults", "texture", str);
+
 	// Write the collected ConfigFile manually - we need to use _get_property_as_text()
 	// above, so we can't rely on ConfigFile.save() to properly store the raw strings.
 	FileAccessRef f = FileAccess::open(p_path.plus_file("project.godot"), FileAccess::WRITE);
@@ -1971,7 +1981,190 @@ void EditorExportGodot3::_save_config(const String &p_path) {
 	f->close();
 }
 
-Error EditorExportGodot3::export_godot3(const String &p_path) {
+Error EditorExportGodot3::_convert_script(const String &p_path, const String &p_target_path) {
+
+	FileAccessRef src = FileAccess::open(p_path, FileAccess::READ);
+	ERR_FAIL_COND_V(!src.operator->(), FAILED);
+	FileAccessRef dst = FileAccess::open(p_target_path, FileAccess::WRITE);
+	ERR_FAIL_COND_V(!dst.operator->(), FAILED);
+
+	String http_var = "";
+
+	while (!src->eof_reached()) {
+		String line = src->get_line();
+
+		// Convert _fixed_process( => _physics_process(
+		RegEx regexp("(.*)_fixed_process\\((.*)");
+		int res = regexp.find(line);
+		if (res >= 0 && regexp.get_capture_count() == 3) {
+			line = regexp.get_capture(1) + "_physics_process(" + regexp.get_capture(2);
+		}
+		regexp.clear();
+
+		// Convert RawArray() => PoolByteArray()
+		regexp.compile("(.*)RawArray\\(\\)(.*)");
+		res = regexp.find(line);
+		if (res >= 0 && regexp.get_capture_count() == 3) {
+			line = regexp.get_capture(1) + "PoolByteArray()" + regexp.get_capture(2);
+		}
+		regexp.clear();
+
+		// Convert Vector2Array() => PoolVector2Array()
+		regexp.compile("(.*)Vector2Array\\(\\)(.*)");
+		res = regexp.find(line);
+		if (res >= 0 && regexp.get_capture_count() == 3) {
+			line = regexp.get_capture(1) + "PoolVector2Array()" + regexp.get_capture(2);
+		}
+		regexp.clear();
+
+		// Convert ReferenceFrame => Control
+		regexp.compile("(.*)ReferenceFrame(.*)");
+		res = regexp.find(line);
+		if (res >= 0 && regexp.get_capture_count() == 3) {
+			line = regexp.get_capture(1) + "Control" + regexp.get_capture(2);
+		}
+		regexp.clear();
+
+		// Try to detect a HTTPClient object
+		regexp.compile("[ \t]*([a-zA-Z0-9_]*)[ ]*=[ ]*HTTPClient\\.new\\(\\)");
+		res = regexp.find(line);
+		if (res >= 0 && regexp.get_capture_count() == 2) {
+			http_var = regexp.get_capture(1).strip_edges();
+		}
+		regexp.clear();
+
+		if (http_var != "") {
+			// Convert .connect( => .connect_to_host(
+			regexp.compile("(.*)" + http_var + "\\.connect\\((.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + http_var + ".connect_to_host(" + regexp.get_capture(2);
+			}
+			regexp.clear();
+		}
+
+		int count;
+		int tries = 0;
+		do {
+			count = 0;
+
+			// Convert _pos( => _position(
+			regexp.compile("(.*)_pos\\((.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + "_position(" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert KEY_RETURN => KEY_ENTER
+			regexp.compile("(.*)KEY_RETURN(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + "KEY_ENTER" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert .get_opacity() => .get_modulate().a
+			regexp.compile("(.*)\\.get_opacity\\(\\)(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + ".get_modulate().a" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert .set_opacity(var) => .modulate.a = var
+			regexp.compile("([ \t]*)([a-zA-Z0-9_]*)[ ]*\\.set_opacity\\((.*)\\)(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 5) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + ".modulate.a = " + regexp.get_capture(3) + regexp.get_capture(4);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.KEY => var is InputEventKey
+			regexp.compile("(.*)([a-zA-Z0-9_]*)\\.type == InputEvent.KEY(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 4) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + " is InputEventKey" + regexp.get_capture(3);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.MOUSE_MOTION => var is InputEventMouseMotion
+			regexp.compile("(.*)([a-zA-Z0-9_]*)\\.type == InputEvent.MOUSE_MOTION(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 4) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + " is InputEventMouseMotion" + regexp.get_capture(3);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.MOUSE_BUTTON => var is InputEventMouseButton
+			regexp.compile("(.*)([a-zA-Z0-9_]*)\\.type == InputEvent.MOUSE_BUTTON(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 4) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + " is InputEventMouseButton" + regexp.get_capture(3);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.JOYSTICK_MOTION => var is InputEventJoypadMotion
+			regexp.compile("(.*)([a-zA-Z0-9_]*)\\.type == InputEvent.JOYSTICK_MOTION(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 4) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + " is InputEventJoypadMotion" + regexp.get_capture(3);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert var.type == InputEvent.JOYSTICK_BUTTON => var is InputEventJoypadButton
+			regexp.compile("(.*)([a-zA-Z0-9_]*)\\.type == InputEvent.JOYSTICK_BUTTON(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 4) {
+				line = regexp.get_capture(1) + regexp.get_capture(2) + " is InputEventJoypadButton" + regexp.get_capture(3);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert is_move_and_slide_on_floor() => is_on_floor()
+			regexp.compile("(.*)is_move_and_slide_on_floor\\(\\)(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + "is_on_floor()" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert is_move_and_slide_on_ceiling() => is_on_ceiling()
+			regexp.compile("(.*)is_move_and_slide_on_ceiling\\(\\)(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + "is_on_ceiling()" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+			// Convert is_move_and_slide_on_wall() => is_on_wall()
+			regexp.compile("(.*)is_move_and_slide_on_wall\\(\\)(.*)");
+			res = regexp.find(line);
+			if (res >= 0 && regexp.get_capture_count() == 3) {
+				line = regexp.get_capture(1) + "is_on_wall()" + regexp.get_capture(2);
+				count++;
+			}
+			regexp.clear();
+
+		} while (count >= 1 && tries++ < 10);
+
+		dst->store_line(line);
+	}
+
+	return OK;
+}
+
+Error EditorExportGodot3::export_godot3(const String &p_path, bool convert_scripts) {
 
 	List<String> files;
 	_find_files(EditorFileSystem::get_singleton()->get_filesystem(), &files);
@@ -2014,6 +2207,10 @@ Error EditorExportGodot3::export_godot3(const String &p_path) {
 
 		String file = E->get();
 		String file_local = file.replace("res://", "");
+
+		resource_replace_map[file] = file;
+		resource_replace_map[file_local] = file_local;
+
 		if (xml_extensions.has(file.extension().to_lower())) {
 			if (ResourceLoader::get_resource_type(file) == "PackedScene") {
 				resource_replace_map[file] = file.basename() + ".tscn";
@@ -2022,6 +2219,11 @@ Error EditorExportGodot3::export_godot3(const String &p_path) {
 				resource_replace_map[file] = file.basename() + ".tres";
 				resource_replace_map[file_local] = file_local.basename() + ".tres";
 			}
+		}
+
+		if (file.extension().to_lower() == "fnt") {
+			resource_replace_map[file] = file.basename() + ".font";
+			resource_replace_map[file_local] = file_local.basename() + ".font";
 		}
 	}
 
@@ -2043,6 +2245,10 @@ Error EditorExportGodot3::export_godot3(const String &p_path) {
 
 		target_path = p_path.plus_file(path.replace("res://", ""));
 
+		if (extension == "fnt") {
+			target_path = target_path.basename() + ".font";
+		}
+
 		progress.step(target_path.get_file(), idx++);
 
 		print_line("exporting: " + target_path);
@@ -2054,34 +2260,36 @@ Error EditorExportGodot3::export_godot3(const String &p_path) {
 
 		ExportData resource_data;
 
+		Error err;
+		bool cont = false;
 		if (xml_extensions.has(extension)) {
-			Error err = ResourceLoader::get_export_data(path, resource_data);
-			if (err != OK) {
-				memdelete(directory);
-				ERR_FAIL_V(err);
-			}
+
+			err = ResourceLoader::get_export_data(path, resource_data);
 		} else if (text_extensions.has(extension)) {
-			Error err = ResourceLoader::get_export_data(path, resource_data);
-			if (err != OK) {
-				memdelete(directory);
-				ERR_FAIL_V(err);
-			}
+
+			err = ResourceLoader::get_export_data(path, resource_data);
 		} else if (binary_extensions.has(extension)) {
 
-			Error err = ResourceLoader::get_export_data(path, resource_data);
-			if (err != OK) {
-				memdelete(directory);
-				ERR_FAIL_V(err);
+			err = ResourceLoader::get_export_data(path, resource_data);
+		} else {
+
+			if (convert_scripts && extension == "gd") {
+				err = _convert_script(path, target_path);
+			} else {
+				//single file, copy it
+				err = directory->copy(path, target_path);
 			}
 
-		} else {
-			//single file, copy it
-			Error err = directory->copy(path, target_path);
-			if (err != OK) {
-				memdelete(directory);
-				ERR_FAIL_V(err);
-			}
-			continue; //no longer needed to do anything, just copied the file!
+			cont = true; //no longer needed to do anything, just copied the file!
+		}
+
+		if (err != OK) {
+			memdelete(directory);
+			ERR_FAIL_V(err);
+		}
+
+		if (cont) {
+			continue;
 		}
 
 		if (resource_data.nodes.size() == 0 && resource_data.resources[resource_data.resources.size() - 1].type == "PackedScene") {
