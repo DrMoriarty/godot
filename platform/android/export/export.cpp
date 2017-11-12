@@ -1,31 +1,31 @@
 /*************************************************************************/
-/*  export.cpp                                                           */
+/*	export.cpp															 */
 /*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
+/*						 This file is part of:							 */
+/*							 GODOT ENGINE								 */
+/*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
-/*                                                                       */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.				 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)	 */
+/*																		 */
 /* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* a copy of this software and associated documentation files (the		 */
+/* "Software"), to deal in the Software without restriction, including	 */
+/* without limitation the rights to use, copy, modify, merge, publish,	 */
+/* distribute, sublicense, and/or sell copies of the Software, and to	 */
 /* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* the following conditions:											 */
+/*																		 */
+/* The above copyright notice and this permission notice shall be		 */
+/* included in all copies or substantial portions of the Software.		 */
+/*																		 */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,		 */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	 */
 /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY	 */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,	 */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE	 */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.				 */
 /*************************************************************************/
 #include "export.h"
 #include "editor/editor_import_export.h"
@@ -217,6 +217,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 	bool use_32_fb;
 	bool immersive;
 	bool export_arm;
+	bool export_arm64;
 	bool export_x86;
 	String apk_expansion_salt;
 	String apk_expansion_pkey;
@@ -314,6 +315,8 @@ bool EditorExportPlatformAndroid::_set(const StringName &p_name, const Variant &
 		_signed = p_value;
 	else if (n == "architecture/arm")
 		export_arm = p_value;
+	else if (n=="architecture/arm64")
+		export_arm64=p_value;
 	else if (n == "architecture/x86")
 		export_x86 = p_value;
 	else if (n == "screen/use_32_bits_view")
@@ -387,6 +390,8 @@ bool EditorExportPlatformAndroid::_get(const StringName &p_name, Variant &r_ret)
 		r_ret = _signed;
 	else if (n == "architecture/arm")
 		r_ret = export_arm;
+	else if (n=="architecture/arm64")
+		export_arm64=p_value;
 	else if (n == "architecture/x86")
 		r_ret = export_x86;
 	else if (n == "screen/use_32_bits_view")
@@ -967,10 +972,10 @@ Error EditorExportPlatformAndroid::save_apk_file(void *p_userdata, const String 
 bool EditorExportPlatformAndroid::_should_compress_asset(const String &p_path, const Vector<uint8_t> &p_data) {
 
 	/*
-	 *  By not compressing files with little or not benefit in doing so,
-	 *  a performance gain is expected at runtime. Moreover, if the APK is
-	 *  zip-aligned, assets stored as they are can be efficiently read by
-	 *  Android by memory-mapping them.
+	 *	By not compressing files with little or not benefit in doing so,
+	 *	a performance gain is expected at runtime. Moreover, if the APK is
+	 *	zip-aligned, assets stored as they are can be efficiently read by
+	 *	Android by memory-mapping them.
 	 */
 
 	// -- Unconditional uncompress to mimic AAPT plus some other
@@ -1119,6 +1124,10 @@ Error EditorExportPlatformAndroid::export_project(const String &p_path, bool p_d
 		}
 
 		if (file.match("lib/armeabi*/libgodot_android.so") && !export_arm) {
+			skip = true;
+		}
+
+		if (file.match("lib/arm64*/libgodot_android.so") && !export_arm64) {
 			skip = true;
 		}
 
@@ -1766,6 +1775,7 @@ EditorExportPlatformAndroid::EditorExportPlatformAndroid() {
 	immersive = true;
 
 	export_arm = true;
+	export_arm64=false;
 	export_x86 = false;
 
 	device_thread = Thread::create(_device_poll_thread, this);
