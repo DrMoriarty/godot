@@ -2,7 +2,7 @@ import os
 import sys
 import string
 import platform
-
+from distutils.version import LooseVersion
 
 def is_active():
     return True
@@ -13,12 +13,7 @@ def get_name():
 
 
 def can_build():
-
-    import os
-    if (not os.environ.has_key("ANDROID_NDK_ROOT")):
-        return False
-
-    return True
+    return ("ANDROID_NDK_ROOT" in os.environ)
 
 
 def get_opts():
@@ -60,7 +55,7 @@ def configure(env):
         import subprocess
 
         def mySubProcess(cmdline, env):
-            # print "SPAWNED : " + cmdline
+            # print("SPAWNED : " + cmdline)
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -68,9 +63,9 @@ def configure(env):
             data, err = proc.communicate()
             rv = proc.wait()
             if rv:
-                print "====="
-                print err
-                print "====="
+                print("=====")
+                print(err)
+                print("=====")
             return rv
 
         def mySpawn(sh, escape, cmd, args, env):
@@ -162,14 +157,24 @@ def configure(env):
     else:
         env['ARCH'] = 'arch-arm'
 
-    sysroot = env["ANDROID_NDK_ROOT"] + \
-        "/platforms/" + ndk_platform + "/" + env['ARCH']
     common_opts = ['-fno-integrated-as', '-gcc-toolchain', gcc_toolchain_path]
 
-    env.Append(CPPFLAGS=["-isystem", sysroot + "/usr/include"])
-    env.Append(CPPFLAGS=string.split(
-        '-fpic -ffunction-sections -funwind-tables -fstack-protector-strong -fvisibility=hidden -fno-strict-aliasing'))
-    env.Append(CPPFLAGS=string.split('-DNO_STATVFS -DGLES2_ENABLED'))
+    lib_sysroot = env["ANDROID_NDK_ROOT"] + "/platforms/" + ndk_platform + "/" + env['ARCH']
+
+    ndk_version = get_ndk_version(env["ANDROID_NDK_ROOT"])
+    if ndk_version != None and LooseVersion(ndk_version) >= LooseVersion("15.0.4075724"):
+        print("Using NDK unified headers")
+        sysroot = env["ANDROID_NDK_ROOT"] + "/sysroot"
+        env.Append(CPPFLAGS=["-isystem", sysroot + "/usr/include"])
+        env.Append(CPPFLAGS=["-isystem", sysroot + "/usr/include/" + abi_subpath])
+        # For unified headers this define has to be set manually
+        env.Append(CPPFLAGS=["-D__ANDROID_API__=" + str(int(ndk_platform.split("-")[1]))])
+    else:
+        print("Using NDK deprecated headers")
+        env.Append(CPPFLAGS=["-isystem", lib_sysroot + "/usr/include"])
+
+    env.Append(CPPFLAGS='-fpic -ffunction-sections -funwind-tables -fstack-protector-strong -fvisibility=hidden -fno-strict-aliasing'.split())
+    env.Append(CPPFLAGS='-DNO_STATVFS -DGLES2_ENABLED'.split())
 
     env['neon_enabled'] = False
     if env['android_arch'] == 'x86':
@@ -180,13 +185,12 @@ def configure(env):
     elif env["android_arch"] == "armv6":
         can_vectorize = False
         target_opts = ['-target', 'armv6-none-linux-androideabi']
-        env.Append(CPPFLAGS=string.split(
-            '-D__ARM_ARCH_6__ -march=armv6 -mfpu=vfp -mfloat-abi=softfp'))
+        env.Append(CPPFLAGS='-D__ARM_ARCH_6__ -march=armv6 -mfpu=vfp -mfloat-abi=softfp'.split())
+
     elif env["android_arch"] == "armv7":
         can_vectorize = True
         target_opts = ['-target', 'armv7-none-linux-androideabi']
-        env.Append(CPPFLAGS=string.split(
-            '-D__ARM_ARCH_7__ -D__ARM_ARCH_7A__ -march=armv7-a -mfloat-abi=softfp'))
+        env.Append(CPPFLAGS='-D__ARM_ARCH_7__ -D__ARM_ARCH_7A__ -march=armv7-a -mfloat-abi=softfp'.split())
         if env['android_neon'] == 'yes':
             env['neon_enabled'] = True
             env.Append(CPPFLAGS=['-mfpu=neon', '-D__ARM_NEON__'])
@@ -203,14 +207,10 @@ def configure(env):
     if (sys.platform.startswith("darwin")):
         env['SHLIBSUFFIX'] = '.so'
 
-    env['LINKFLAGS'] = ['-shared', '--sysroot=' +
-                        sysroot, '-Wl,--warn-shared-textrel']
-    env.Append(LINKFLAGS=string.split(
-        '-Wl,--fix-cortex-a8'))
-    env.Append(LINKFLAGS=string.split(
-        '-Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now'))
-    env.Append(LINKFLAGS=string.split(
-        '-Wl,-soname,libgodot_android.so -Wl,--gc-sections'))
+    env['LINKFLAGS'] = ['-shared', '--sysroot=' + lib_sysroot, '-Wl,--warn-shared-textrel']
+    env.Append(LINKFLAGS='-Wl,--fix-cortex-a8'.split())
+    env.Append(LINKFLAGS='-Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now'.split())
+    env.Append(LINKFLAGS='-Wl,-soname,libgodot_android.so -Wl,--gc-sections'.split())
     if mt_link:
         env.Append(LINKFLAGS=['-Wl,--threads'])
     env.Append(LINKFLAGS=target_opts)
@@ -263,3 +263,18 @@ def configure(env):
         action=methods.build_gles2_headers, suffix='glsl.gen.h', src_suffix='.glsl')})
 
     env.use_windows_spawn_fix()
+
+# Return NDK version string in source.properties (adapted from the Chromium project).
+def get_ndk_version(path):
+    if path == None:
+        return None
+    prop_file_path = os.path.join(path, "source.properties")
+    try:
+        with open(prop_file_path) as prop_file:
+            for line in prop_file:
+                key_value = map(lambda x: string.strip(x), line.split("="))
+                if key_value[0] == "Pkg.Revision":
+                    return key_value[1]
+    except:
+        print("Could not read source prop file '%s'" % prop_file_path)
+    return None
