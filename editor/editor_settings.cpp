@@ -410,7 +410,7 @@ void EditorSettings::setup_network() {
 
 	List<IP_Address> local_ip;
 	IP::get_singleton()->get_local_addresses(&local_ip);
-	String lip;
+	String lip = "127.0.0.1";
 	String hint;
 	String current = has("network/debug_host") ? get("network/debug_host") : "";
 	int port = has("network/debug_port") ? (int)get("network/debug_port") : 6096;
@@ -419,8 +419,9 @@ void EditorSettings::setup_network() {
 
 		String ip = E->get();
 
-		if (lip == "")
-			lip = ip;
+		// link-local IPv6 addresses don't work, skipping them
+		if (ip.begins_with("fe80:0:0:0:")) // fe80::/64
+			continue;
 		if (ip == current)
 			lip = current; //so it saves
 		if (hint != "")
@@ -541,6 +542,8 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("text_editor/show_line_length_guideline", false);
 	set("text_editor/line_length_guideline_column", 80);
 	hints["text_editor/line_length_guideline_column"] = PropertyInfo(Variant::INT, "text_editor/line_length_guideline_column", PROPERTY_HINT_RANGE, "20, 160, 10");
+
+	set("text_editor/show_members_overview", true);
 
 	set("text_editor/trim_trailing_whitespace_on_save", false);
 	set("text_editor/idle_parse_delay", 2);

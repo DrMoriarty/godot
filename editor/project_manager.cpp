@@ -573,6 +573,9 @@ void ProjectManager::_unhandled_input(const InputEvent &p_ev) {
 		if (!k.pressed)
 			return;
 
+		if (tabs->get_current_tab() != 0)
+			return;
+
 		bool scancode_handled = true;
 
 		switch (k.scancode) {
@@ -855,6 +858,7 @@ void ProjectManager::_load_recent_projects() {
 
 		TextureFrame *tf = memnew(TextureFrame);
 		tf->set_texture(icon);
+		tf->set_v_size_flags(SIZE_EXPAND);
 		hb->add_child(tf);
 
 		VBoxContainer *vb = memnew(VBoxContainer);
@@ -945,6 +949,10 @@ void ProjectManager::_open_project_confirm() {
 
 		args.push_back("-editor");
 
+		if (OS::get_singleton()->is_disable_crash_handler()) {
+			args.push_back("--disable-crash-handler");
+		}
+
 		String exec = OS::get_singleton()->get_executable_path();
 
 		OS::ProcessID pid = 0;
@@ -984,6 +992,10 @@ void ProjectManager::_run_project_confirm() {
 
 		args.push_back("-path");
 		args.push_back(path);
+
+		if (OS::get_singleton()->is_disable_crash_handler()) {
+			args.push_back("--disable-crash-handler");
+		}
 
 		String exec = OS::get_singleton()->get_executable_path();
 
@@ -1220,7 +1232,7 @@ ProjectManager::ProjectManager() {
 	String cp;
 	cp.push_back(0xA9);
 	cp.push_back(0);
-	OS::get_singleton()->set_window_title(_MKSTR(VERSION_NAME) + String(" - ") + TTR("Project Manager") + " - " + cp + " 2008-2017 Juan Linietsky, Ariel Manzur.");
+	OS::get_singleton()->set_window_title(_MKSTR(VERSION_NAME) + String(" - ") + TTR("Project Manager") + " - " + cp + " 2008-2017 Juan Linietsky, Ariel Manzur & Godot Contributors");
 
 	HBoxContainer *top_hb = memnew(HBoxContainer);
 	vb->add_child(top_hb);

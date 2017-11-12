@@ -240,7 +240,7 @@ def configure(env):
 
         elif (env["target"] == "debug"):
 
-            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od'])
+            env.Append(CCFLAGS=['/Z7', '/DDEBUG_ENABLED', '/DDEBUG_MEMORY_ENABLED', '/DD3D_DEBUG_INFO', '/Od', '/EHsc'])
             env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
             env.Append(LINKFLAGS=['/DEBUG'])
 
@@ -250,6 +250,7 @@ def configure(env):
         env.Append(CCFLAGS=['/I' + os.getenv("WindowsSdkDir") + "/Include"])
         env.Append(CCFLAGS=['/DWINDOWS_ENABLED'])
         env.Append(CCFLAGS=['/DRTAUDIO_ENABLED'])
+        env.Append(CCFLAGS=['/DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['/DWIN32'])
         env.Append(CCFLAGS=['/DTYPED_METHOD_BIND'])
 
@@ -280,7 +281,7 @@ def configure(env):
 
         # Note: this detection/override code from here onward should be here instead of in SConstruct because it's platform and compiler specific (MSVC/Windows)
         if(env["bits"] != "default"):
-            print "Error: bits argument is disabled for MSVC"
+            print("Error: bits argument is disabled for MSVC")
             print ("Bits argument is not supported for MSVC compilation. Architecture depends on the Native/Cross Compile Tools Prompt/Developer Console (or Visual Studio settings)"
                    + " that is being used to run SCons. As a consequence, bits argument is disabled. Run scons again without bits argument (example: scons p=windows) and SCons will attempt to detect what MSVC compiler"
                    + " will be executed and inform you.")
@@ -291,16 +292,16 @@ def configure(env):
         env["bits"] = "32"
         env["x86_libtheora_opt_vc"] = True
 
-        print "Detected MSVC compiler: " + compiler_version_str
+        print("Detected MSVC compiler: " + compiler_version_str)
         # If building for 64bit architecture, disable assembly optimisations for 32 bit builds (theora as of writting)... vc compiler for 64bit can not compile _asm
         if(compiler_version_str == "amd64" or compiler_version_str == "x86_amd64"):
             env["bits"] = "64"
             env["x86_libtheora_opt_vc"] = False
-            print "Compiled program architecture will be a 64 bit executable (forcing bits=64)."
+            print("Compiled program architecture will be a 64 bit executable (forcing bits=64).")
         elif (compiler_version_str == "x86" or compiler_version_str == "amd64_x86"):
-            print "Compiled program architecture will be a 32 bit executable. (forcing bits=32)."
+            print("Compiled program architecture will be a 32 bit executable. (forcing bits=32).")
         else:
-            print "Failed to detect MSVC compiler architecture version... Defaulting to 32bit executable settings (forcing bits=32). Compilation attempt will continue, but SCons can not detect for what architecture this build is compiled for. You should check your settings/compilation setup."
+            print("Failed to detect MSVC compiler architecture version... Defaulting to 32bit executable settings (forcing bits=32). Compilation attempt will continue, but SCons can not detect for what architecture this build is compiled for. You should check your settings/compilation setup.")
         if env["bits"] == "64":
             env.Append(CCFLAGS=['/D_WIN64'])
     else:
@@ -362,8 +363,9 @@ def configure(env):
 
         env.Append(CCFLAGS=['-DWINDOWS_ENABLED', '-mwindows'])
         env.Append(CPPFLAGS=['-DRTAUDIO_ENABLED'])
+        env.Append(CPPFLAGS=['-DWASAPI_ENABLED'])
         env.Append(CCFLAGS=['-DGLES2_ENABLED'])
-        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid'])
+        env.Append(LIBS=['mingw32', 'opengl32', 'dsound', 'ole32', 'd3d9', 'winmm', 'gdi32', 'iphlpapi', 'shlwapi', 'wsock32', 'ws2_32', 'kernel32', 'oleaut32', 'dinput8', 'dxguid', 'ksuser'])
 
         # if (env["bits"]=="32"):
         # env.Append(LIBS=['gcc_s'])

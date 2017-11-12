@@ -43,12 +43,14 @@
 #include "os/input.h"
 #include "os/keyboard.h"
 #include "pair.h"
+#include "plugins/script_editor_plugin.h"
 #include "print_string.h"
 #include "scene/gui/label.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/font.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
+#include "script_editor_debugger.h"
 
 void CustomPropertyEditor::_notification(int p_what) {
 
@@ -699,17 +701,17 @@ bool CustomPropertyEditor::edit(Object *p_owner, const String &p_name, Variant::
 					menu->add_separator();
 			}
 
-			menu->add_icon_item(get_icon("Load", "EditorIcons"), "Load", OBJ_MENU_LOAD);
+			menu->add_icon_item(get_icon("Load", "EditorIcons"), TTR("Load"), OBJ_MENU_LOAD);
 
 			if (!RES(v).is_null()) {
 
-				menu->add_icon_item(get_icon("EditResource", "EditorIcons"), "Edit", OBJ_MENU_EDIT);
-				menu->add_icon_item(get_icon("Del", "EditorIcons"), "Clear", OBJ_MENU_CLEAR);
-				menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), "Make Unique", OBJ_MENU_MAKE_UNIQUE);
+				menu->add_icon_item(get_icon("EditResource", "EditorIcons"), TTR("Edit"), OBJ_MENU_EDIT);
+				menu->add_icon_item(get_icon("Del", "EditorIcons"), TTR("Clear"), OBJ_MENU_CLEAR);
+				menu->add_icon_item(get_icon("Duplicate", "EditorIcons"), TTR("Make Unique"), OBJ_MENU_MAKE_UNIQUE);
 				RES r = v;
 				if (r.is_valid() && r->get_path().is_resource_file() && r->get_import_metadata().is_valid()) {
 					menu->add_separator();
-					menu->add_icon_item(get_icon("ReloadSmall", "EditorIcons"), "Re-Import", OBJ_MENU_REIMPORT);
+					menu->add_icon_item(get_icon("ReloadSmall", "EditorIcons"), TTR("Re-Import"), OBJ_MENU_REIMPORT);
 				}
 				/*if (r.is_valid() && r->get_path().is_resource_file()) {
 					menu->set_item_tooltip(1,r->get_path());
@@ -3616,10 +3618,19 @@ void PropertyEditor::edit(Object *p_object) {
 
 	if (obj) {
 
+		set_enable_capitalize_paths(true);
 		obj->remove_change_receptor(this);
 
-		if (obj->is_type("ScriptEditorDebuggerInspectedObject"))
-			set_enable_capitalize_paths(false);
+		if (obj->is_type("ScriptEditorDebuggerInspectedObject")) {
+			ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
+			if (sed->is_connected()) {
+				set_enable_capitalize_paths(false);
+				emit_signal("object_id_selected", obj->call("get_remote_object_id"));
+			} else {
+				obj = NULL;
+				p_object = NULL;
+			}
+		}
 	}
 
 	evaluator->edit(p_object);

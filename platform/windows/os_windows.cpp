@@ -170,6 +170,8 @@ static MemoryPoolDynamic *mempool_dynamic = NULL;
 
 void OS_Windows::initialize_core() {
 
+	crash_handler.initialize();
+
 	last_button_state = 0;
 
 	//RedirectIOToConsole();
@@ -1899,7 +1901,7 @@ void OS_Windows::set_cursor_shape(CursorShape p_shape) {
 	cursor_shape = p_shape;
 }
 
-Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode) {
+Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr) {
 
 	if (p_blocking && r_pipe) {
 
@@ -2309,6 +2311,14 @@ bool OS_Windows::is_vsync_enabled() const {
 	return true;
 }
 
+void OS_Windows::disable_crash_handler() {
+	crash_handler.disable();
+}
+
+bool OS_Windows::is_disable_crash_handler() const {
+	return crash_handler.is_disabled();
+}
+
 OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 
 	key_event_pos = 0;
@@ -2330,6 +2340,9 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 #endif
 	user_proc = NULL;
 
+#ifdef WASAPI_ENABLED
+	AudioDriverManagerSW::add_driver(&driver_wasapi);
+#endif
 #ifdef RTAUDIO_ENABLED
 	AudioDriverManagerSW::add_driver(&driver_rtaudio);
 #endif

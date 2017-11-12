@@ -17,15 +17,29 @@ TODO.
 
 ## fonts
 
-- Upstream: ?
+### Noto Sans
 
-TODO.
+- Upstream: https://github.com/googlei18n/noto-fonts
+- Version: 1.06
+- License: OFL-1.1
+
+Use UI font if exists, because it has tight vertial metrix and good for UI.
+
+### Adobe Source Code Pro Regular
+
+- Upstream: https://github.com/adobe-fonts/source-code-pro
+- Version: 2.030
+- License: OFL-1.1
+
+### DroidSans*.ttf
+
+- Upstream: ?
 
 
 ## freetype
 
 - Upstream: https://www.freetype.org
-- Version: 2.8
+- Version: 2.8.1
 - License: FreeType License (BSD-like)
 
 Files extracted from upstream source:
@@ -88,7 +102,7 @@ Files extracted from upstream source:
 ## libpng
 
 - Upstream: http://libpng.org/pub/png/libpng.html
-- Version: 1.6.32
+- Version: 1.6.34
 - License: libpng/zlib
 
 Files extracted from upstream source:
