@@ -1,2 +1,5 @@
 include ':mmedia'
 project(':mmedia').projectDir = new File(settingsDir, '../../../modules/appodeal/android/mmedia')
+
+include ':adcolony'
+project(':adcolony').projectDir = new File(settingsDir, '../../../modules/appodeal/android/adcolony')
