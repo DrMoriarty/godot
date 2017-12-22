@@ -71,6 +71,7 @@ if 'TERM' in os.environ:
 env_base.AppendENVPath('PATH', os.getenv('PATH'))
 env_base.AppendENVPath('PKG_CONFIG_PATH', os.getenv('PKG_CONFIG_PATH'))
 env_base.global_defaults = global_defaults
+env_base.android_buildscript_maven_repos = []
 env_base.android_maven_repos = []
 env_base.android_flat_dirs = []
 env_base.android_dependencies = []
@@ -96,6 +97,7 @@ env_base.Decider('MD5-timestamp')
 env_base.SetOption('implicit_cache', 1)
 
 
+env_base.__class__.android_add_buildscript_maven_repository = methods.android_add_buildscript_maven_repository
 env_base.__class__.android_add_maven_repository = methods.android_add_maven_repository
 env_base.__class__.android_add_flat_dir = methods.android_add_flat_dir
 env_base.__class__.android_add_dependency = methods.android_add_dependency

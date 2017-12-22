@@ -1284,6 +1284,10 @@ def android_add_flat_dir(self, dir):
     if (dir not in self.android_flat_dirs):
         self.android_flat_dirs.append(dir)
 
+def android_add_buildscript_maven_repository(self, url):
+    if (url not in self.android_buildscript_maven_repos):
+        self.android_buildscript_maven_repos.append(url)
+
 def android_add_maven_repository(self, url):
     if (url not in self.android_maven_repos):
         self.android_maven_repos.append(url)

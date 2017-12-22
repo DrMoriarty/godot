@@ -391,7 +391,7 @@ bool EditorExportPlatformAndroid::_get(const StringName &p_name, Variant &r_ret)
 	else if (n == "architecture/arm")
 		r_ret = export_arm;
 	else if (n=="architecture/arm64")
-		export_arm64=p_value;
+		r_ret = export_arm64;
 	else if (n == "architecture/x86")
 		r_ret = export_x86;
 	else if (n == "screen/use_32_bits_view")

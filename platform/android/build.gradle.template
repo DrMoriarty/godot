@@ -1,6 +1,7 @@
 buildscript {
 	repositories {
 		jcenter()
+        $$BUILDSCRIPT_GRADLE_REPOSITORY_URLS$$
 	}
 	dependencies {
 		classpath 'com.android.tools.build:gradle:2.3.3'
@@ -13,8 +14,9 @@ apply plugin: 'com.android.application'
 allprojects {
     repositories {
     	jcenter()
-	mavenCentral()
-	$$GRADLE_REPOSITORY_URLS$$
+        mavenCentral()
+        maven { url "https://maven.google.com" }
+        $$GRADLE_REPOSITORY_URLS$$
     }
 }
 
@@ -30,8 +32,8 @@ android {
 		disable 'MissingTranslation'
 	}
 
-	compileSdkVersion 24
-	buildToolsVersion "26.0.1"
+	compileSdkVersion 26
+	buildToolsVersion "26.0.2"
 	useLibrary 'org.apache.http.legacy'
 
 	packagingOptions {
@@ -47,6 +49,9 @@ android {
 	buildTypes.all { buildType ->
 		buildType.zipAlignEnabled false
 		buildType.signingConfig null
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
 	}
 	sourceSets {
 		main {
@@ -80,6 +85,33 @@ android {
 		// ApplicationVariant is undocumented, but this method is widely used; may break with another version of the Android Gradle plugin
 		variant.outputs.get(0).setOutputFile(new File("${projectDir}/../../../bin", "android_${variant.name}.apk"))
 	}
+//    splits {
+//        abi {
+//            enable true
+//            reset()
+//            include 'armeabi-v7a'
+//            universalApk false
+//        }
+//    }
 }
 
 $$GRADLE_PLUGINS$$
+
+crashlytics {
+  enableNdk true
+  androidNdkOut 'libs/debug'
+  androidNdkLibsOut 'libs/release'
+  manifestPath 'AndroidManifest.xml'
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+  def tasks = taskGraph.getAllTasks()
+  tasks.each {
+    def taskName = it.getName()
+    if(taskName.startsWith("crashlyticsUploadSymbols")) {
+      println("Found $taskName")
+      it.setOnlyIf { true }
+      it.outputs.upToDateWhen { false }
+    }
+  }
+}
