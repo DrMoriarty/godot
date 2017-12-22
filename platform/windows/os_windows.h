@@ -130,6 +130,9 @@ class OS_Windows : public OS {
 
 	InputDefault *input;
 	joystick_windows *joystick;
+#if WINVER >= 0x0601 // for windows 7
+	Map<int, Point2i> touch_state;
+#endif
 
 #ifdef WASAPI_ENABLED
 	AudioDriverWASAPI driver_wasapi;
@@ -279,6 +282,8 @@ public:
 
 	virtual void set_use_vsync(bool p_enable);
 	virtual bool is_vsync_enabled() const;
+
+	virtual Error move_path_to_trash(String p_dir);
 
 	void disable_crash_handler();
 	bool is_disable_crash_handler() const;
