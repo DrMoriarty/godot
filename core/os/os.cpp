@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -544,6 +544,17 @@ Dictionary OS::get_engine_version() const {
 	dict["string"] = stringver;
 
 	return dict;
+}
+
+void OS::center_window() {
+
+	if (is_window_fullscreen()) return;
+
+	Size2 scr = get_screen_size(get_current_screen());
+	Size2 wnd = get_real_window_size();
+	int x = scr.width / 2 - wnd.width / 2;
+	int y = scr.height / 2 - wnd.height / 2;
+	set_window_position(Vector2(x, y));
 }
 
 OS::OS() {

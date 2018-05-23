@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -280,7 +280,7 @@ void AudioMixerSW::mix_channel(Channel &c) {
 		//stereo pan
 		float pan = c.pan * 0.5 + 0.5;
 		float panv[2] = {
-			(1.0 - pan) * (1 << MIX_VOL_FRAC_BITS),
+			(1.0f - pan) * (1 << MIX_VOL_FRAC_BITS),
 			(pan) * (1 << MIX_VOL_FRAC_BITS)
 		};
 
@@ -297,9 +297,9 @@ void AudioMixerSW::mix_channel(Channel &c) {
 		float pany = c.depth * 0.5 + 0.5;
 		// with this model every speaker plays at 0.25 energy at the center.. i'm not sure if it's correct but it seems to be balanced
 		float panv[4] = {
-			(1.0 - pany) * (1.0 - panx) * (1 << MIX_VOL_FRAC_BITS),
-			(1.0 - pany) * (panx) * (1 << MIX_VOL_FRAC_BITS),
-			(pany) * (1.0 - panx) * (1 << MIX_VOL_FRAC_BITS),
+			(1.0f - pany) * (1.0f - panx) * (1 << MIX_VOL_FRAC_BITS),
+			(1.0f - pany) * (panx) * (1 << MIX_VOL_FRAC_BITS),
+			(pany) * (1.0f - panx) * (1 << MIX_VOL_FRAC_BITS),
 			(pany) * (panx) * (1 << MIX_VOL_FRAC_BITS)
 		};
 

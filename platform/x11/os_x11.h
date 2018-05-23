@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -132,6 +132,9 @@ class OS_X11 : public OS_Unix {
 		XIEventMask event_mask;
 		Map<int, Point2i> state;
 	} touch;
+	// For touch-to-mouse
+	int num_touches;
+	int touch_mouse_index;
 #endif
 
 	PhysicsServer *physics_server;
@@ -192,6 +195,7 @@ class OS_X11 : public OS_Unix {
 	bool maximized;
 	//void set_wm_border(bool p_enabled);
 	void set_wm_fullscreen(bool p_enabled);
+	void set_wm_above(bool p_enabled);
 
 	typedef xrr_monitor_info *(*xrr_get_monitors_t)(Display *dpy, Window window, Bool get_active, int *nmonitors);
 	typedef void (*xrr_free_monitors_t)(xrr_monitor_info *monitors);
@@ -218,6 +222,7 @@ public:
 	virtual String get_name();
 
 	virtual void set_cursor_shape(CursorShape p_shape);
+	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
 
 	void set_mouse_mode(MouseMode p_mode);
 	MouseMode get_mouse_mode() const;
@@ -257,6 +262,7 @@ public:
 	virtual Point2 get_window_position() const;
 	virtual void set_window_position(const Point2 &p_position);
 	virtual Size2 get_window_size() const;
+	virtual Size2 get_real_window_size() const;
 	virtual void set_window_size(const Size2 p_size);
 	virtual void set_window_fullscreen(bool p_enabled);
 	virtual bool is_window_fullscreen() const;
@@ -266,6 +272,8 @@ public:
 	virtual bool is_window_minimized() const;
 	virtual void set_window_maximized(bool p_enabled);
 	virtual bool is_window_maximized() const;
+	virtual void set_window_always_on_top(bool p_enabled);
+	virtual bool is_window_always_on_top() const;
 	virtual void request_attention();
 
 	virtual void move_window_to_foreground();
@@ -283,6 +291,8 @@ public:
 
 	void disable_crash_handler();
 	bool is_disable_crash_handler() const;
+
+	virtual LatinKeyboardVariant get_latin_keyboard_variant() const;
 
 	OS_X11();
 };

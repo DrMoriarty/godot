@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -93,6 +93,7 @@ static OS::VideoMode video_mode;
 static bool init_maximized = false;
 static bool init_windowed = false;
 static bool init_fullscreen = false;
+static bool init_always_on_top = false;
 static bool init_use_custom_pos = false;
 #ifdef DEBUG_ENABLED
 static bool debug_collisions = false;
@@ -126,8 +127,8 @@ static String unescape_cmdline(const String &p_str) {
 void Main::print_help(const char *p_binary) {
 
 	OS::get_singleton()->print(VERSION_FULL_NAME " - https://godotengine.org\n");
-	OS::get_singleton()->print("(c) 2007-2017 Juan Linietsky, Ariel Manzur.\n");
-	OS::get_singleton()->print("(c) 2014-2017 Godot Engine contributors.\n");
+	OS::get_singleton()->print("(c) 2007-2018 Juan Linietsky, Ariel Manzur.\n");
+	OS::get_singleton()->print("(c) 2014-2018 Godot Engine contributors.\n");
 	OS::get_singleton()->print("\n");
 	OS::get_singleton()->print("Usage: %s [options] [path to scene or 'engine.cfg' file]\n", p_binary);
 	OS::get_singleton()->print("\n");
@@ -153,6 +154,7 @@ void Main::print_help(const char *p_binary) {
 	OS::get_singleton()->print("\t-f : Request fullscreen.\n");
 	OS::get_singleton()->print("\t-mx : Request maximized.\n");
 	OS::get_singleton()->print("\t-w : Request windowed.\n");
+	OS::get_singleton()->print("\t-t : Request always-on-top.\n");
 	OS::get_singleton()->print("\t-vd <driver> : Video driver (");
 	for (int i = 0; i < OS::get_singleton()->get_video_driver_count(); i++) {
 
@@ -425,8 +427,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 		} else if (I->get() == "-f") { // fullscreen
 
-			//video_mode.fullscreen=false;
 			init_fullscreen = true;
+		} else if (I->get() == "-t") { // always-on-top
+
+			init_always_on_top = true;
 		} else if (I->get() == "-e" || I->get() == "-editor") { // fonud editor
 
 			editor = true;
@@ -690,6 +694,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		video_mode.resizable = globals->get("display/resizable");
 	if (use_custom_res && globals->has("display/borderless_window"))
 		video_mode.borderless_window = globals->get("display/borderless_window");
+	if (use_custom_res && globals->has("display/always_on_top"))
+		video_mode.always_on_top = globals->get("display/always_on_top");
 
 	if (!force_res && use_custom_res && globals->has("display/test_width") && globals->has("display/test_height")) {
 		int tw = globals->get("display/test_width");
@@ -706,6 +712,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	GLOBAL_DEF("display/fullscreen", video_mode.fullscreen);
 	GLOBAL_DEF("display/resizable", video_mode.resizable);
 	GLOBAL_DEF("display/borderless_window", video_mode.borderless_window);
+	GLOBAL_DEF("display/always_on_top", video_mode.always_on_top);
 	use_vsync = GLOBAL_DEF("display/use_vsync", use_vsync);
 	GLOBAL_DEF("display/test_width", 0);
 	GLOBAL_DEF("display/test_height", 0);
@@ -882,6 +889,9 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	} else if (init_fullscreen) {
 		OS::get_singleton()->set_window_fullscreen(true);
 	}
+	if (init_always_on_top) {
+		OS::get_singleton()->set_window_always_on_top(true);
+	}
 	MAIN_PRINT("Main: Load Remaps");
 
 	path_remap->load_remaps();
@@ -953,20 +963,6 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 	register_scene_types();
 	register_server_types();
 
-	GLOBAL_DEF("display/custom_mouse_cursor", String());
-	GLOBAL_DEF("display/custom_mouse_cursor_hotspot", Vector2());
-	Globals::get_singleton()->set_custom_property_info("display/custom_mouse_cursor", PropertyInfo(Variant::STRING, "display/custom_mouse_cursor", PROPERTY_HINT_FILE, "*.png,*.webp"));
-
-	if (String(Globals::get_singleton()->get("display/custom_mouse_cursor")) != String()) {
-
-		//print_line("use custom cursor");
-		Ref<Texture> cursor = ResourceLoader::load(Globals::get_singleton()->get("display/custom_mouse_cursor"));
-		if (cursor.is_valid()) {
-			//	print_line("loaded ok");
-			Vector2 hotspot = Globals::get_singleton()->get("display/custom_mouse_cursor_hotspot");
-			Input::get_singleton()->set_custom_mouse_cursor(cursor, hotspot);
-		}
-	}
 #ifdef TOOLS_ENABLED
 	EditorNode::register_editor_types();
 #endif

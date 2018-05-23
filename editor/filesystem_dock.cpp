@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -432,6 +432,37 @@ String FileSystemDock::get_selected_path() const {
 		return "";
 	String path = sel->get_metadata(0);
 	return "res://" + path;
+}
+
+void FileSystemDock::navigate_to_path(const String &p_path) {
+	// If the path is a file, do not only go to the directory in the tree, also select the file in the file list.
+	String file_name = "";
+	DirAccess *dirAccess = DirAccess::open("res://");
+	if (dirAccess->file_exists(p_path)) {
+		path = p_path.get_base_dir();
+		file_name = p_path.get_file();
+	} else if (dirAccess->dir_exists(p_path)) {
+		path = p_path;
+	} else {
+		ERR_EXPLAIN(vformat(TTR("Cannot navigate to '%s' as it has not been found in the file system!"), p_path));
+		ERR_FAIL();
+	}
+
+	current_path->set_text(path);
+	_push_to_history();
+
+	_update_tree();
+	_update_files(false);
+
+	if (!file_name.empty()) {
+		for (int i = 0; i < files->get_item_count(); i++) {
+			if (files->get_item_text(i) == file_name) {
+				files->select(i, true);
+				files->ensure_current_is_visible();
+				break;
+			}
+		}
+	}
 }
 
 String FileSystemDock::get_current_path() const {
@@ -1757,6 +1788,7 @@ void FileSystemDock::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("_select_file"), &FileSystemDock::_select_file);
 	ObjectTypeDB::bind_method(_MD("_go_to_tree"), &FileSystemDock::_go_to_tree);
 	ObjectTypeDB::bind_method(_MD("_go_to_dir"), &FileSystemDock::_go_to_dir);
+	ObjectTypeDB::bind_method(_MD("navigate_to_path"), &FileSystemDock::navigate_to_path);
 	ObjectTypeDB::bind_method(_MD("_change_file_display"), &FileSystemDock::_change_file_display);
 	ObjectTypeDB::bind_method(_MD("_fw_history"), &FileSystemDock::_fw_history);
 	ObjectTypeDB::bind_method(_MD("_bw_history"), &FileSystemDock::_bw_history);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -189,8 +189,8 @@ static EM_BOOL _mousemove_callback(int event_type, const EmscriptenMouseEvent *m
 	ev.mouse_motion.global_x = ev.mouse_motion.x = mouse_event->canvasX;
 	ev.mouse_motion.global_y = ev.mouse_motion.y = mouse_event->canvasY;
 
-	ev.mouse_motion.relative_x = _input->get_mouse_pos().x - ev.mouse_motion.x;
-	ev.mouse_motion.relative_y = _input->get_mouse_pos().y - ev.mouse_motion.y;
+	ev.mouse_motion.relative_x = ev.mouse_motion.x - _input->get_mouse_pos().x;
+	ev.mouse_motion.relative_y = ev.mouse_motion.y - _input->get_mouse_pos().y;
 
 	_input->set_mouse_pos(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
 	ev.mouse_motion.speed_x = _input->get_mouse_speed().x;
@@ -310,8 +310,8 @@ static EM_BOOL _touchmove_callback(int event_type, const EmscriptenTouchEvent *t
 		ev.mouse_motion.button_mask = _input->get_mouse_button_mask() >> 1;
 		ev.mouse_motion.global_x = ev.mouse_motion.x = touch_event->touches[lowest_id_index].canvasX;
 		ev.mouse_motion.global_y = ev.mouse_motion.y = touch_event->touches[lowest_id_index].canvasY;
-		ev.mouse_motion.relative_x = _input->get_mouse_pos().x - ev.mouse_motion.x;
-		ev.mouse_motion.relative_y = _input->get_mouse_pos().y - ev.mouse_motion.y;
+		ev.mouse_motion.relative_x = ev.mouse_motion.x - _input->get_mouse_pos().x;
+		ev.mouse_motion.relative_y = ev.mouse_motion.y - _input->get_mouse_pos().y;
 
 		_input->set_mouse_pos(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
 		ev.mouse_motion.speed_x = _input->get_mouse_speed().x;
@@ -439,7 +439,6 @@ void OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, i
 
 	visual_server = memnew(VisualServerRaster(rasterizer));
 	visual_server->init();
-	visual_server->cursor_set_visible(false, 0);
 
 	/*AudioDriverManagerSW::get_driver(p_audio_driver)->set_singleton();
 
@@ -498,9 +497,9 @@ void OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, i
 	SET_EM_CALLBACK("#canvas", touchmove, _touchmove_callback)
 	SET_EM_CALLBACK("#canvas", touchend, _touchpress_callback)
 	SET_EM_CALLBACK("#canvas", touchcancel, _touchpress_callback)
-	SET_EM_CALLBACK("#canvas", keydown, _keydown_callback)
-	SET_EM_CALLBACK("#canvas", keypress, _keypress_callback)
-	SET_EM_CALLBACK("#canvas", keyup, _keyup_callback)
+	SET_EM_CALLBACK("#window", keydown, _keydown_callback)
+	SET_EM_CALLBACK("#window", keypress, _keypress_callback)
+	SET_EM_CALLBACK("#window", keyup, _keyup_callback)
 	SET_EM_CALLBACK(NULL, resize, _browser_resize_callback)
 	SET_EM_CALLBACK(NULL, fullscreenchange, _fullscreen_change_callback)
 	SET_EM_CALLBACK_NODATA(gamepadconnected, joy_callback_func)
@@ -684,6 +683,10 @@ bool OS_JavaScript::can_draw() const {
 void OS_JavaScript::set_cursor_shape(CursorShape p_shape) {
 
 	//javascript really really really has no mouse.. how amazing..
+}
+
+void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+
 }
 
 void OS_JavaScript::main_loop_begin() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<doc version="2.1.4.stable.custom_build" name="Engine Types">
+<doc version="2.1.5.beta.custom_build" name="Engine Types">
 <class name="@GDScript" category="Core">
 	<brief_description>
 		Built-in GDScript functions.
@@ -15782,6 +15782,15 @@
 				Return a resolved item address, or an empty string if an error happened or resolution didn't happen yet (see [method get_resolve_item_status]).
 			</description>
 		</method>
+		<method name="get_resolve_item_addresses" qualifiers="const">
+			<return type="Array">
+			</return>
+			<argument index="0" name="id" type="int">
+			</argument>
+			<description>
+				Return resolved addresses, or an empty array if an error happened or resolution didn't happen yet (see [method get_resolve_item_status]).
+			</description>
+		</method>
 		<method name="get_resolve_item_status" qualifiers="const">
 			<return type="int">
 			</return>
@@ -15800,6 +15809,17 @@
 			</argument>
 			<description>
 				Resolve a given hostname, blocking. Resolved hostname is returned as an IPv4 or IPv6 depending on "ip_type".
+			</description>
+		</method>
+		<method name="resolve_hostname_addresses">
+			<return type="Array">
+			</return>
+			<argument index="0" name="host" type="String">
+			</argument>
+			<argument index="1" name="ip_type" type="int">
+			</argument>
+			<description>
+				Resolve a given hostname, blocking. Addresses are returned as an Array of IPv4 or IPv6 depending on "ip_type".
 			</description>
 		</method>
 		<method name="resolve_hostname_queue_item">
@@ -16587,9 +16607,12 @@
 		<method name="set_custom_mouse_cursor">
 			<argument index="0" name="image" type="Texture">
 			</argument>
-			<argument index="1" name="hotspot" type="Vector2" default="Vector2(0, 0)">
+			<argument index="1" name="shape" type="int" default="0">
+			</argument>
+			<argument index="2" name="hotspot" type="Vector2" default="Vector2(0, 0)">
 			</argument>
 			<description>
+				See enum CURSOR_* for the list of shapes.
 				Set a custom mouse cursor image, which is only visible inside the game window. The hotspot can also be specified.
 			</description>
 		</method>
@@ -16649,6 +16672,40 @@
 		</constant>
 		<constant name="MOUSE_MODE_CAPTURED" value="2">
 			Captures the mouse. The mouse will be hidden and unable to leave the game window. But it will still register movement and mouse button presses.
+		</constant>
+		<constant name="CURSOR_ARROW" value="0">
+		</constant>
+		<constant name="CURSOR_IBEAM" value="1">
+		</constant>
+		<constant name="CURSOR_POINTING_HAND" value="2">
+		</constant>
+		<constant name="CURSOR_CROSS" value="3">
+		</constant>
+		<constant name="CURSOR_WAIT" value="4">
+		</constant>
+		<constant name="CURSOR_BUSY" value="5">
+		</constant>
+		<constant name="CURSOR_DRAG" value="6">
+		</constant>
+		<constant name="CURSOR_CAN_DROP" value="7">
+		</constant>
+		<constant name="CURSOR_FORBIDDEN" value="8">
+		</constant>
+		<constant name="CURSOR_VSIZE" value="9">
+		</constant>
+		<constant name="CURSOR_HSIZE" value="10">
+		</constant>
+		<constant name="CURSOR_BDIAGSIZE" value="11">
+		</constant>
+		<constant name="CURSOR_FDIAGSIZE" value="12">
+		</constant>
+		<constant name="CURSOR_MOVE" value="13">
+		</constant>
+		<constant name="CURSOR_VSPLIT" value="14">
+		</constant>
+		<constant name="CURSOR_HSPLIT" value="15">
+		</constant>
+		<constant name="CURSOR_HELP" value="16">
 		</constant>
 	</constants>
 </class>
@@ -18953,6 +19010,8 @@
 			<argument index="2" name="slope_stop_min_velocity" type="float" default="5">
 			</argument>
 			<argument index="3" name="max_bounces" type="int" default="4">
+			</argument>
+			<argument index="4" name="floor_max_angle" type="float" default="0.785398">
 			</argument>
 			<description>
 			</description>
@@ -23196,6 +23255,10 @@
 				Returns if the current host platform is using multiple threads.
 			</description>
 		</method>
+		<method name="center_window">
+			<description>
+			</description>
+		</method>
 		<method name="delay_msec" qualifiers="const">
 			<argument index="0" name="msec" type="int">
 			</argument>
@@ -23399,7 +23462,7 @@
 			</return>
 			<description>
 				Returns the current latin keyboard variant as a String.
-				Possible return values are: "QWERTY", "AZERTY", "QZERTY", "DVORAK", "NEO" or "ERROR"
+				Possible return values are: "QWERTY", "AZERTY", "QZERTY", "DVORAK", "NEO", "COLEMAK" or "ERROR"
 			</description>
 		</method>
 		<method name="get_locale" qualifiers="const">
@@ -23442,6 +23505,12 @@
 			</return>
 			<description>
 				Returns the number of cores available in the host machine.
+			</description>
+		</method>
+		<method name="get_real_window_size" qualifiers="const">
+			<return type="Vector2">
+			</return>
+			<description>
 			</description>
 		</method>
 		<method name="get_scancode_string" qualifiers="const">
@@ -23707,6 +23776,12 @@
 			<description>
 			</description>
 		</method>
+		<method name="is_window_always_on_top" qualifiers="const">
+			<return type="bool">
+			</return>
+			<description>
+			</description>
+		</method>
 		<method name="is_window_fullscreen" qualifiers="const">
 			<return type="bool">
 			</return>
@@ -23906,6 +23981,12 @@
 			</argument>
 			<description>
 				Change the video mode.
+			</description>
+		</method>
+		<method name="set_window_always_on_top">
+			<argument index="0" name="enabled" type="bool">
+			</argument>
+			<description>
 			</description>
 		</method>
 		<method name="set_window_fullscreen">
@@ -39213,11 +39294,29 @@
 				Perform a case-sensitive comparison to another string, return -1 if less, 0 if equal and +1 if greater.
 			</description>
 		</method>
+		<method name="decrypt_text">
+			<return type="String">
+			</return>
+			<argument index="0" name="key" type="String">
+			</argument>
+			<description>
+				Copy the String and return it decrypted.
+			</description>
+		</method>
 		<method name="empty">
 			<return type="bool">
 			</return>
 			<description>
 				Return true if the string is empty.
+			</description>
+		</method>
+		<method name="encrypt_text">
+			<return type="String">
+			</return>
+			<argument index="0" name="key" type="String">
+			</argument>
+			<description>
+				Copy the String and return it encrypted.
 			</description>
 		</method>
 		<method name="ends_with">
@@ -40716,6 +40815,12 @@
 				Clear the undo history.
 			</description>
 		</method>
+		<method name="convert_case">
+			<argument index="0" name="case" type="int">
+			</argument>
+			<description>
+			</description>
+		</method>
 		<method name="copy">
 			<description>
 				Copy the current selection.
@@ -41062,11 +41167,11 @@
 		</constant>
 		<constant name="MENU_CLEAR" value="3">
 		</constant>
-		<constant name="MENU_SELECT_ALL" value="4">
+		<constant name="MENU_SELECT_ALL" value="6">
 		</constant>
-		<constant name="MENU_UNDO" value="5">
+		<constant name="MENU_UNDO" value="7">
 		</constant>
-		<constant name="MENU_MAX" value="6">
+		<constant name="MENU_MAX" value="8">
 		</constant>
 	</constants>
 	<theme_items>
@@ -44926,7 +45031,13 @@
 			<argument index="0" name="vec" type="Vector2">
 			</argument>
 			<description>
-				Like "slide", but reflects the Vector instead of continuing along the wall.
+				Reflects the vector along the given plane, specified by its normal vector.
+				Note that the normal vector is the one you call the method on:
+				[codeblock]
+				var vector = Vector2(4, 2)
+				var x_reflection = Vector2(1, 0).reflect(vector)  # (-4, 2)
+				var y_reflection = Vector2(0, 1).reflect(vector)  # (4, -2)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="rotated">
@@ -44944,7 +45055,13 @@
 			<argument index="0" name="vec" type="Vector2">
 			</argument>
 			<description>
-				Slides the vector by the other vector.
+				Slide returns the component of the vector along the given plane, specified by its normal vector.
+				Note that the normal vector is the one you call the method on:
+				[codeblock]
+				var vector = Vector2(4, 2)
+				var x_slide = Vector2(1, 0).slide(vector)  # (0, 2)
+				var y_slide = Vector2(0, 1).slide(vector)  # (4, 0)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="snapped">
@@ -46793,42 +46910,6 @@
 		</method>
 		<method name="canvas_item_set_z">
 			<argument index="0" name="arg0" type="RID">
-			</argument>
-			<argument index="1" name="arg1" type="int">
-			</argument>
-			<description>
-			</description>
-		</method>
-		<method name="cursor_set_pos">
-			<argument index="0" name="arg0" type="Vector2">
-			</argument>
-			<argument index="1" name="arg1" type="int">
-			</argument>
-			<description>
-			</description>
-		</method>
-		<method name="cursor_set_rotation">
-			<argument index="0" name="arg0" type="float">
-			</argument>
-			<argument index="1" name="arg1" type="int">
-			</argument>
-			<description>
-			</description>
-		</method>
-		<method name="cursor_set_texture">
-			<argument index="0" name="arg0" type="RID">
-			</argument>
-			<argument index="1" name="arg1" type="Vector2">
-			</argument>
-			<argument index="2" name="arg2" type="int">
-			</argument>
-			<argument index="3" name="arg3" type="Rect2">
-			</argument>
-			<description>
-			</description>
-		</method>
-		<method name="cursor_set_visible">
-			<argument index="0" name="arg0" type="bool">
 			</argument>
 			<argument index="1" name="arg1" type="int">
 			</argument>

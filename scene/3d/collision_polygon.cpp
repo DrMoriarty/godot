@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -103,6 +103,19 @@ void CollisionPolygon::_add_to_collision_object(Object *p_obj) {
 	//co->add_shape(shape,get_transform());
 }
 
+void CollisionPolygon::_update_xform_in_parent() {
+
+	if (shape_from >= 0 && shape_to >= 0) {
+
+		CollisionObject *co = get_parent()->cast_to<CollisionObject>();
+		if (co) {
+			for (int i = shape_from; i <= shape_to; i++) {
+				co->set_shape_transform(i, get_transform());
+			}
+		}
+	}
+}
+
 void CollisionPolygon::_update_parent() {
 
 	if (!can_update_body)
@@ -135,6 +148,10 @@ void CollisionPolygon::_notification(int p_what) {
 			can_update_body = get_tree()->is_editor_hint();
 			set_notify_local_transform(!can_update_body);
 
+			if (!can_update_body) {
+				_update_xform_in_parent();
+			}
+
 			//indicator_instance = VisualServer::get_singleton()->instance_create2(indicator,get_world()->get_scenario());
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
@@ -151,14 +168,8 @@ void CollisionPolygon::_notification(int p_what) {
 
 		} break;
 		case NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
-			if (!can_update_body && shape_from >= 0 && shape_to >= 0) {
-
-				CollisionObject *co = get_parent()->cast_to<CollisionObject>();
-				if (co) {
-					for (int i = shape_from; i <= shape_to; i++) {
-						co->set_shape_transform(i, get_transform());
-					}
-				}
+			if (!can_update_body) {
+				_update_xform_in_parent();
 			}
 
 		} break;

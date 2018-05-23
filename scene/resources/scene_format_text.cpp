@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1527,8 +1527,15 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 
 static String _valprop(const String &p_name) {
 
-	if (p_name.find("\"") != -1 || p_name.find("=") != -1 || p_name.find(" ") != -1)
-		return "\"" + p_name.c_escape_multiline() + "\"";
+	// Escape and quote strings with extended ASCII or further Unicode characters
+	// as well as '"', '=' or ' ' (32)
+	const CharType *cstr = p_name.c_str();
+	for (int i = 0; cstr[i]; i++) {
+		if (cstr[i] == '=' || cstr[i] == '"' || cstr[i] < 33 || cstr[i] > 126) {
+			return "\"" + p_name.c_escape_multiline() + "\"";
+		}
+	}
+	// Keep as is
 	return p_name;
 }
 

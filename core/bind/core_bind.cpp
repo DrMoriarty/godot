@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -68,7 +68,13 @@ Ref<ResourceInteractiveLoader> _ResourceLoader::load_interactive(const String &p
 
 RES _ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p_no_cache) {
 
-	RES ret = ResourceLoader::load(p_path, p_type_hint, p_no_cache);
+	Error err = OK;
+	RES ret = ResourceLoader::load(p_path, p_type_hint, p_no_cache, &err);
+
+	if (err != OK) {
+		ERR_EXPLAIN("Error loading resource: '" + p_path + "'");
+		ERR_FAIL_COND_V(err != OK, ret);
+	}
 	return ret;
 }
 
@@ -261,6 +267,10 @@ Size2 _OS::get_window_size() const {
 	return OS::get_singleton()->get_window_size();
 }
 
+Size2 _OS::get_real_window_size() const {
+	return OS::get_singleton()->get_real_window_size();
+}
+
 void _OS::set_window_size(const Size2 &p_size) {
 	OS::get_singleton()->set_window_size(p_size);
 }
@@ -295,6 +305,14 @@ void _OS::set_window_maximized(bool p_enabled) {
 
 bool _OS::is_window_maximized() const {
 	return OS::get_singleton()->is_window_maximized();
+}
+
+void _OS::set_window_always_on_top(bool p_enabled) {
+	OS::get_singleton()->set_window_always_on_top(p_enabled);
+}
+
+bool _OS::is_window_always_on_top() const {
+	return OS::get_singleton()->is_window_always_on_top();
 }
 
 void _OS::set_borderless_window(bool p_borderless) {
@@ -429,6 +447,7 @@ String _OS::get_latin_keyboard_variant() const {
 		case OS::LATIN_KEYBOARD_QZERTY: return "QZERTY";
 		case OS::LATIN_KEYBOARD_DVORAK: return "DVORAK";
 		case OS::LATIN_KEYBOARD_NEO: return "NEO";
+		case OS::LATIN_KEYBOARD_COLEMAK: return "COLEMAK";
 		default: return "ERROR";
 	}
 }
@@ -935,6 +954,11 @@ void _OS::request_attention() {
 	OS::get_singleton()->request_attention();
 }
 
+void _OS::center_window() {
+
+	OS::get_singleton()->center_window();
+}
+
 bool _OS::is_debug_build() const {
 
 #ifdef DEBUG_ENABLED
@@ -1031,7 +1055,11 @@ void _OS::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("is_window_minimized"), &_OS::is_window_minimized);
 	ObjectTypeDB::bind_method(_MD("set_window_maximized", "enabled"), &_OS::set_window_maximized);
 	ObjectTypeDB::bind_method(_MD("is_window_maximized"), &_OS::is_window_maximized);
+	ObjectTypeDB::bind_method(_MD("set_window_always_on_top", "enabled"), &_OS::set_window_always_on_top);
+	ObjectTypeDB::bind_method(_MD("is_window_always_on_top"), &_OS::is_window_always_on_top);
 	ObjectTypeDB::bind_method(_MD("request_attention"), &_OS::request_attention);
+	ObjectTypeDB::bind_method(_MD("get_real_window_size"), &_OS::get_real_window_size);
+	ObjectTypeDB::bind_method(_MD("center_window"), &_OS::center_window);
 
 	ObjectTypeDB::bind_method(_MD("set_borderless_window", "borderless"), &_OS::set_borderless_window);
 	ObjectTypeDB::bind_method(_MD("get_borderless_window"), &_OS::get_borderless_window);

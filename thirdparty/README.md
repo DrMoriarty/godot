@@ -10,9 +10,14 @@
 
 ## certs
 
-- Upstream: ?
+- Upstream: Mozilla, via https://apps.fedoraproject.org/packages/ca-certificates
+- Version: 2018.2.22
+- License: MPL 2.0
 
-TODO.
+File extracted from a recent Fedora install:
+/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+(It can't be extracted directly from the package,
+as it's generated on the user's system.)
 
 
 ## fonts
@@ -142,7 +147,7 @@ Files extracted from upstream source:
 ## libwebp
 
 - Upstream: https://chromium.googlesource.com/webm/libwebp/
-- Version: 0.6.1
+- Version: 1.0.0
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -158,7 +163,7 @@ changes are marked with `// -- GODOT --` comments.
 ## minizip
 
 - Upstream: http://www.zlib.net
-- Version: 1.2.4 (zlib contrib)
+- Version: 1.2.11 (zlib contrib)
 - License: zlib
 
 Files extracted from the upstream source:

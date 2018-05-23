@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -142,7 +142,6 @@ void OS_Android::initialize(const VideoMode &p_desired, int p_video_driver, int 
 		visual_server = memnew(VisualServerWrapMT(visual_server, false));
 	};
 	visual_server->init();
-	visual_server->cursor_set_visible(false, 0);
 
 	AudioDriverManagerSW::get_driver(p_audio_driver)->set_singleton();
 
@@ -178,43 +177,6 @@ void OS_Android::set_main_loop(MainLoop *p_main_loop) {
 
 	main_loop = p_main_loop;
 	input->set_main_loop(p_main_loop);
-#if 0
-
-	print_line("preGS");
-	FileAccess *f=memnew( FileAccessAndroid );
-	print("made f %p\n",f);
-	Error err = f->open("AndroidManifest.xml",FileAccess::READ);
-	if (err) {
-
-		print("************NO FILE!!\n");
-	} else {
-		print("************YES FILE!!\n");
-	}
-	f->close();
-	print_line("end");
-
-
-	AAssetDir* aad = AAssetManager_openDir(FileAccessAndroid::asset_manager,".");
-
-	if (aad) {
-
-		print_line("DIR OPEN OK");
-
-		const char *fn= AAssetDir_getNextFileName(aad);
-
-		while(fn) {
-
-			print_line("FNAME: "+String(fn));
-			fn= AAssetDir_getNextFileName(aad);
-		}
-
-		AAssetDir_close(aad);
-	} else {
-
-		print_line("DIR NO OPEN");
-	}
-
-#endif
 }
 
 void OS_Android::delete_main_loop() {
@@ -238,6 +200,11 @@ void OS_Android::print(const char *p_format, ...) {
 	va_start(argp, p_format);
 	__android_log_vprint(ANDROID_LOG_INFO, "godot", p_format, argp);
 	va_end(argp);
+}
+
+void OS_Android::printfatal(const char *cond, const char *p_error_type, const char *p_function, const char *p_err_details, const char *p_file, int p_line) {
+
+	__android_log_assert(cond, "godot", "%s exception: %s: %s(%s:%i)\n", p_error_type, p_function, p_err_details, p_file, p_line);
 }
 
 void OS_Android::alert(const String &p_alert, const String &p_title) {
@@ -272,12 +239,9 @@ int OS_Android::get_mouse_button_state() const {
 
 	return 0;
 }
+
 void OS_Android::set_window_title(const String &p_title) {
 }
-
-//interesting byt not yet
-//void set_clipboard(const String& p_text);
-//String get_clipboard() const;
 
 void OS_Android::set_video_mode(const VideoMode &p_video_mode, int p_screen) {
 }
@@ -323,6 +287,11 @@ bool OS_Android::can_draw() const {
 void OS_Android::set_cursor_shape(CursorShape p_shape) {
 
 	//android really really really has no mouse.. how amazing..
+}
+
+void OS_Android::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+
+	// Since android has no mouse, we do not need to change its texture (how amazing !)
 }
 
 void OS_Android::main_loop_begin() {
@@ -674,6 +643,23 @@ String OS_Android::get_locale() const {
 	return OS_Unix::get_locale();
 }
 
+void OS_Android::set_clipboard(const String &p_text) {
+
+	if (set_clipboard_func) {
+		set_clipboard_func(p_text);
+	} else {
+		OS_Unix::set_clipboard(p_text);
+	}
+}
+
+String OS_Android::get_clipboard() const {
+	if (get_clipboard_func) {
+		return get_clipboard_func();
+	}
+
+	return OS_Unix::get_clipboard();
+}
+
 String OS_Android::get_model_name() const {
 
 	if (get_model_func)
@@ -783,11 +769,35 @@ bool OS_Android::is_joy_known(int p_device) {
 	return input->is_joy_mapped(p_device);
 }
 
+void OS_Android::print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, ErrorType p_type) {
+	const char *err_details;
+	if (p_rationale && p_rationale[0])
+		err_details = p_rationale;
+	else
+		err_details = p_code;
+
+	switch (p_type) {
+		case ERR_ERROR:
+			printfatal(NULL, "Error", p_function, err_details, p_file, p_line);
+			break;
+
+		case ERR_WARNING:
+			print("WARNING: %s: %s\n", p_function, err_details);
+			print("   At: %s:%i\n", p_file, p_line);
+			break;
+
+		case ERR_SCRIPT:
+			printfatal(NULL, "Script error", p_function, err_details, p_file, p_line);
+
+			break;
+	}
+}
+
 String OS_Android::get_joy_guid(int p_device) const {
 	return input->get_joy_guid_remapped(p_device);
 }
 
-OS_Android::OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURIFunc p_open_uri_func, GetDataDirFunc p_get_data_dir_func, GetLocaleFunc p_get_locale_func, GetModelFunc p_get_model_func, GetScreenDPIFunc p_get_screen_dpi_func, ShowVirtualKeyboardFunc p_show_vk, HideVirtualKeyboardFunc p_hide_vk, SetScreenOrientationFunc p_screen_orient, GetUniqueIDFunc p_get_unique_id, GetSystemDirFunc p_get_sdir_func, VideoPlayFunc p_video_play_func, VideoIsPlayingFunc p_video_is_playing_func, VideoPauseFunc p_video_pause_func, VideoStopFunc p_video_stop_func, SetKeepScreenOnFunc p_set_keep_screen_on_func, AlertFunc p_alert_func, bool p_use_apk_expansion) {
+OS_Android::OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURIFunc p_open_uri_func, GetDataDirFunc p_get_data_dir_func, GetLocaleFunc p_get_locale_func, GetModelFunc p_get_model_func, GetScreenDPIFunc p_get_screen_dpi_func, ShowVirtualKeyboardFunc p_show_vk, HideVirtualKeyboardFunc p_hide_vk, SetScreenOrientationFunc p_screen_orient, GetUniqueIDFunc p_get_unique_id, GetSystemDirFunc p_get_sdir_func, VideoPlayFunc p_video_play_func, VideoIsPlayingFunc p_video_is_playing_func, VideoPauseFunc p_video_pause_func, VideoStopFunc p_video_stop_func, SetKeepScreenOnFunc p_set_keep_screen_on_func, AlertFunc p_alert_func, bool p_use_apk_expansion, SetClipboardFunc p_set_clipboard_func, GetClipboardFunc p_get_clipboard_func) {
 
 	use_apk_expansion = p_use_apk_expansion;
 	default_videomode.width = 800;
@@ -823,6 +833,9 @@ OS_Android::OS_Android(GFXInitFunc p_gfx_init_func, void *p_gfx_init_ud, OpenURI
 	set_keep_screen_on_func = p_set_keep_screen_on_func;
 	alert_func = p_alert_func;
 	use_reload_hooks = false;
+
+	set_clipboard_func = p_set_clipboard_func;
+	get_clipboard_func = p_get_clipboard_func;
 }
 
 OS_Android::~OS_Android() {

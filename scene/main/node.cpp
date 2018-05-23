@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1976,13 +1976,11 @@ void Node::print_stray_nodes() {
 
 void Node::queue_delete() {
 
-	//ERR_FAIL_COND(!is_inside_tree());
-	if(!is_inside_tree()) {
-        // this check also exists when compile a release build
-		WARN_PRINTS("Delete the node outside the scene tree. Name: " + String(get_name()) + " filename: " + String(get_filename()));
-		return;
+	if (is_inside_tree()) {
+		get_tree()->queue_delete(this);
+	} else {
+		SceneTree::get_singleton()->queue_delete(this);
 	}
-	get_tree()->queue_delete(this);
 }
 
 Array Node::_get_children() const {

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -504,6 +504,27 @@ static const _KeyCodeReplace _keycode_replace_dvorak[] = {
 };
 
 static const _KeyCodeReplace _keycode_replace_neo[] = {
+	{ 0, 0 }
+};
+
+static const _KeyCodeReplace _keycode_replace_colemak[] = {
+	{ KEY_E, KEY_F },
+	{ KEY_R, KEY_P },
+	{ KEY_T, KEY_G },
+	{ KEY_Y, KEY_J },
+	{ KEY_U, KEY_L },
+	{ KEY_I, KEY_U },
+	{ KEY_O, KEY_Y },
+	{ KEY_P, KEY_SEMICOLON },
+	{ KEY_S, KEY_R },
+	{ KEY_D, KEY_S },
+	{ KEY_F, KEY_T },
+	{ KEY_G, KEY_D },
+	{ KEY_J, KEY_N },
+	{ KEY_K, KEY_E },
+	{ KEY_L, KEY_I },
+	{ KEY_SEMICOLON, KEY_O },
+	{ KEY_N, KEY_K },
 	{ 0, 0 }
 };
 

@@ -5,9 +5,9 @@
 /*							 GODOT ENGINE								 */
 /*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.				 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)	 */
-/*																		 */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the		 */
 /* "Software"), to deal in the Software without restriction, including	 */
@@ -315,8 +315,8 @@ bool EditorExportPlatformAndroid::_set(const StringName &p_name, const Variant &
 		_signed = p_value;
 	else if (n == "architecture/arm")
 		export_arm = p_value;
-	else if (n=="architecture/arm64")
-		export_arm64=p_value;
+	else if (n == "architecture/arm64")
+		export_arm64 = p_value;
 	else if (n == "architecture/x86")
 		export_x86 = p_value;
 	else if (n == "screen/use_32_bits_view")
@@ -390,7 +390,7 @@ bool EditorExportPlatformAndroid::_get(const StringName &p_name, Variant &r_ret)
 		r_ret = _signed;
 	else if (n == "architecture/arm")
 		r_ret = export_arm;
-	else if (n=="architecture/arm64")
+	else if (n == "architecture/arm64")
 		r_ret = export_arm64;
 	else if (n == "architecture/x86")
 		r_ret = export_x86;
@@ -448,6 +448,7 @@ void EditorExportPlatformAndroid::_get_property_list(List<PropertyInfo> *p_list)
 	p_list->push_back(PropertyInfo(Variant::STRING, "package/icon", PROPERTY_HINT_FILE, "png"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "package/signed"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "architecture/arm"));
+	p_list->push_back(PropertyInfo(Variant::BOOL, "architecture/arm64"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "architecture/x86"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "screen/use_32_bits_view"));
 	p_list->push_back(PropertyInfo(Variant::BOOL, "screen/immersive_mode"));
@@ -1291,9 +1292,9 @@ Error EditorExportPlatformAndroid::export_project(const String &p_path, bool p_d
 
 		List<String> args;
 		args.push_back("-digestalg");
-		args.push_back("SHA1");
+		args.push_back("SHA-256");
 		args.push_back("-sigalg");
-		args.push_back("MD5withRSA");
+		args.push_back("SHA256withRSA");
 		String tsa_url = EditorSettings::get_singleton()->get("android/timestamping_authority_url");
 		if (tsa_url != "") {
 			args.push_back("-tsa");
@@ -1514,8 +1515,7 @@ void EditorExportPlatformAndroid::_device_poll_thread(void *ud) {
 						args.push_back("-s");
 						args.push_back(d.id);
 						args.push_back("shell");
-						args.push_back("cat");
-						args.push_back("/system/build.prop");
+						args.push_back("getprop");
 						int ec;
 						String dp;
 
@@ -1528,7 +1528,14 @@ void EditorExportPlatformAndroid::_device_poll_thread(void *ud) {
 						d.api_level = 0;
 						for (int j = 0; j < props.size(); j++) {
 
+							// got information by `shell cat /system/build.prop` before and its format is "property=value"
+							// it's now changed to use `shell getporp` because of permission issue with Android 8.0 and above
+							// its format is "[property]: [value]" so changed it as like build.prop
 							String p = props[j];
+							p = p.replace("]: ", "=");
+							p = p.replace("[", "");
+							p = p.replace("]", "");
+
 							if (p.begins_with("ro.product.model=")) {
 								device = p.get_slice("=", 1).strip_edges();
 							} else if (p.begins_with("ro.product.brand=")) {
@@ -1775,7 +1782,7 @@ EditorExportPlatformAndroid::EditorExportPlatformAndroid() {
 	immersive = true;
 
 	export_arm = true;
-	export_arm64=false;
+	export_arm64 = false;
 	export_x86 = false;
 
 	device_thread = Thread::create(_device_poll_thread, this);

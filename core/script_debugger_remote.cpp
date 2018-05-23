@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1150,7 +1150,7 @@ ScriptDebuggerRemote::ScriptDebuggerRemote() {
 	tcp_client = StreamPeerTCP::create_ref();
 	packet_peer_stream = Ref<PacketPeerStream>(memnew(PacketPeerStream));
 	packet_peer_stream->set_stream_peer(tcp_client);
-	packet_peer_stream->set_input_buffer_max_size(pow(2, 20));
+	packet_peer_stream->set_input_buffer_max_size(1024 * 1024 * 1);
 	mutex = Mutex::create();
 	locking = false;
 

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -374,7 +374,8 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		breaked = true;
 		dobreak->set_disabled(true);
 		docontinue->set_disabled(false);
-		emit_signal("breaked", true, can_continue);
+		// Variant() needed to call the right overload
+		emit_signal("breaked", Variant(true), Variant(can_continue));
 		OS::get_singleton()->move_window_to_foreground();
 		if (error != "") {
 			tabs->set_current_tab(0);
@@ -399,7 +400,8 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 		forward->set_disabled(true);
 		dobreak->set_disabled(false);
 		docontinue->set_disabled(true);
-		emit_signal("breaked", false, false);
+		// Variant() needed to call the right overload
+		emit_signal("breaked", Variant(false), Variant(false));
 		//tabs->set_current_tab(0);
 		profiler->set_enabled(true);
 		profiler->disable_seeking();
@@ -1718,7 +1720,7 @@ void ScriptEditorDebugger::_bind_methods() {
 ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 
 	ppeer = Ref<PacketPeerStream>(memnew(PacketPeerStream));
-	ppeer->set_input_buffer_max_size(pow(2, 20));
+	ppeer->set_input_buffer_max_size(1024 * 1024 * 1);
 
 	editor = p_editor;
 	editor->get_property_editor()->connect("object_id_selected", this, "_scene_tree_property_select_object");

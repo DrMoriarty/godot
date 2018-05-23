@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,6 +34,7 @@
 #include "main/main.h"
 #include "os/keyboard.h"
 #include "print_string.h"
+#include "scene/resources/texture.h"
 #include "sem_osx.h"
 #include "servers/physics/physics_server_sw.h"
 #include "servers/visual/visual_server_raster.h"
@@ -490,9 +491,6 @@ static void _mouseDownEvent(NSEvent *event, int index, int mask, bool pressed) {
 	if (OS_OSX::singleton->main_loop && OS_OSX::singleton->mouse_mode != OS::MOUSE_MODE_CAPTURED)
 		OS_OSX::singleton->main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_EXIT);
 
-	if (OS_OSX::singleton->input)
-		OS_OSX::singleton->input->set_mouse_in_window(false);
-
 	//_glfwInputCursorEnter(window, GL_FALSE);
 }
 
@@ -504,8 +502,10 @@ static void _mouseDownEvent(NSEvent *event, int index, int mask, bool pressed) {
 	if (OS_OSX::singleton->main_loop && OS_OSX::singleton->mouse_mode != OS::MOUSE_MODE_CAPTURED)
 		OS_OSX::singleton->main_loop->notification(MainLoop::NOTIFICATION_WM_MOUSE_ENTER);
 
-	if (OS_OSX::singleton->input)
-		OS_OSX::singleton->input->set_mouse_in_window(true);
+	if (OS_OSX::singleton->input) {
+		OS_OSX::singleton->cursor_shape = OS::CURSOR_MAX;
+		OS_OSX::singleton->set_cursor_shape(OS::CURSOR_ARROW);
+	}
 }
 
 - (void)viewDidChangeBackingProperties {
@@ -1026,7 +1026,6 @@ void OS_OSX::initialize(const VideoMode &p_desired, int p_video_driver, int p_au
 	}
 
 	visual_server->init();
-	visual_server->cursor_set_visible(false, 0);
 
 	AudioDriverManagerSW::get_driver(p_audio_driver)->set_singleton();
 
@@ -1167,28 +1166,114 @@ void OS_OSX::set_cursor_shape(CursorShape p_shape) {
 	if (cursor_shape == p_shape)
 		return;
 
-	switch (p_shape) {
-		case CURSOR_ARROW: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_IBEAM: [[NSCursor IBeamCursor] set]; break;
-		case CURSOR_POINTING_HAND: [[NSCursor pointingHandCursor] set]; break;
-		case CURSOR_CROSS: [[NSCursor crosshairCursor] set]; break;
-		case CURSOR_WAIT: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_BUSY: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_DRAG: [[NSCursor closedHandCursor] set]; break;
-		case CURSOR_CAN_DROP: [[NSCursor openHandCursor] set]; break;
-		case CURSOR_FORBIDDEN: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_VSIZE: [[NSCursor resizeUpDownCursor] set]; break;
-		case CURSOR_HSIZE: [[NSCursor resizeLeftRightCursor] set]; break;
-		case CURSOR_BDIAGSIZE: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_FDIAGSIZE: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_MOVE: [[NSCursor arrowCursor] set]; break;
-		case CURSOR_VSPLIT: [[NSCursor resizeUpDownCursor] set]; break;
-		case CURSOR_HSPLIT: [[NSCursor resizeLeftRightCursor] set]; break;
-		case CURSOR_HELP: [[NSCursor arrowCursor] set]; break;
-		default: {};
+	if (mouse_mode != MOUSE_MODE_VISIBLE) {
+		cursor_shape = p_shape;
+		return;
+	}
+
+	if (cursors[p_shape] != NULL) {
+		[cursors[p_shape] set];
+	} else {
+		switch (p_shape) {
+			case CURSOR_ARROW: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_IBEAM: [[NSCursor IBeamCursor] set]; break;
+			case CURSOR_POINTING_HAND: [[NSCursor pointingHandCursor] set]; break;
+			case CURSOR_CROSS: [[NSCursor crosshairCursor] set]; break;
+			case CURSOR_WAIT: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_BUSY: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_DRAG: [[NSCursor closedHandCursor] set]; break;
+			case CURSOR_CAN_DROP: [[NSCursor openHandCursor] set]; break;
+			case CURSOR_FORBIDDEN: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_VSIZE: [[NSCursor resizeUpDownCursor] set]; break;
+			case CURSOR_HSIZE: [[NSCursor resizeLeftRightCursor] set]; break;
+			case CURSOR_BDIAGSIZE: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_FDIAGSIZE: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_MOVE: [[NSCursor arrowCursor] set]; break;
+			case CURSOR_VSPLIT: [[NSCursor resizeUpDownCursor] set]; break;
+			case CURSOR_HSPLIT: [[NSCursor resizeLeftRightCursor] set]; break;
+			case CURSOR_HELP: [[NSCursor arrowCursor] set]; break;
+			default: {};
+		}
 	}
 
 	cursor_shape = p_shape;
+}
+
+void OS_OSX::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
+	if (p_cursor.is_valid()) {
+		Ref<ImageTexture> texture = p_cursor;
+		Ref<AtlasTexture> atlas_texture = p_cursor;
+		Size2 texture_size;
+		Rect2 atlas_rect;
+
+		if (!texture.is_valid() && atlas_texture.is_valid()) {
+			texture = atlas_texture->get_atlas();
+
+			atlas_rect.size.width = texture->get_width();
+			atlas_rect.size.height = texture->get_height();
+			atlas_rect.pos.x = atlas_texture->get_region().pos.x;
+			atlas_rect.pos.y = atlas_texture->get_region().pos.y;
+
+			texture_size.width = atlas_texture->get_region().size.x;
+			texture_size.height = atlas_texture->get_region().size.y;
+		} else if (texture.is_valid()) {
+			texture_size.width = texture->get_width();
+			texture_size.height = texture->get_height();
+		}
+
+		ERR_FAIL_COND(!texture.is_valid());
+		ERR_FAIL_COND(texture_size.width > 256 || texture_size.height > 256);
+
+		Image image = texture->get_data();
+
+		NSBitmapImageRep *imgrep = [[[NSBitmapImageRep alloc]
+				initWithBitmapDataPlanes:NULL
+							  pixelsWide:int(texture_size.width)
+							  pixelsHigh:int(texture_size.height)
+						   bitsPerSample:8
+						 samplesPerPixel:4
+								hasAlpha:YES
+								isPlanar:NO
+						  colorSpaceName:NSDeviceRGBColorSpace
+							 bytesPerRow:int(texture_size.width) * 4
+							bitsPerPixel:32] autorelease];
+		ERR_FAIL_COND(imgrep == nil);
+		uint8_t *pixels = [imgrep bitmapData];
+
+		int len = int(texture_size.width * texture_size.height);
+		DVector<uint8_t> data = image.get_data();
+		DVector<uint8_t>::Read r = data.read();
+
+		/* Premultiply the alpha channel */
+		for (int i = 0; i < len; i++) {
+			int row_index = floor(i / texture_size.width) + atlas_rect.pos.y;
+			int column_index = (i % int(texture_size.width)) + atlas_rect.pos.x;
+
+			if (atlas_texture.is_valid()) {
+				column_index = MIN(column_index, atlas_rect.size.width - 1);
+				row_index = MIN(row_index, atlas_rect.size.height - 1);
+			}
+
+			uint32_t color = image.get_pixel(column_index, row_index).to_ARGB32();
+
+			uint8_t alpha = (color >> 24) & 0xFF;
+			pixels[i * 4 + 0] = ((color >> 16) & 0xFF) * alpha / 255;
+			pixels[i * 4 + 1] = ((color >> 8) & 0xFF) * alpha / 255;
+			pixels[i * 4 + 2] = ((color) & 0xFF) * alpha / 255;
+			pixels[i * 4 + 3] = alpha;
+		}
+
+		NSImage *nsimage = [[[NSImage alloc] initWithSize:NSMakeSize(texture_size.width, texture_size.height)] autorelease];
+		[nsimage addRepresentation:imgrep];
+
+		NSCursor *cursor = [[NSCursor alloc] initWithImage:nsimage hotSpot:NSMakePoint(p_hotspot.x, p_hotspot.y)];
+
+		cursors[p_shape] = cursor;
+
+		if (p_shape == CURSOR_ARROW) {
+			[cursor set];
+		}
+	}
 }
 
 void OS_OSX::set_mouse_show(bool p_show) {
@@ -1549,6 +1634,12 @@ Size2 OS_OSX::get_window_size() const {
 	return window_size;
 };
 
+Size2 OS_OSX::get_real_window_size() const {
+
+	NSRect frame = [window_object frame];
+	return Size2(frame.size.width, frame.size.height);
+}
+
 void OS_OSX::set_window_size(const Size2 p_size) {
 
 	Size2 size = p_size;
@@ -1643,6 +1734,20 @@ bool OS_OSX::is_window_maximized() const {
 void OS_OSX::move_window_to_foreground() {
 
 	[window_object orderFrontRegardless];
+}
+
+void OS_OSX::set_window_always_on_top(bool p_enabled) {
+	if (is_window_always_on_top() == p_enabled)
+		return;
+
+	if (p_enabled)
+		[window_object setLevel:NSFloatingWindowLevel];
+	else
+		[window_object setLevel:NSNormalWindowLevel];
+}
+
+bool OS_OSX::is_window_always_on_top() const {
+	return [window_object level] == NSFloatingWindowLevel;
 }
 
 void OS_OSX::request_attention() {
@@ -1765,6 +1870,8 @@ OS::LatinKeyboardVariant OS_OSX::get_latin_keyboard_variant() const {
 			layout = LATIN_KEYBOARD_DVORAK;
 		} else if ([test isEqualToString:@"xvlcwk"]) {
 			layout = LATIN_KEYBOARD_NEO;
+		} else if ([test isEqualToString:@"qwfpgj"]) {
+			layout = LATIN_KEYBOARD_COLEMAK;
 		}
 
 		[test release];

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -67,7 +67,7 @@ static void _godot_draw(void) {
 
 extern "C" {
 
-void main_after_fs_sync(int value) {
+void main_after_fs_sync() {
 
 	start_step = 1;
 	printf("FS SYNCHED!\n");
@@ -110,9 +110,7 @@ int main(int argc, char *argv[]) {
 		 FS.syncfs(true, function (err) {
 			 assert(!err);
 			 console.log("done syncinc!");
-			 _after_sync_cb = Module.cwrap('main_after_fs_sync', 'void',['number']);
-			 _after_sync_cb(0);
-
+			 ccall('main_after_fs_sync');
 		 });
 
 	  );

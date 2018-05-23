@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,6 +40,7 @@ class EditorAutoloadSettings : public VBoxContainer {
 	OBJ_TYPE(EditorAutoloadSettings, VBoxContainer);
 
 	enum {
+		BUTTON_OPEN,
 		BUTTON_MOVE_UP,
 		BUTTON_MOVE_DOWN,
 		BUTTON_DELETE
@@ -73,6 +74,10 @@ class EditorAutoloadSettings : public VBoxContainer {
 	void _autoload_edited();
 	void _autoload_button_pressed(Object *p_item, int p_column, int p_button);
 	void _autoload_file_callback(const String &p_path);
+
+	void _autoload_activated();
+
+	void _autoload_open(const String &fpath);
 
 	Variant get_drag_data_fw(const Point2 &p_point, Control *p_from);
 	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;

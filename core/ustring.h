@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -191,6 +191,10 @@ public:
 	uint64_t hash64() const; /* hash the string */
 	String md5_text() const;
 	String sha256_text() const;
+
+	String encrypt_text(const String &p_key) const;
+	String decrypt_text(const String &p_key) const;
+
 	Vector<uint8_t> md5_buffer() const;
 	Vector<uint8_t> sha256_buffer() const;
 

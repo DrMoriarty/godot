@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -78,13 +78,15 @@ public:
 		bool fullscreen;
 		bool resizable;
 		bool borderless_window;
+		bool always_on_top;
 		float get_aspect() const { return (float)width / (float)height; }
-		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false) {
+		VideoMode(int p_width = 1024, int p_height = 600, bool p_fullscreen = false, bool p_resizable = true, bool p_borderless_window = false, bool p_always_on_top = false) {
 			width = p_width;
 			height = p_height;
 			fullscreen = p_fullscreen;
 			resizable = p_resizable;
 			borderless_window = p_borderless_window;
+			always_on_top = p_always_on_top;
 		}
 	};
 
@@ -168,6 +170,7 @@ public:
 	virtual Point2 get_window_position() const { return Vector2(); }
 	virtual void set_window_position(const Point2 &p_position) {}
 	virtual Size2 get_window_size() const = 0;
+	virtual Size2 get_real_window_size() const { return get_window_size(); }
 	virtual void set_window_size(const Size2 p_size) {}
 	virtual void set_window_fullscreen(bool p_enabled) {}
 	virtual bool is_window_fullscreen() const { return true; }
@@ -177,7 +180,10 @@ public:
 	virtual bool is_window_minimized() const { return false; }
 	virtual void set_window_maximized(bool p_enabled) {}
 	virtual bool is_window_maximized() const { return true; }
+	virtual void set_window_always_on_top(bool p_enabled) {}
+	virtual bool is_window_always_on_top() const { return false; }
 	virtual void request_attention() {}
+	virtual void center_window();
 
 	virtual void set_borderless_window(int p_borderless) {}
 	virtual bool get_borderless_window() { return 0; }
@@ -314,6 +320,7 @@ public:
 	virtual void hide_virtual_keyboard();
 
 	virtual void set_cursor_shape(CursorShape p_shape) = 0;
+	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) = 0;
 
 	virtual bool get_swap_ok_cancel() { return false; }
 	virtual void dump_memory_to_file(const char *p_file);
@@ -404,6 +411,7 @@ public:
 		LATIN_KEYBOARD_QZERTY,
 		LATIN_KEYBOARD_DVORAK,
 		LATIN_KEYBOARD_NEO,
+		LATIN_KEYBOARD_COLEMAK,
 	};
 
 	virtual LatinKeyboardVariant get_latin_keyboard_variant() const;
