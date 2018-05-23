@@ -16,7 +16,7 @@
 
 package com.google.android.vending.expansion.downloader;
 
-import com.godot.game.R;
+import free.games.match.three.puzzle.galactic.adventure_2.android.R;
 
 import android.content.Context;
 import android.os.Build;

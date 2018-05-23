@@ -133,8 +133,8 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 
     private void setButtonPausedState(boolean paused) {
         mStatePaused = paused;
-        int stringResourceID = paused ? com.godot.game.R.string.text_button_resume :
-        	com.godot.game.R.string.text_button_pause;
+        int stringResourceID = paused ? free.games.match.three.puzzle.galactic.adventure_2.android.R.string.text_button_resume :
+        	free.games.match.three.puzzle.galactic.adventure_2.android.R.string.text_button_pause;
         mPauseButton.setText(stringResourceID);
     }
     
@@ -549,17 +549,17 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 			        	mDownloaderClientStub = DownloaderClientMarshaller.CreateStub(this,
 			        			GodotDownloaderService.class);
 
-			        	setContentView(com.godot.game.R.layout.downloading_expansion);
-			        	mPB = (ProgressBar) findViewById(com.godot.game.R.id.progressBar);
-			            mStatusText = (TextView) findViewById(com.godot.game.R.id.statusText);
-			            mProgressFraction = (TextView) findViewById(com.godot.game.R.id.progressAsFraction);
-			            mProgressPercent = (TextView) findViewById(com.godot.game.R.id.progressAsPercentage);
-			            mAverageSpeed = (TextView) findViewById(com.godot.game.R.id.progressAverageSpeed);
-			            mTimeRemaining = (TextView) findViewById(com.godot.game.R.id.progressTimeRemaining);
-			            mDashboard = findViewById(com.godot.game.R.id.downloaderDashboard);
-			            mCellMessage = findViewById(com.godot.game.R.id.approveCellular);
-			            mPauseButton = (Button) findViewById(com.godot.game.R.id.pauseButton);
-			            mWiFiSettingsButton = (Button) findViewById(com.godot.game.R.id.wifiSettingsButton);
+			        	setContentView(free.games.match.three.puzzle.galactic.adventure_2.android.R.layout.downloading_expansion);
+			        	mPB = (ProgressBar) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.progressBar);
+			            mStatusText = (TextView) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.statusText);
+			            mProgressFraction = (TextView) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.progressAsFraction);
+			            mProgressPercent = (TextView) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.progressAsPercentage);
+			            mAverageSpeed = (TextView) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.progressAverageSpeed);
+			            mTimeRemaining = (TextView) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.progressTimeRemaining);
+			            mDashboard = findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.downloaderDashboard);
+			            mCellMessage = findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.approveCellular);
+			            mPauseButton = (Button) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.pauseButton);
+			            mWiFiSettingsButton = (Button) findViewById(free.games.match.three.puzzle.galactic.adventure_2.android.R.id.wifiSettingsButton);
 			        	
 			            return;
 			        } else{
@@ -969,9 +969,9 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 
 	@Override
 	public void onDownloadProgress(DownloadProgressInfo progress) {
-		mAverageSpeed.setText(getString(com.godot.game.R.string.kilobytes_per_second,
+		mAverageSpeed.setText(getString(free.games.match.three.puzzle.galactic.adventure_2.android.R.string.kilobytes_per_second,
                 Helpers.getSpeedString(progress.mCurrentSpeed)));
-        mTimeRemaining.setText(getString(com.godot.game.R.string.time_remaining,
+        mTimeRemaining.setText(getString(free.games.match.three.puzzle.galactic.adventure_2.android.R.string.time_remaining,
                 Helpers.getTimeRemaining(progress.mTimeRemaining)));
 
         progress.mOverallTotal = progress.mOverallTotal;

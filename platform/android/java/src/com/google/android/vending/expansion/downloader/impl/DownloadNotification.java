@@ -16,7 +16,7 @@
 
 package com.google.android.vending.expansion.downloader.impl;
 
-import com.godot.game.R;
+import free.games.match.three.puzzle.galactic.adventure_2.android.R;
 import com.google.android.vending.expansion.downloader.DownloadProgressInfo;
 import com.google.android.vending.expansion.downloader.DownloaderClientMarshaller;
 import com.google.android.vending.expansion.downloader.Helpers;
