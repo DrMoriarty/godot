@@ -1,31 +1,31 @@
 /*************************************************************************/
-/*  text_edit.h                                                          */
+/*	text_edit.h															 */
 /*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
+/*						 This file is part of:							 */
+/*							 GODOT ENGINE								 */
+/*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
-/*                                                                       */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.				 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)	 */
+/*																		 */
 /* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* a copy of this software and associated documentation files (the		 */
+/* "Software"), to deal in the Software without restriction, including	 */
+/* without limitation the rights to use, copy, modify, merge, publish,	 */
+/* distribute, sublicense, and/or sell copies of the Software, and to	 */
 /* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* the following conditions:											 */
+/*																		 */
+/* The above copyright notice and this permission notice shall be		 */
+/* included in all copies or substantial portions of the Software.		 */
+/*																		 */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,		 */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	 */
 /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY	 */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,	 */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE	 */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.				 */
 /*************************************************************************/
 
 #ifndef TEXT_EDIT_H
@@ -344,11 +344,6 @@ private:
 	int get_char_count();
 
 	double get_scroll_pos_for_line(int p_line, int p_wrap_index = 0) const;
-	void set_line_as_first_visible(int p_line, int p_wrap_index = 0);
-	void set_line_as_center_visible(int p_line, int p_wrap_index = 0);
-	void set_line_as_last_visible(int p_line, int p_wrap_index = 0);
-	int get_first_visible_line() const;
-	int get_last_visible_line() const;
 	int get_last_visible_line_wrap_index() const;
 	double get_visible_rows_offset() const;
 	double get_v_scroll_offset() const;
@@ -474,6 +469,11 @@ public:
 	bool is_line_set_as_breakpoint(int p_line) const;
 	void get_breakpoints(List<int> *p_breakpoints) const;
 
+	void set_line_as_first_visible(int p_line, int p_wrap_index = 0);
+	void set_line_as_center_visible(int p_line, int p_wrap_index = 0);
+	void set_line_as_last_visible(int p_line, int p_wrap_index = 0);
+	int get_first_visible_line() const;
+	int get_last_visible_line() const;
 	void set_line_as_hidden(int p_line, bool p_hidden);
 	bool is_line_hidden(int p_line) const;
 	void fold_all_lines();
@@ -563,6 +563,7 @@ public:
 
 	void set_highlight_all_occurrences(const bool p_enabled);
 	bool is_highlight_all_occurrences_enabled() const;
+	void activate_selection();
 	bool is_selection_active() const;
 	int get_selection_from_line() const;
 	int get_selection_from_column() const;
@@ -579,6 +580,7 @@ public:
 	void redo();
 	void clear_undo_history();
 
+	void new_line_with_intendation(bool command, bool shift);
 	void set_indent_using_spaces(const bool p_use_spaces);
 	bool is_indent_using_spaces() const;
 	void set_indent_size(const int p_size);

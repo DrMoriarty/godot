@@ -1,31 +1,31 @@
 /*************************************************************************/
-/*  script_text_editor.cpp                                               */
+/*	script_text_editor.cpp												 */
 /*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
+/*						 This file is part of:							 */
+/*							 GODOT ENGINE								 */
+/*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
-/*                                                                       */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.				 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)	 */
+/*																		 */
 /* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* a copy of this software and associated documentation files (the		 */
+/* "Software"), to deal in the Software without restriction, including	 */
+/* without limitation the rights to use, copy, modify, merge, publish,	 */
+/* distribute, sublicense, and/or sell copies of the Software, and to	 */
 /* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* the following conditions:											 */
+/*																		 */
+/* The above copyright notice and this permission notice shall be		 */
+/* included in all copies or substantial portions of the Software.		 */
+/*																		 */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,		 */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	 */
 /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY	 */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,	 */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE	 */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.				 */
 /*************************************************************************/
 
 #include "script_text_editor.h"
@@ -1284,6 +1284,100 @@ void ScriptTextEditor::_edit_option(int p_op) {
 				emit_signal("request_help_search", text);
 			}
 		} break;
+
+	case MOVE_CURSOR_FORWARD: {
+
+		if(tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size()-1)
+			tx->cursor_set_column(tx->cursor_get_column()+1);
+		else {
+			tx->cursor_set_line(tx->cursor_get_line()+1);
+			tx->cursor_set_column(0);
+		}
+	} break;
+
+	case MOVE_CURSOR_BACKWARD: {
+
+		if(tx->cursor_get_column() > 0)
+			tx->cursor_set_column(tx->cursor_get_column()-1);
+		else {
+			tx->cursor_set_line(tx->cursor_get_line()-1);
+			tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
+		}
+	} break;
+
+	case MOVE_CURSOR_UP: {
+
+		tx->cursor_set_line(tx->cursor_get_line()-1);
+	} break;
+
+	case MOVE_CURSOR_DOWN: {
+
+		tx->cursor_set_line(tx->cursor_get_line()+1);
+	} break;
+
+	case MOVE_CURSOR_PAGE_UP: {
+
+		int line = tx->get_first_visible_line();
+		tx->set_line_as_last_visible(line);
+		tx->cursor_set_line(line);
+	} break;
+
+	case MOVE_CURSOR_PAGE_DOWN: {
+
+		int line = tx->get_last_visible_line();
+		tx->set_line_as_first_visible(line);
+		tx->cursor_set_line(line);
+	} break;
+
+	case SCROLL_TO_CURSOR: {
+
+		int line = tx->cursor_get_line();
+		if(line == tx->get_first_visible_line()) {
+			tx->set_line_as_last_visible(line);
+		} else if(line == (tx->get_last_visible_line() + tx->get_first_visible_line())/2 - 1) {
+			tx->set_line_as_first_visible(line);
+		} else {
+			tx->set_line_as_center_visible(line);
+		}
+	} break;
+
+	case EDIT_DELETE: {
+
+		if(tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size()-1)
+			tx->cursor_set_column(tx->cursor_get_column()+1);
+		else {
+			tx->cursor_set_line(tx->cursor_get_line()+1);
+			tx->cursor_set_column(0);
+		}
+		tx->backspace_at_cursor();
+	} break;
+
+	case EDIT_KILL: {
+
+		int cursor_column = tx->cursor_get_column();
+		tx->select(tx->cursor_get_line(), tx->cursor_get_column(), tx->cursor_get_line(), tx->get_line(tx->cursor_get_line()).size());
+		tx->cut();
+		tx->cursor_set_column(cursor_column);
+	} break;
+
+	case EDIT_BREAK_LINE: {
+
+		tx->insert_text_at_cursor("\n");
+		tx->cursor_set_line(tx->cursor_get_line()-1);
+		tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
+	} break;
+
+	case EDIT_NEW_LINE: {
+
+		//tx->insert_text_at_cursor("\n");
+		tx->new_line_with_intendation(false, false);
+	} break;
+
+	case EDIT_SET_MARK: {
+		
+		tx->activate_selection();
+	} break;
+
 	}
 }
 
@@ -1674,6 +1768,23 @@ ScriptTextEditor::ScriptTextEditor() {
 	convert_case->add_shortcut(ED_SHORTCUT("script_text_editor/convert_to_lowercase", TTR("Lowercase")), EDIT_TO_LOWERCASE);
 	convert_case->add_shortcut(ED_SHORTCUT("script_text_editor/capitalize", TTR("Capitalize")), EDIT_CAPITALIZE);
 	convert_case->connect("id_pressed", this, "_edit_option");
+	PopupMenu *emacsify_menu = memnew(PopupMenu);
+	emacsify_menu->set_name("emacsify_menu");
+	edit_menu->get_popup()->add_child(emacsify_menu);
+	edit_menu->get_popup()->add_submenu_item(TTR("Emacsify Editor"), "emacsify_menu");
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_forward", TTR("Move Cursor Forward")), MOVE_CURSOR_FORWARD);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_backward", TTR("Move Cursor Backward")), MOVE_CURSOR_BACKWARD);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_up", TTR("Move Cursor Up")), MOVE_CURSOR_UP);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_down", TTR("Move Cursor Down")), MOVE_CURSOR_DOWN);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_page_up", TTR("Move Cursor Page Up")), MOVE_CURSOR_PAGE_UP);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/move_cursor_page_down", TTR("Move Cursor Page Down")), MOVE_CURSOR_PAGE_DOWN);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/scroll_to_cursor", TTR("Scroll to Cursor")), SCROLL_TO_CURSOR);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/edit_delete", TTR("Delete Char")), EDIT_DELETE);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/edit_kill", TTR("Kill Line")), EDIT_KILL);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/edit_break_line", TTR("Break Line")), EDIT_BREAK_LINE);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/edit_new_line", TTR("New Line")), EDIT_NEW_LINE);
+	emacsify_menu->add_shortcut(ED_SHORTCUT("script_text_editor/edit_set_mark", TTR("Set Mark")), EDIT_SET_MARK);
+	emacsify_menu->connect("id_pressed", this, "_edit_option");
 
 	search_menu = memnew(MenuButton);
 	edit_hb->add_child(search_menu);
@@ -1770,6 +1881,19 @@ void ScriptTextEditor::register_editor() {
 	ED_SHORTCUT("script_text_editor/goto_line", TTR("Goto Line..."), KEY_MASK_CMD | KEY_L);
 
 	ED_SHORTCUT("script_text_editor/contextual_help", TTR("Contextual Help"), KEY_MASK_SHIFT | KEY_F1);
+
+	ED_SHORTCUT("script_text_editor/move_cursor_forward", TTR("Move Cursor Forward"), 0);
+	ED_SHORTCUT("script_text_editor/move_cursor_backward", TTR("Move Cursor Backward"), 0);
+	ED_SHORTCUT("script_text_editor/move_cursor_up", TTR("Move Curor Up"), 0);
+	ED_SHORTCUT("script_text_editor/move_cursor_down", TTR("Move Cursor Down"), 0);
+	ED_SHORTCUT("script_text_editor/move_cursor_page_up", TTR("Move Cursor Page Up"), 0);
+	ED_SHORTCUT("script_text_editor/move_cursor_page_down", TTR("Move Cursor Page Down"), 0);
+	ED_SHORTCUT("script_text_editor/scroll_to_cursor", TTR("Scroll to Cursor"), 0);
+	ED_SHORTCUT("script_text_editor/edit_delete", TTR("Delete Char"), 0);
+	ED_SHORTCUT("script_text_editor/edit_kill", TTR("Kill Line"), 0);
+	ED_SHORTCUT("script_text_editor/edit_break_line", TTR("Break Line"), 0);
+	ED_SHORTCUT("script_text_editor/edit_new_line", TTR("New Line"), 0);
+	ED_SHORTCUT("script_text_editor/edit_set_mark", TTR("Set Mark"), 0);
 
 	ScriptEditor::register_create_script_editor_function(create_editor);
 }

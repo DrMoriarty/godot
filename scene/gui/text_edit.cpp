@@ -1,31 +1,31 @@
 /*************************************************************************/
-/*  text_edit.cpp                                                        */
+/*	text_edit.cpp														 */
 /*************************************************************************/
-/*                       This file is part of:                           */
-/*                           GODOT ENGINE                                */
-/*                      https://godotengine.org                          */
+/*						 This file is part of:							 */
+/*							 GODOT ENGINE								 */
+/*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
-/*                                                                       */
+/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.				 */
+/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)	 */
+/*																		 */
 /* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the       */
-/* "Software"), to deal in the Software without restriction, including   */
-/* without limitation the rights to use, copy, modify, merge, publish,   */
-/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* a copy of this software and associated documentation files (the		 */
+/* "Software"), to deal in the Software without restriction, including	 */
+/* without limitation the rights to use, copy, modify, merge, publish,	 */
+/* distribute, sublicense, and/or sell copies of the Software, and to	 */
 /* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:                                             */
-/*                                                                       */
-/* The above copyright notice and this permission notice shall be        */
-/* included in all copies or substantial portions of the Software.       */
-/*                                                                       */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* the following conditions:											 */
+/*																		 */
+/* The above copyright notice and this permission notice shall be		 */
+/* included in all copies or substantial portions of the Software.		 */
+/*																		 */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,		 */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	 */
 /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY	 */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,	 */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE	 */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.				 */
 /*************************************************************************/
 
 #include "text_edit.h"
@@ -1600,11 +1600,16 @@ void TextEdit::indent_right() {
 		set_line(i, line_text);
 	}
 
+	int ind = 1;
+	if (indent_using_spaces) {
+		ind = space_indent.size();
+	}
+
 	// fix selection and cursor being off by one on the last line
 	if (is_selection_active()) {
-		select(selection.from_line, selection.from_column + 1, selection.to_line, selection.to_column + 1);
+		select(selection.from_line, selection.from_column + ind, selection.to_line, selection.to_column + ind);
 	}
-	cursor_set_column(cursor.column + 1, false);
+	cursor_set_column(cursor.column + ind, false);
 	end_complex_operation();
 	update();
 }
@@ -1695,6 +1700,85 @@ void TextEdit::_get_mouse_pos(const Point2i &p_mouse, int &r_row, int &r_col) co
 
 	r_row = row;
 	r_col = col;
+}
+
+void TextEdit::new_line_with_intendation(bool command, bool shift) {
+	String ins = "\n";
+
+	//keep indentation
+	int space_count = 0;
+	for (int i = 0; i < cursor.column; i++) {
+		if (text[cursor.line][i] == '\t') {
+			if (indent_using_spaces) {
+				ins += space_indent;
+			} else {
+				ins += "\t";
+			}
+			space_count = 0;
+		} else if (text[cursor.line][i] == ' ') {
+			space_count++;
+
+			if (space_count == indent_size) {
+				if (indent_using_spaces) {
+					ins += space_indent;
+				} else {
+					ins += "\t";
+				}
+				space_count = 0;
+			}
+		} else {
+			break;
+		}
+	}
+
+	if (is_folded(cursor.line))
+		unfold_line(cursor.line);
+
+	bool brace_indent = false;
+
+	// no need to indent if we are going upwards.
+	if (auto_indent && !(command && shift)) {
+		// indent once again if previous line will end with ':' or '{'
+		// (i.e. colon/brace precedes current cursor position)
+		if (cursor.column > 0 && (text[cursor.line][cursor.column - 1] == ':' || text[cursor.line][cursor.column - 1] == '{')) {
+			if (indent_using_spaces) {
+				ins += space_indent;
+			} else {
+				ins += "\t";
+			}
+
+			// no need to move the brace below if we are not taking the text with us.
+			if (text[cursor.line][cursor.column] == '}' && !command) {
+				brace_indent = true;
+				ins += "\n" + ins.substr(1, ins.length() - 2);
+			}
+		}
+	}
+	begin_complex_operation();
+	bool first_line = false;
+	if (command) {
+		if (shift) {
+			if (cursor.line > 0) {
+				cursor_set_line(cursor.line - 1);
+				cursor_set_column(text[cursor.line].length());
+			} else {
+				cursor_set_column(0);
+				first_line = true;
+			}
+		} else {
+			cursor_set_column(text[cursor.line].length());
+		}
+	}
+
+	insert_text_at_cursor(ins);
+
+	if (first_line) {
+		cursor_set_line(0);
+	} else if (brace_indent) {
+		cursor_set_line(cursor.line - 1);
+		cursor_set_column(text[cursor.line].length());
+	}
+	end_complex_operation();
 }
 
 void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
@@ -2267,83 +2351,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 
 				if (readonly)
 					break;
-
-				String ins = "\n";
-
-				//keep indentation
-				int space_count = 0;
-				for (int i = 0; i < cursor.column; i++) {
-					if (text[cursor.line][i] == '\t') {
-						if (indent_using_spaces) {
-							ins += space_indent;
-						} else {
-							ins += "\t";
-						}
-						space_count = 0;
-					} else if (text[cursor.line][i] == ' ') {
-						space_count++;
-
-						if (space_count == indent_size) {
-							if (indent_using_spaces) {
-								ins += space_indent;
-							} else {
-								ins += "\t";
-							}
-							space_count = 0;
-						}
-					} else {
-						break;
-					}
-				}
-
-				if (is_folded(cursor.line))
-					unfold_line(cursor.line);
-
-				bool brace_indent = false;
-
-				// no need to indent if we are going upwards.
-				if (auto_indent && !(k->get_command() && k->get_shift())) {
-					// indent once again if previous line will end with ':' or '{'
-					// (i.e. colon/brace precedes current cursor position)
-					if (cursor.column > 0 && (text[cursor.line][cursor.column - 1] == ':' || text[cursor.line][cursor.column - 1] == '{')) {
-						if (indent_using_spaces) {
-							ins += space_indent;
-						} else {
-							ins += "\t";
-						}
-
-						// no need to move the brace below if we are not taking the text with us.
-						if (text[cursor.line][cursor.column] == '}' && !k->get_command()) {
-							brace_indent = true;
-							ins += "\n" + ins.substr(1, ins.length() - 2);
-						}
-					}
-				}
-				begin_complex_operation();
-				bool first_line = false;
-				if (k->get_command()) {
-					if (k->get_shift()) {
-						if (cursor.line > 0) {
-							cursor_set_line(cursor.line - 1);
-							cursor_set_column(text[cursor.line].length());
-						} else {
-							cursor_set_column(0);
-							first_line = true;
-						}
-					} else {
-						cursor_set_column(text[cursor.line].length());
-					}
-				}
-
-				insert_text_at_cursor(ins);
-
-				if (first_line) {
-					cursor_set_line(0);
-				} else if (brace_indent) {
-					cursor_set_line(cursor.line - 1);
-					cursor_set_column(text[cursor.line].length());
-				}
-				end_complex_operation();
+				this->new_line_with_intendation(k->get_command(), k->get_shift());
 			} break;
 			case KEY_ESCAPE: {
 				if (completion_hint != "") {
@@ -4587,6 +4595,23 @@ void TextEdit::swap_lines(int line1, int line2) {
 	set_line(line2, tmp);
 	set_line(line1, tmp2);
 }
+
+void TextEdit::activate_selection() {
+	if(!selection.active) {
+		selection.active = true;
+		selection.selecting_mode = Selection::MODE_POINTER;
+		selection.from_column = cursor.column;
+		selection.from_line = cursor.line;
+		selection.to_column = cursor.column;
+		selection.to_line = cursor.line;
+		selection.selecting_line = cursor.line;
+		selection.selecting_column = cursor.column;
+		update();
+	} else {
+		selection.active = false;
+		update();
+	}
+}
 bool TextEdit::is_selection_active() const {
 
 	return selection.active;
@@ -6218,7 +6243,7 @@ TextEdit::TextEdit() {
 	highlight_all_occurrences = false;
 	highlight_current_line = false;
 	indent_using_spaces = false;
-	space_indent = "    ";
+	space_indent = "	";
 	auto_indent = false;
 	insert_mode = false;
 	window_has_focus = true;
