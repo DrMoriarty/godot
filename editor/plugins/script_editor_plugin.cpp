@@ -1215,6 +1215,9 @@ void ScriptEditor::_notification(int p_what) {
 			script_forward->set_icon(get_icon("Forward", "EditorIcons"));
 			script_back->set_icon(get_icon("Back", "EditorIcons"));
 
+			members_overview_alphabeta_sort_button->set_icon(get_icon("Sort", "EditorIcons"));
+			filename->add_style_override("normal", editor->get_gui_base()->get_stylebox("normal", "LineEdit"));
+
 			recent_scripts->set_as_minsize();
 		} break;
 
@@ -1404,16 +1407,16 @@ void ScriptEditor::_update_members_overview_visibility() {
 
 	ScriptEditorBase *se = _get_current_editor();
 	if (!se) {
-		members_overview_buttons_hbox->set_visible(false);
+		members_overview_alphabeta_sort_button->set_visible(false);
 		members_overview->set_visible(false);
 		return;
 	}
 
 	if (members_overview_enabled && se->show_members_overview()) {
-		members_overview_buttons_hbox->set_visible(true);
+		members_overview_alphabeta_sort_button->set_visible(true);
 		members_overview->set_visible(true);
 	} else {
-		members_overview_buttons_hbox->set_visible(false);
+		members_overview_alphabeta_sort_button->set_visible(false);
 		members_overview->set_visible(false);
 	}
 }
@@ -1440,6 +1443,11 @@ void ScriptEditor::_update_members_overview() {
 		members_overview->add_item(functions[i].get_slice(":", 0));
 		members_overview->set_item_metadata(i, functions[i].get_slice(":", 1).to_int() - 1);
 	}
+
+	String path = se->get_edited_script()->get_path();
+	bool built_in = !path.is_resource_file();
+	String name = built_in ? path.get_file() : se->get_name();
+	filename->set_text(name);
 }
 
 void ScriptEditor::_update_help_overview_visibility() {
@@ -1458,8 +1466,9 @@ void ScriptEditor::_update_help_overview_visibility() {
 	}
 
 	if (help_overview_enabled) {
-		members_overview_buttons_hbox->set_visible(false);
+		members_overview_alphabeta_sort_button->set_visible(false);
 		help_overview->set_visible(true);
+		filename->set_text(se->get_name());
 	} else {
 		help_overview->set_visible(false);
 	}
@@ -2680,6 +2689,12 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	list_split->add_child(members_overview_vbox);
 	members_overview_buttons_hbox = memnew(HBoxContainer);
 	members_overview_vbox->add_child(members_overview_buttons_hbox);
+
+	filename = memnew(Label);
+	filename->set_clip_text(true);
+	filename->set_h_size_flags(SIZE_EXPAND_FILL);
+	filename->add_style_override("normal", EditorNode::get_singleton()->get_gui_base()->get_stylebox("normal", "LineEdit"));
+	members_overview_buttons_hbox->add_child(filename);
 
 	members_overview_alphabeta_sort_button = memnew(ToolButton);
 	members_overview_alphabeta_sort_button->set_tooltip(TTR("Toggle alphabetical sorting of the method list."));
