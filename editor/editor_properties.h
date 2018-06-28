@@ -453,6 +453,7 @@ class EditorPropertyNodePath : public EditorProperty {
 	SceneTreeDialog *scene_tree;
 	NodePath base_hint;
 
+	Vector<StringName> valid_types;
 	void _node_selected(const NodePath &p_path);
 	void _node_assign();
 	void _node_clear();
@@ -463,7 +464,7 @@ protected:
 
 public:
 	virtual void update_property();
-	void setup(const NodePath &p_base_hint);
+	void setup(const NodePath &p_base_hint, Vector<StringName> p_valid_types);
 	EditorPropertyNodePath();
 };
 
@@ -491,6 +492,7 @@ class EditorPropertyResource : public EditorProperty {
 	EditorFileDialog *file;
 	Vector<String> inheritors_array;
 	EditorInspector *sub_inspector;
+	VBoxContainer *sub_inspector_vbox;
 
 	bool use_sub_inspector;
 	bool dropping;
@@ -515,6 +517,8 @@ class EditorPropertyResource : public EditorProperty {
 	bool _is_drop_valid(const Dictionary &p_drag_data) const;
 	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
 	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
+
+	void _open_editor_pressed();
 
 protected:
 	static void _bind_methods();

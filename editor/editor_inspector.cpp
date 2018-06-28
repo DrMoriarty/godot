@@ -1464,7 +1464,8 @@ void EditorInspector::update_tree() {
 #endif
 		for (List<Ref<EditorInspectorPlugin> >::Element *E = valid_plugins.front(); E; E = E->next()) {
 			Ref<EditorInspectorPlugin> ped = E->get();
-			ped->parse_property(object, p.type, p.name, p.hint, p.hint_string, p.usage);
+			bool exclusive = ped->parse_property(object, p.type, p.name, p.hint, p.hint_string, p.usage);
+
 			List<EditorInspectorPlugin::AddedEditor> editors = ped->added_editors; //make a copy, since plugins may be used again in a sub-inspector
 			ped->added_editors.clear();
 
@@ -1477,6 +1478,9 @@ void EditorInspector::update_tree() {
 
 					ep->object = object;
 					ep->connect("property_changed", this, "_property_changed");
+					if (p.usage & PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED) {
+						ep->connect("property_changed", this, "_property_changed_update_all", varray(), CONNECT_DEFERRED);
+					}
 					ep->connect("property_keyed", this, "_property_keyed");
 					ep->connect("property_keyed_with_value", this, "_property_keyed_with_value");
 					ep->connect("property_checked", this, "_property_checked");
@@ -1528,6 +1532,10 @@ void EditorInspector::update_tree() {
 						ep->select(current_focusable);
 					}
 				}
+			}
+
+			if (exclusive) {
+				break;
 			}
 		}
 	}
@@ -1654,6 +1662,10 @@ void EditorInspector::set_use_folding(bool p_enable) {
 	update_tree();
 }
 
+bool EditorInspector::is_using_folding() {
+	return use_folding;
+}
+
 void EditorInspector::collapse_all_folding() {
 
 	for (List<EditorInspectorSection *>::Element *E = sections.front(); E; E = E->next()) {
@@ -1776,6 +1788,10 @@ void EditorInspector::_edit_set(const String &p_name, const Variant &p_value, bo
 void EditorInspector::_property_changed(const String &p_path, const Variant &p_value) {
 
 	_edit_set(p_path, p_value, false, "");
+}
+
+void EditorInspector::_property_changed_update_all(const String &p_path, const Variant &p_value) {
+	update_tree();
 }
 
 void EditorInspector::_multiple_properties_changed(Vector<String> p_paths, Array p_values) {
@@ -1947,6 +1963,8 @@ void EditorInspector::_bind_methods() {
 
 	ClassDB::bind_method("_multiple_properties_changed", &EditorInspector::_multiple_properties_changed);
 	ClassDB::bind_method("_property_changed", &EditorInspector::_property_changed);
+	ClassDB::bind_method("_property_changed_update_all", &EditorInspector::_property_changed_update_all);
+
 	ClassDB::bind_method("_edit_request_change", &EditorInspector::_edit_request_change);
 	ClassDB::bind_method("_node_removed", &EditorInspector::_node_removed);
 	ClassDB::bind_method("_filter_changed", &EditorInspector::_filter_changed);
