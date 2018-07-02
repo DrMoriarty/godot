@@ -587,7 +587,6 @@ void EditorNode::edit_node(Node *p_node) {
 void EditorNode::save_resource_in_path(const Ref<Resource> &p_resource, const String &p_path) {
 
 	editor_data.apply_changes_in_editors();
-
 	int flg = 0;
 	if (EditorSettings::get_singleton()->get("filesystem/on_save/compress_binary_resources"))
 		flg |= ResourceSaver::FLAG_COMPRESS;
@@ -1055,8 +1054,23 @@ void EditorNode::_save_scene(String p_file, int idx) {
 	flg |= ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS;
 
 	err = ResourceSaver::save(p_file, sdata, flg);
-	Map<RES, bool> processed;
-	_save_edited_subresources(scene, processed, flg);
+	//Map<RES, bool> processed;
+	//this method is slow and not always works, deprecating
+	//_save_edited_subresources(scene, processed, flg);
+	{ //instead, just find globally unsaved subresources and save them
+
+		List<Ref<Resource> > cached;
+		ResourceCache::get_cached_resources(&cached);
+		for (List<Ref<Resource> >::Element *E = cached.front(); E; E = E->next()) {
+
+			Ref<Resource> res = E->get();
+			if (res->is_edited() && res->get_path().is_resource_file()) {
+				ResourceSaver::save(res->get_path(), res, flg);
+				res->set_edited(false);
+			}
+		}
+	}
+
 	editor_data.save_editor_external_data();
 	if (err == OK) {
 		scene->set_filename(ProjectSettings::get_singleton()->localize_path(p_file));
@@ -1074,8 +1088,7 @@ void EditorNode::_save_scene(String p_file, int idx) {
 
 void EditorNode::_save_all_scenes() {
 
-	int i = _next_unsaved_scene(true, 0);
-	while (i != -1) {
+	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 		Node *scene = editor_data.get_edited_scene_root(i);
 		if (scene && scene->get_filename() != "") {
 			if (i != editor_data.get_edited_scene())
@@ -1083,7 +1096,6 @@ void EditorNode::_save_all_scenes() {
 			else
 				_save_scene_with_preview(scene->get_filename());
 		} // else: ignore new scenes
-		i = _next_unsaved_scene(true, ++i);
 	}
 
 	_save_default_environment();
@@ -1359,8 +1371,7 @@ void EditorNode::_save_default_environment() {
 	if (fallback.is_valid() && fallback->get_path().is_resource_file()) {
 		Map<RES, bool> processed;
 		_find_and_save_edited_subresources(fallback.ptr(), processed, 0);
-		if (fallback->get_last_modified_time() != fallback->get_import_last_modified_time())
-			save_resource_in_path(fallback, fallback->get_path());
+		save_resource_in_path(fallback, fallback->get_path());
 	}
 }
 

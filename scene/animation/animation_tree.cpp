@@ -1041,7 +1041,22 @@ void AnimationTree::_process_graph(float p_delta) {
 									t->start = time;
 								}
 							} else if (t->playing) {
-								if (t->start > time || (t->len > 0 && time - t->start < t->len)) {
+
+								bool loop = a->has_loop();
+
+								bool stop = false;
+
+								if (!loop && time < t->start) {
+									stop = true;
+								} else if (t->len > 0) {
+									float len = t->start > time ? (a->get_length() - t->start) + time : time - t->start;
+
+									if (len > t->len) {
+										stop=true;
+									}
+								}
+
+								if (stop) {
 									//time to stop
 									t->object->call("stop");
 									t->playing = false;
@@ -1050,6 +1065,12 @@ void AnimationTree::_process_graph(float p_delta) {
 							}
 						}
 
+						float db = Math::linear2db(MAX(blend,0.00001));
+						if (t->object->has_method("set_unit_db")) {
+							t->object->call("set_unit_db", db);
+						} else {
+							t->object->call("set_volume_db", db);
+						}
 					} break;
 					case Animation::TYPE_ANIMATION: {
 
@@ -1286,6 +1307,10 @@ void AnimationTree::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_root_motion_track", "path"), &AnimationTree::set_root_motion_track);
 	ClassDB::bind_method(D_METHOD("get_root_motion_track"), &AnimationTree::get_root_motion_track);
+
+	ClassDB::bind_method(D_METHOD("get_root_motion_transform"), &AnimationTree::get_root_motion_transform);
+
+
 
 	ClassDB::bind_method(D_METHOD("_node_removed"), &AnimationTree::_node_removed);
 
