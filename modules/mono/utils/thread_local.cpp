@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  resource_importer_webm.h                                             */
+/*  thread_local.cpp                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,29 +28,72 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef RESOURCEIMPORTERWEBM_H
-#define RESOURCEIMPORTERWEBM_H
+#include "thread_local.h"
 
-#include "io/resource_import.h"
+#ifdef WINDOWS_ENABLED
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
-class ResourceImporterWebm : public ResourceImporter {
-	GDCLASS(ResourceImporterWebm, ResourceImporter)
-public:
-	virtual String get_importer_name() const;
-	virtual String get_visible_name() const;
-	virtual void get_recognized_extensions(List<String> *p_extensions) const;
-	virtual String get_save_extension() const;
-	virtual String get_resource_type() const;
+#include "core/os/memory.h"
+#include "core/print_string.h"
 
-	virtual int get_preset_count() const;
-	virtual String get_preset_name(int p_idx) const;
+struct ThreadLocalStorage::Impl {
 
-	virtual void get_import_options(List<ImportOption> *r_options, int p_preset = 0) const;
-	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const;
+#ifdef WINDOWS_ENABLED
+	DWORD dwFlsIndex;
+#else
+	pthread_key_t key;
+#endif
 
-	virtual Error import(const String &p_source_file, const String &p_save_path, const Map<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files = NULL);
+	void *get_value() const {
+#ifdef WINDOWS_ENABLED
+		return FlsGetValue(dwFlsIndex);
+#else
+		return pthread_getspecific(key);
+#endif
+	}
 
-	ResourceImporterWebm();
+	void set_value(void *p_value) const {
+#ifdef WINDOWS_ENABLED
+		FlsSetValue(dwFlsIndex, p_value);
+#else
+		pthread_setspecific(key, p_value);
+#endif
+	}
+
+	Impl(void (*p_destr_callback_func)(void *)) {
+#ifdef WINDOWS_ENABLED
+		dwFlsIndex = FlsAlloc(p_destr_callback_func);
+		ERR_FAIL_COND(dwFlsIndex == FLS_OUT_OF_INDEXES);
+#else
+		pthread_key_create(&key, p_destr_callback_func);
+#endif
+	}
+
+	~Impl() {
+#ifdef WINDOWS_ENABLED
+		FlsFree(dwFlsIndex);
+#else
+		pthread_key_delete(key);
+#endif
+	}
 };
 
-#endif // RESOURCEIMPORTERWEBM_H
+void *ThreadLocalStorage::get_value() const {
+	return pimpl->get_value();
+}
+
+void ThreadLocalStorage::set_value(void *p_value) const {
+	pimpl->set_value(p_value);
+}
+
+void ThreadLocalStorage::alloc(void (*p_destr_callback)(void *)) {
+	pimpl = memnew(ThreadLocalStorage::Impl(p_destr_callback));
+}
+
+void ThreadLocalStorage::free() {
+	memdelete(pimpl);
+	pimpl = NULL;
+}
