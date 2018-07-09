@@ -79,6 +79,7 @@
 #include "editor/plugins/collision_polygon_2d_editor_plugin.h"
 #include "editor/plugins/collision_polygon_editor_plugin.h"
 #include "editor/plugins/collision_shape_2d_editor_plugin.h"
+#include "editor/plugins/cpu_particles_editor_plugin.h"
 #include "editor/plugins/cube_grid_theme_editor_plugin.h"
 #include "editor/plugins/curve_editor_plugin.h"
 #include "editor/plugins/editor_preview_plugins.h"
@@ -3033,6 +3034,7 @@ void EditorNode::register_editor_types() {
 	ClassDB::register_class<EditorInspectorPlugin>();
 	ClassDB::register_class<EditorProperty>();
 	ClassDB::register_class<AnimationTrackEditPlugin>();
+	ClassDB::register_class<ScriptCreateDialog>();
 
 	// FIXME: Is this stuff obsolete, or should it be ported to new APIs?
 	ClassDB::register_class<EditorScenePostImport>();
@@ -4395,6 +4397,8 @@ void EditorNode::_bind_methods() {
 
 	ClassDB::bind_method("stop_child_process", &EditorNode::stop_child_process);
 
+	ClassDB::bind_method("get_script_create_dialog", &EditorNode::get_script_create_dialog);
+
 	ClassDB::bind_method("_sources_changed", &EditorNode::_sources_changed);
 	ClassDB::bind_method("_fs_changed", &EditorNode::_fs_changed);
 	ClassDB::bind_method("_dock_select_draw", &EditorNode::_dock_select_draw);
@@ -5380,6 +5384,7 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(SpriteEditorPlugin(this)));
 	add_editor_plugin(memnew(Skeleton2DEditorPlugin(this)));
 	add_editor_plugin(memnew(ParticlesEditorPlugin(this)));
+	add_editor_plugin(memnew(CPUParticlesEditorPlugin(this)));
 	add_editor_plugin(memnew(ResourcePreloaderEditorPlugin(this)));
 	add_editor_plugin(memnew(ItemListEditorPlugin(this)));
 	add_editor_plugin(memnew(Polygon3DEditorPlugin(this)));
