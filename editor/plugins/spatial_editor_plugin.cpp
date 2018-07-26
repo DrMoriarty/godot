@@ -1928,6 +1928,11 @@ void SpatialEditorViewport::_nav_zoom(Ref<InputEventWithModifiers> p_event, cons
 
 void SpatialEditorViewport::_nav_orbit(Ref<InputEventWithModifiers> p_event, const Vector2 &p_relative) {
 
+	if (lock_rotation) {
+		_nav_pan(p_event, p_relative);
+		return;
+	}
+
 	real_t degrees_per_pixel = EditorSettings::get_singleton()->get("editors/3d/navigation_feel/orbit_sensitivity");
 	real_t radians_per_pixel = Math::deg2rad(degrees_per_pixel);
 	bool invert_y_axis = EditorSettings::get_singleton()->get("editors/3d/navigation/invert_y-axis");
@@ -2563,6 +2568,19 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 			_update_name();
 
 		} break;
+		case VIEW_LOCK_ROTATION: {
+
+			int idx = view_menu->get_popup()->get_item_index(VIEW_LOCK_ROTATION);
+			bool current = view_menu->get_popup()->is_item_checked(idx);
+			lock_rotation = !current;
+			view_menu->get_popup()->set_item_checked(idx, !current);
+			if (lock_rotation) {
+				view_menu->set_icon(get_icon("Lock", "EditorIcons"));
+			} else {
+				view_menu->set_icon(Ref<Texture>());
+			}
+
+		} break;
 		case VIEW_AUDIO_LISTENER: {
 
 			int idx = view_menu->get_popup()->get_item_index(VIEW_AUDIO_LISTENER);
@@ -2836,6 +2854,12 @@ void SpatialEditorViewport::set_state(const Dictionary &p_state) {
 		if (!view_menu->get_popup()->is_item_checked(idx))
 			_menu_option(display);
 	}
+	if (p_state.has("lock_rotation")) {
+		lock_rotation = p_state["lock_rotation"];
+
+		int idx = view_menu->get_popup()->get_item_index(VIEW_LOCK_ROTATION);
+		view_menu->get_popup()->set_item_checked(idx, lock_rotation);
+	}
 	if (p_state.has("use_environment")) {
 		bool env = p_state["use_environment"];
 
@@ -2923,6 +2947,8 @@ Dictionary SpatialEditorViewport::get_state() const {
 	d["half_res"] = viewport_container->get_stretch_shrink() > 1;
 	if (previewing)
 		d["previewing"] = EditorNode::get_singleton()->get_edited_scene()->get_path_to(previewing);
+	if (lock_rotation)
+		d["lock_rotation"] = lock_rotation;
 
 	return d;
 }
@@ -2951,6 +2977,7 @@ void SpatialEditorViewport::_bind_methods() {
 void SpatialEditorViewport::reset() {
 
 	orthogonal = false;
+	lock_rotation = false;
 	message_time = 0;
 	message = "";
 	last_message = "";
@@ -3376,6 +3403,8 @@ SpatialEditorViewport::SpatialEditorViewport(SpatialEditor *p_spatial_editor, Ed
 	view_menu->get_popup()->add_radio_check_item(TTR("Perspective") + " (" + ED_GET_SHORTCUT("spatial_editor/switch_perspective_orthogonal")->get_as_text() + ")", VIEW_PERSPECTIVE);
 	view_menu->get_popup()->add_radio_check_item(TTR("Orthogonal") + " (" + ED_GET_SHORTCUT("spatial_editor/switch_perspective_orthogonal")->get_as_text() + ")", VIEW_ORTHOGONAL);
 	view_menu->get_popup()->set_item_checked(view_menu->get_popup()->get_item_index(VIEW_PERSPECTIVE), true);
+	view_menu->get_popup()->add_separator();
+	view_menu->get_popup()->add_check_shortcut(ED_SHORTCUT("spatial_editor/view_lock_rotation", TTR("Lock View Rotation")), VIEW_LOCK_ROTATION);
 	view_menu->get_popup()->add_separator();
 	view_menu->get_popup()->add_radio_check_shortcut(ED_SHORTCUT("spatial_editor/view_display_normal", TTR("Display Normal")), VIEW_DISPLAY_NORMAL);
 	view_menu->get_popup()->add_radio_check_shortcut(ED_SHORTCUT("spatial_editor/view_display_wireframe", TTR("Display Wireframe")), VIEW_DISPLAY_WIREFRAME);
@@ -4641,9 +4670,7 @@ void SpatialEditor::_init_grid() {
 			Vector3 p2_dest = p2 * (-axis_n1 + axis_n2);
 
 			Color line_color = secondary_grid_color;
-			if (j == 0) {
-				continue;
-			} else if (j % primary_grid_steps == 0) {
+			if (j % primary_grid_steps == 0) {
 				line_color = primary_grid_color;
 			}
 
@@ -5011,7 +5038,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_MODE_SELECT]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_SELECT]->set_flat(true);
 	tool_button[TOOL_MODE_SELECT]->set_pressed(true);
-	button_binds[0] = MENU_TOOL_SELECT;
+	button_binds.write[0] = MENU_TOOL_SELECT;
 	tool_button[TOOL_MODE_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SELECT]->set_tooltip(TTR("Select Mode (Q)") + "\n" + keycode_get_string(KEY_MASK_CMD) + TTR("Drag: Rotate\nAlt+Drag: Move\nAlt+RMB: Depth list selection"));
 
@@ -5019,7 +5046,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_MOVE]);
 	tool_button[TOOL_MODE_MOVE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_MOVE]->set_flat(true);
-	button_binds[0] = MENU_TOOL_MOVE;
+	button_binds.write[0] = MENU_TOOL_MOVE;
 	tool_button[TOOL_MODE_MOVE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_MOVE]->set_tooltip(TTR("Move Mode (W)"));
 
@@ -5027,7 +5054,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_ROTATE]);
 	tool_button[TOOL_MODE_ROTATE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_ROTATE]->set_flat(true);
-	button_binds[0] = MENU_TOOL_ROTATE;
+	button_binds.write[0] = MENU_TOOL_ROTATE;
 	tool_button[TOOL_MODE_ROTATE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_ROTATE]->set_tooltip(TTR("Rotate Mode (E)"));
 
@@ -5035,7 +5062,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_SCALE]);
 	tool_button[TOOL_MODE_SCALE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_SCALE]->set_flat(true);
-	button_binds[0] = MENU_TOOL_SCALE;
+	button_binds.write[0] = MENU_TOOL_SCALE;
 	tool_button[TOOL_MODE_SCALE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SCALE]->set_tooltip(TTR("Scale Mode (R)"));
 
@@ -5043,19 +5070,19 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_LIST_SELECT]);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_flat(true);
-	button_binds[0] = MENU_TOOL_LIST_SELECT;
+	button_binds.write[0] = MENU_TOOL_LIST_SELECT;
 	tool_button[TOOL_MODE_LIST_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_tooltip(TTR("Show a list of all objects at the position clicked\n(same as Alt+RMB in select mode)."));
 
 	tool_button[TOOL_LOCK_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_LOCK_SELECTED]);
-	button_binds[0] = MENU_LOCK_SELECTED;
+	button_binds.write[0] = MENU_LOCK_SELECTED;
 	tool_button[TOOL_LOCK_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_LOCK_SELECTED]->set_tooltip(TTR("Lock the selected object in place (can't be moved)."));
 
 	tool_button[TOOL_UNLOCK_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_UNLOCK_SELECTED]);
-	button_binds[0] = MENU_UNLOCK_SELECTED;
+	button_binds.write[0] = MENU_UNLOCK_SELECTED;
 	tool_button[TOOL_UNLOCK_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_UNLOCK_SELECTED]->set_tooltip(TTR("Unlock the selected object (can be moved)."));
 
@@ -5066,7 +5093,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_option_button[TOOL_OPT_LOCAL_COORDS]);
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->set_toggle_mode(true);
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->set_flat(true);
-	button_binds[0] = MENU_TOOL_LOCAL_COORDS;
+	button_binds.write[0] = MENU_TOOL_LOCAL_COORDS;
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->connect("toggled", this, "_menu_item_toggled", button_binds);
 	ED_SHORTCUT("spatial_editor/local_coords", TTR("Local Coords"), KEY_T);
 	sct = ED_GET_SHORTCUT("spatial_editor/local_coords").ptr()->get_as_text();
@@ -5076,7 +5103,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_option_button[TOOL_OPT_USE_SNAP]);
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_toggle_mode(true);
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_flat(true);
-	button_binds[0] = MENU_TOOL_USE_SNAP;
+	button_binds.write[0] = MENU_TOOL_USE_SNAP;
 	tool_option_button[TOOL_OPT_USE_SNAP]->connect("toggled", this, "_menu_item_toggled", button_binds);
 	ED_SHORTCUT("spatial_editor/snap", TTR("Snap"), KEY_Y);
 	sct = ED_GET_SHORTCUT("spatial_editor/snap").ptr()->get_as_text();

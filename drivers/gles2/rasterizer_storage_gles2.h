@@ -182,6 +182,8 @@ public:
 
 		Ref<Image> images[6];
 
+		bool redraw_if_visible;
+
 		Texture() {
 			flags = 0;
 			width = 0;
@@ -205,6 +207,8 @@ public:
 			proxy = NULL;
 
 			render_target = NULL;
+
+			redraw_if_visible = false;
 		}
 
 		_ALWAYS_INLINE_ Texture *get_ptr() {
@@ -263,6 +267,8 @@ public:
 	virtual void texture_set_detect_3d_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 	virtual void texture_set_detect_srgb_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
 	virtual void texture_set_detect_normal_callback(RID p_texture, VisualServer::TextureDetectCallback p_callback, void *p_userdata);
+
+	virtual void texture_set_force_redraw_if_visible(RID p_texture, bool p_enable);
 
 	/* SKY API */
 
@@ -508,7 +514,7 @@ public:
 
 	virtual RID multimesh_create();
 
-	virtual void multimesh_allocate(RID p_multimesh, int p_instances, VS::MultimeshTransformFormat p_transform_format, VS::MultimeshColorFormat p_color_format,VS::MultimeshCustomDataFormat p_data=VS::MULTIMESH_CUSTOM_DATA_NONE);
+	virtual void multimesh_allocate(RID p_multimesh, int p_instances, VS::MultimeshTransformFormat p_transform_format, VS::MultimeshColorFormat p_color_format, VS::MultimeshCustomDataFormat p_data = VS::MULTIMESH_CUSTOM_DATA_NONE);
 	virtual int multimesh_get_instance_count(RID p_multimesh) const;
 
 	virtual void multimesh_set_mesh(RID p_multimesh, RID p_mesh);
@@ -818,7 +824,6 @@ public:
 		int canvas_draw_commands;
 		float time[4];
 		float delta;
-		uint64_t prev_tick;
 		uint64_t count;
 
 	} frame;

@@ -211,6 +211,9 @@ public:
 	FUNC3(body_set_param, RID, BodyParameter, real_t);
 	FUNC2RC(real_t, body_get_param, RID, BodyParameter);
 
+	FUNC3(body_set_combine_mode, RID, BodyParameter, CombineMode);
+	FUNC2RC(CombineMode, body_get_combine_mode, RID, BodyParameter);
+
 	FUNC3(body_set_state, RID, BodyState, const Variant &);
 	FUNC2RC(Variant, body_get_state, RID, BodyState);
 
@@ -220,7 +223,11 @@ public:
 	FUNC2(body_set_applied_torque, RID, real_t);
 	FUNC1RC(real_t, body_get_applied_torque, RID);
 
+	FUNC2(body_add_central_force, RID, const Vector2 &);
 	FUNC3(body_add_force, RID, const Vector2 &, const Vector2 &);
+	FUNC2(body_add_torque, RID, real_t);
+	FUNC2(body_apply_central_impulse, RID, const Vector2 &);
+	FUNC2(body_apply_torque_impulse, RID, real_t);
 	FUNC3(body_apply_impulse, RID, const Vector2 &, const Vector2 &);
 	FUNC2(body_set_axis_velocity, RID, const Vector2 &);
 
@@ -245,10 +252,16 @@ public:
 
 	FUNC2(body_set_pickable, RID, bool);
 
-	bool body_test_motion(RID p_body, const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia, real_t p_margin = 0.001, MotionResult *r_result = NULL) {
+	bool body_test_motion(RID p_body, const Transform2D &p_from, const Vector2 &p_motion, bool p_infinite_inertia, real_t p_margin = 0.001, MotionResult *r_result = NULL, bool p_exclude_raycast_shapes = true) {
 
 		ERR_FAIL_COND_V(main_thread != Thread::get_caller_id(), false);
-		return physics_2d_server->body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result);
+		return physics_2d_server->body_test_motion(p_body, p_from, p_motion, p_infinite_inertia, p_margin, r_result, p_exclude_raycast_shapes);
+	}
+
+	int body_test_ray_separation(RID p_body, const Transform2D &p_transform, bool p_infinite_inertia, Vector2 &r_recover_motion, SeparationResult *r_results, int p_result_max, float p_margin = 0.001) {
+
+		ERR_FAIL_COND_V(main_thread != Thread::get_caller_id(), false);
+		return physics_2d_server->body_test_ray_separation(p_body, p_transform, p_infinite_inertia, r_recover_motion, r_results, p_result_max, p_margin);
 	}
 
 	// this function only works on physics process, errors and returns null otherwise

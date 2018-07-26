@@ -60,6 +60,7 @@ public:
 	virtual Variant get_handle_value(int p_idx) const;
 	virtual void set_handle(int p_idx, Camera *p_camera, const Point2 &p_point);
 	virtual void commit_handle(int p_idx, const Variant &p_restore, bool p_cancel = false);
+	virtual bool is_gizmo_handle_highlighted(int idx) const { return false; }
 
 	virtual bool intersect_frustum(const Camera *p_camera, const Vector<Plane> &p_frustum);
 	virtual bool intersect_ray(Camera *p_camera, const Point2 &p_point, Vector3 &r_pos, Vector3 &r_normal, int *r_gizmo_handle = NULL, bool p_sec_first = false);
@@ -93,7 +94,8 @@ class SpatialEditorViewport : public Control {
 		VIEW_DISPLAY_NORMAL,
 		VIEW_DISPLAY_WIREFRAME,
 		VIEW_DISPLAY_OVERDRAW,
-		VIEW_DISPLAY_SHADELESS
+		VIEW_DISPLAY_SHADELESS,
+		VIEW_LOCK_ROTATION
 	};
 
 public:
@@ -131,6 +133,7 @@ private:
 	Camera *camera;
 	bool transforming;
 	bool orthogonal;
+	bool lock_rotation;
 	float gizmo_scale;
 
 	bool freelook_active;

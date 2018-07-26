@@ -825,7 +825,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	OS::get_singleton()->set_cmdline(execpath, main_args);
 
 	GLOBAL_DEF("rendering/quality/driver/driver_name", "GLES3");
-	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/driver/driver_name", PropertyInfo(Variant::STRING, "rendering/quality/driver/driver_name", PROPERTY_HINT_ENUM, "GLES3,GLES2"));
+	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/driver/driver_name", PropertyInfo(Variant::STRING, "rendering/quality/driver/driver_name", PROPERTY_HINT_ENUM, "GLES2,GLES3"));
 	if (video_driver == "") {
 		video_driver = GLOBAL_GET("rendering/quality/driver/driver_name");
 	}
@@ -914,7 +914,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	}
 
 	if (audio_driver == "") { // specified in project.godot
-		audio_driver = GLOBAL_DEF("audio/driver", OS::get_singleton()->get_audio_driver_name(0));
+		audio_driver = GLOBAL_DEF_RST("audio/driver", OS::get_singleton()->get_audio_driver_name(0));
 	}
 
 	for (int i = 0; i < OS::get_singleton()->get_audio_driver_count(); i++) {
@@ -1734,8 +1734,11 @@ bool Main::iteration() {
 	int physics_fps = Engine::get_singleton()->get_iterations_per_second();
 	float frame_slice = 1.0 / physics_fps;
 
+	float time_scale = Engine::get_singleton()->get_time_scale();
+
 	MainFrameTime advance = main_timer_sync.advance(frame_slice, physics_fps);
 	double step = advance.idle_step;
+	double scaled_step = step * time_scale;
 
 	Engine::get_singleton()->_frame_step = step;
 
@@ -1756,8 +1759,6 @@ bool Main::iteration() {
 		step -= (advance.physics_steps - max_physics_steps) * frame_slice;
 		advance.physics_steps = max_physics_steps;
 	}
-
-	float time_scale = Engine::get_singleton()->get_time_scale();
 
 	bool exit = false;
 
@@ -1805,11 +1806,11 @@ bool Main::iteration() {
 
 		if ((!force_redraw_requested) && OS::get_singleton()->is_in_low_processor_usage_mode()) {
 			if (VisualServer::get_singleton()->has_changed()) {
-				VisualServer::get_singleton()->draw(); // flush visual commands
+				VisualServer::get_singleton()->draw(true, scaled_step); // flush visual commands
 				Engine::get_singleton()->frames_drawn++;
 			}
 		} else {
-			VisualServer::get_singleton()->draw(); // flush visual commands
+			VisualServer::get_singleton()->draw(true, scaled_step); // flush visual commands
 			Engine::get_singleton()->frames_drawn++;
 			force_redraw_requested = false;
 		}
@@ -1822,6 +1823,8 @@ bool Main::iteration() {
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 		ScriptServer::get_language(i)->frame();
 	}
+
+	AudioServer::get_singleton()->update();
 
 	if (script_debugger) {
 		if (script_debugger->is_profiling()) {
@@ -1954,6 +1957,15 @@ void Main::cleanup() {
 		memdelete(globals);
 	if (engine)
 		memdelete(engine);
+
+	if (OS::get_singleton()->is_restart_on_exit_set()) {
+		//attempt to restart with arguments
+		String exec = OS::get_singleton()->get_executable_path();
+		List<String> args = OS::get_singleton()->get_restart_on_exit_arguments();
+		OS::ProcessID pid = 0;
+		OS::get_singleton()->execute(exec, args, false, &pid);
+		OS::get_singleton()->set_restart_on_exit(false, List<String>()); //clear list (uses memory)
+	}
 
 	unregister_core_driver_types();
 	unregister_core_types();

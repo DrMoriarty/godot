@@ -140,6 +140,10 @@ RasterizerStorageGLES2::Texture *RasterizerCanvasGLES2::_bind_canvas_texture(con
 
 			texture = texture->get_ptr();
 
+			if (texture->redraw_if_visible) {
+				VisualServerRaster::redraw_request();
+			}
+
 			if (texture->render_target) {
 				texture->render_target->used_in_frame = true;
 			}
@@ -405,8 +409,6 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 
 					Rect2 dst_rect = Rect2(r->rect.position, r->rect.size);
 
-					state.canvas_shader.set_uniform(CanvasShaderGLES2::COLOR_TEXPIXEL_SIZE, texpixel_size);
-
 					if (dst_rect.size.width < 0) {
 						dst_rect.position.x += dst_rect.size.width;
 						dst_rect.size.width *= -1;
@@ -659,6 +661,8 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 				if (state.canvas_shader.bind())
 					_set_uniforms();
 
+				_bind_canvas_texture(RID(), RID());
+
 				if (pline->triangles.size()) {
 					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.ptr(), NULL, pline->triangle_colors.ptr(), pline->triangle_colors.size() == 1);
 				} else {
@@ -908,6 +912,10 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 					}
 
 					t = t->get_ptr();
+
+					if (t->redraw_if_visible) {
+						VisualServerRaster::redraw_request();
+					}
 
 					glBindTexture(t->target, t->tex_id);
 				}

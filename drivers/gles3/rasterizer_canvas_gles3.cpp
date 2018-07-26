@@ -211,6 +211,10 @@ RasterizerStorageGLES3::Texture *RasterizerCanvasGLES3::_bind_canvas_texture(con
 
 		} else {
 
+			if (texture->redraw_if_visible) { //check before proxy, because this is usually used with proxies
+				VisualServerRaster::redraw_request();
+			}
+
 			texture = texture->get_ptr();
 
 			if (texture->render_target)
@@ -247,6 +251,10 @@ RasterizerStorageGLES3::Texture *RasterizerCanvasGLES3::_bind_canvas_texture(con
 			state.canvas_shader.set_uniform(CanvasShaderGLES3::USE_DEFAULT_NORMAL, false);
 
 		} else {
+
+			if (normal_map->redraw_if_visible) { //check before proxy, because this is usually used with proxies
+				VisualServerRaster::redraw_request();
+			}
 
 			normal_map = normal_map->get_ptr();
 			glActiveTexture(GL_TEXTURE1);
@@ -1266,6 +1274,10 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 						continue;
 					}
 
+					if (t->redraw_if_visible) { //check before proxy, because this is usually used with proxies
+						VisualServerRaster::redraw_request();
+					}
+
 					t = t->get_ptr();
 
 					if (storage->config.srgb_decode_supported && t->using_srgb) {
@@ -1883,7 +1895,7 @@ void RasterizerCanvasGLES3::initialize() {
 	}
 	{
 
-		uint32_t poly_size = GLOBAL_DEF("rendering/limits/buffers/canvas_polygon_buffer_size_kb", 128);
+		uint32_t poly_size = GLOBAL_DEF_RST("rendering/limits/buffers/canvas_polygon_buffer_size_kb", 128);
 		poly_size *= 1024; //kb
 		poly_size = MAX(poly_size, (2 + 2 + 4) * 4 * sizeof(float));
 		glGenBuffers(1, &data.polygon_buffer);
@@ -1930,7 +1942,7 @@ void RasterizerCanvasGLES3::initialize() {
 
 		glGenVertexArrays(1, &data.polygon_buffer_pointer_array);
 
-		uint32_t index_size = GLOBAL_DEF("rendering/limits/buffers/canvas_polygon_index_buffer_size_kb", 128);
+		uint32_t index_size = GLOBAL_DEF_RST("rendering/limits/buffers/canvas_polygon_index_buffer_size_kb", 128);
 		index_size *= 1024; //kb
 		glGenBuffers(1, &data.polygon_index_buffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.polygon_index_buffer);

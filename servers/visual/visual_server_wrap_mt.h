@@ -55,7 +55,7 @@ class VisualServerWrapMT : public VisualServer {
 	bool create_thread;
 
 	uint64_t draw_pending;
-	void thread_draw();
+	void thread_draw(bool p_swap_buffers, double frame_step);
 	void thread_flush();
 
 	void thread_exit();
@@ -106,6 +106,8 @@ public:
 	FUNC1(textures_keep_original, bool)
 
 	FUNC2(texture_set_proxy, RID, RID)
+
+	FUNC2(texture_set_force_redraw_if_visible, RID, bool)
 
 	/* SKY API */
 
@@ -576,7 +578,7 @@ public:
 
 	virtual void init();
 	virtual void finish();
-	virtual void draw(bool p_swap_buffers);
+	virtual void draw(bool p_swap_buffers, double frame_step);
 	virtual void sync();
 	FUNC0RC(bool, has_changed)
 

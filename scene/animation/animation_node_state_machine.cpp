@@ -71,9 +71,9 @@ void AnimationNodeStateMachineTransition::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "priority", PROPERTY_HINT_RANGE, "0,32,1"), "set_priority", "get_priority");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "disabled"), "set_disabled", "is_disabled");
 
-	BIND_CONSTANT(SWITCH_MODE_IMMEDIATE);
-	BIND_CONSTANT(SWITCH_MODE_SYNC);
-	BIND_CONSTANT(SWITCH_MODE_AT_END);
+	BIND_ENUM_CONSTANT(SWITCH_MODE_IMMEDIATE);
+	BIND_ENUM_CONSTANT(SWITCH_MODE_SYNC);
+	BIND_ENUM_CONSTANT(SWITCH_MODE_AT_END);
 }
 
 AnimationNodeStateMachineTransition::AnimationNodeStateMachineTransition() {
@@ -169,11 +169,11 @@ void AnimationNodeStateMachine::rename_node(const StringName &p_name, const Stri
 
 	for (int i = 0; i < transitions.size(); i++) {
 		if (transitions[i].from == p_name) {
-			transitions[i].from = p_new_name;
+			transitions.write[i].from = p_new_name;
 		}
 
 		if (transitions[i].to == p_name) {
-			transitions[i].to = p_new_name;
+			transitions.write[i].to = p_new_name;
 		}
 	}
 

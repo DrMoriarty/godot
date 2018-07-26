@@ -173,6 +173,8 @@ public:
 
 	BIND2(texture_set_proxy, RID, RID)
 
+	BIND2(texture_set_force_redraw_if_visible, RID, bool)
+
 	/* SKY API */
 
 	BIND0R(RID, sky_create)
@@ -658,7 +660,7 @@ public:
 
 	virtual void request_frame_drawn_callback(Object *p_where, const StringName &p_method, const Variant &p_userdata);
 
-	virtual void draw(bool p_swap_buffers);
+	virtual void draw(bool p_swap_buffers, double frame_step);
 	virtual void sync();
 	virtual bool has_changed() const;
 	virtual void init();
