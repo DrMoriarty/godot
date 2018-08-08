@@ -300,7 +300,7 @@ public:
 			case ShaderLanguage::TYPE_MAT3: {
 				GLfloat mat[9];
 
-				for (int i = 0; i < 0; i++) {
+				for (int i = 0; i < 9; i++) {
 					mat[i] = values[i].real;
 				}
 
@@ -311,7 +311,7 @@ public:
 			case ShaderLanguage::TYPE_MAT4: {
 				GLfloat mat[16];
 
-				for (int i = 0; i < 0; i++) {
+				for (int i = 0; i < 16; i++) {
 					mat[i] = values[i].real;
 				}
 
@@ -465,7 +465,7 @@ public:
 
 	// this void* is actually a RasterizerStorageGLES2::Material, but C++ doesn't
 	// like forward declared nested classes.
-	void use_material(void *p_material, int p_num_predef_textures);
+	void use_material(void *p_material);
 
 	uint32_t get_version() const { return new_conditional_version.version; }
 

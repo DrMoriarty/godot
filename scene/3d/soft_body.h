@@ -72,9 +72,7 @@ public:
 		int point_index;
 		NodePath spatial_attachment_path;
 		Spatial *spatial_attachment; // Cache
-		/// This is the offset from the soft body to point or attachment to point
-		/// Depend if the spatial_attachment_node is NULL or not
-		Transform vertex_offset_transform; // Cache
+		Vector3 offset;
 
 		PinnedPoint();
 		PinnedPoint(const PinnedPoint &obj_tocopy);
@@ -89,7 +87,7 @@ private:
 	uint32_t collision_mask;
 	uint32_t collision_layer;
 	NodePath parent_collision_ignore;
-	PoolVector<PinnedPoint> pinned_points_indices;
+	PoolVector<PinnedPoint> pinned_points;
 	bool simulation_started;
 	bool pinned_points_cache_dirty;
 
@@ -186,9 +184,14 @@ public:
 
 private:
 	void reset_softbody_pin();
+
+	void _make_cache_dirty();
 	void _update_cache_pin_points_datas();
+
 	void _pin_point_on_physics_server(int p_point_index, bool pin);
 	void _add_pinned_point(int p_point_index, const NodePath &p_spatial_attachment_path);
+	void _reset_points_offsets();
+
 	void _remove_pinned_point(int p_point_index);
 	int _get_pinned_point(int p_point_index, PinnedPoint *&r_point) const;
 	int _has_pinned_point(int p_point_index) const;
