@@ -94,7 +94,7 @@ Files extracted from upstream source:
 ## libogg
 
 - Upstream: https://www.xiph.org/ogg
-- Version: 1.3.2
+- Version: 1.3.3
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -241,7 +241,7 @@ Collection of single-file libraries used in Godot components.
 ## openssl
 
 - Upstream: https://www.openssl.org
-- Version: 1.0.2l
+- Version: 1.0.2o
 - License: OpenSSL license / BSD-like
 
 Files extracted from the upstream source:

@@ -188,6 +188,7 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		protected void onGLDrawFrame(GL10 gl) {}
 		protected void onGLSurfaceChanged(GL10 gl, int width, int height) {} // singletons will always miss first onGLSurfaceChanged call
 
+		protected void onError(final String type, final String functionName, final String details, final String filename, final int line) {}
 		public void registerMethods() {}
 	}
 
@@ -399,7 +400,7 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		_self = this;
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-		mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+		mClipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
 
 		if (true) {
 			boolean md5mismatch = false;
@@ -571,8 +572,8 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 		String copiedText = "";
 
 		if (mClipboard.getPrimaryClip() != null) {
-				ClipData.Item item = mClipboard.getPrimaryClip().getItemAt(0);
-				copiedText = item.getText().toString();
+			ClipData.Item item = mClipboard.getPrimaryClip().getItemAt(0);
+			copiedText = item.getText().toString();
 		}
 
 		return copiedText;
@@ -634,10 +635,10 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
 
 		float[] adjustedValues = new float[3];
 		final int axisSwap[][] = {
-			{ 1, -1, 0, 1 },  // ROTATION_0
+			{ 1, -1, 0, 1 }, // ROTATION_0
 			{ -1, -1, 1, 0 }, // ROTATION_90
-			{ -1, 1, 0, 1 },  // ROTATION_180
-			{ 1, 1, 1, 0 }    // ROTATION_270
+			{ -1, 1, 0, 1 }, // ROTATION_180
+			{ 1, 1, 1, 0 } // ROTATION_270
 		};
 
 		final int[] as = axisSwap[displayRotation];
@@ -920,6 +921,13 @@ public class Godot extends Activity implements SensorEventListener, IDownloaderC
                 (progress.mOverallProgress,
                         progress.mOverallTotal));
 		
+	}
+
+	public void emitErrorSignal(final String type, final String functionName, final String details, final String filename, final int line) {
+		// Allow users to use 3rd party modules to catch godot's errors.
+		for (int i = 0; i < singleton_count; i++) {
+			singletons[i].onError(type, functionName, details, filename, line);
+		}
 	}
     
 }
