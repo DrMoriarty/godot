@@ -123,6 +123,10 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoader::load_interactive(const Stri
 	return ril;
 }
 
+bool ResourceFormatLoader::exists(const String &p_path) const {
+	return FileAccess::exists(p_path); //by default just check file
+}
+
 RES ResourceFormatLoader::load(const String &p_path, const String &p_original_path, Error *r_error) {
 
 	String path = p_path;
@@ -200,8 +204,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 
 	if (!p_no_cache && ResourceCache::has(local_path)) {
 
-		if (OS::get_singleton()->is_stdout_verbose())
-			print_line("load resource: " + local_path + " (cached)");
+		print_verbose("Loading resource: " + local_path + " (cached)");
 		if (r_error)
 			*r_error = OK;
 		return RES(ResourceCache::get(local_path));
@@ -212,9 +215,7 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 
 	ERR_FAIL_COND_V(path == "", RES());
 
-	if (OS::get_singleton()->is_stdout_verbose())
-		print_line("load resource: " + path);
-
+	print_verbose("Loading resource: " + path);
 	RES res = _load(path, local_path, p_type_hint, p_no_cache, r_error);
 
 	if (res.is_null()) {
@@ -239,6 +240,36 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 	return res;
 }
 
+bool ResourceLoader::exists(const String &p_path, const String &p_type_hint) {
+
+	String local_path;
+	if (p_path.is_rel_path())
+		local_path = "res://" + p_path;
+	else
+		local_path = ProjectSettings::get_singleton()->localize_path(p_path);
+
+	if (ResourceCache::has(local_path)) {
+
+		return true; // If cached, it probably exists
+	}
+
+	bool xl_remapped = false;
+	String path = _path_remap(local_path, &xl_remapped);
+
+	// Try all loaders and pick the first match for the type hint
+	for (int i = 0; i < loader_count; i++) {
+
+		if (!loader[i]->recognize_path(path, p_type_hint)) {
+			continue;
+		}
+
+		if (loader[i]->exists(path))
+			return true;
+	}
+
+	return false;
+}
+
 Ref<ResourceInteractiveLoader> ResourceLoader::load_interactive(const String &p_path, const String &p_type_hint, bool p_no_cache, Error *r_error) {
 
 	if (r_error)
@@ -252,9 +283,7 @@ Ref<ResourceInteractiveLoader> ResourceLoader::load_interactive(const String &p_
 
 	if (!p_no_cache && ResourceCache::has(local_path)) {
 
-		if (OS::get_singleton()->is_stdout_verbose())
-			print_line("load resource: " + local_path + " (cached)");
-
+		print_verbose("Loading resource: " + local_path + " (cached)");
 		Ref<Resource> res_cached = ResourceCache::get(local_path);
 		Ref<ResourceInteractiveLoaderDefault> ril = Ref<ResourceInteractiveLoaderDefault>(memnew(ResourceInteractiveLoaderDefault));
 
@@ -264,14 +293,10 @@ Ref<ResourceInteractiveLoader> ResourceLoader::load_interactive(const String &p_
 
 	bool xl_remapped = false;
 	String path = _path_remap(local_path, &xl_remapped);
-
 	ERR_FAIL_COND_V(path == "", Ref<ResourceInteractiveLoader>());
-
-	if (OS::get_singleton()->is_stdout_verbose())
-		print_line("load resource: ");
+	print_verbose("Loading resource: " + path);
 
 	bool found = false;
-
 	for (int i = 0; i < loader_count; i++) {
 
 		if (!loader[i]->recognize_path(path, p_type_hint))

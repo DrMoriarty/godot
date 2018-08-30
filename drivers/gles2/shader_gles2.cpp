@@ -231,7 +231,6 @@ static String _fix_error_code_line(const String &p_error, int p_code_start, int 
 			continue;
 
 		String numstr = error.substr(last_find_pos + 1, (end_pos - last_find_pos) - 1);
-		print_line("numstr: " + numstr);
 		String begin = error.substr(0, last_find_pos + 1);
 		String end = error.substr(end_pos, error.length());
 		int num = numstr.to_int() + p_code_start - p_offset;
@@ -950,36 +949,24 @@ void ShaderGLES2::use_material(void *p_material) {
 					}
 
 					value.second.write[0].real = val.basis.elements[0][0];
-					value.second.write[0].real = val.basis.elements[0][1];
-					value.second.write[0].real = val.basis.elements[0][2];
-					value.second.write[0].real = 0;
-					value.second.write[0].real = val.basis.elements[1][0];
-					value.second.write[0].real = val.basis.elements[1][1];
-					value.second.write[0].real = val.basis.elements[1][2];
-					value.second.write[0].real = 0;
-					value.second.write[0].real = val.basis.elements[2][0];
-					value.second.write[0].real = val.basis.elements[2][1];
-					value.second.write[0].real = val.basis.elements[2][2];
-					value.second.write[0].real = 0;
-					value.second.write[0].real = val.origin[0];
-					value.second.write[0].real = val.origin[1];
-					value.second.write[0].real = val.origin[2];
-					value.second.write[0].real = 1;
+					value.second.write[1].real = val.basis.elements[0][1];
+					value.second.write[2].real = val.basis.elements[0][2];
+					value.second.write[3].real = 0;
+					value.second.write[4].real = val.basis.elements[1][0];
+					value.second.write[5].real = val.basis.elements[1][1];
+					value.second.write[6].real = val.basis.elements[1][2];
+					value.second.write[7].real = 0;
+					value.second.write[8].real = val.basis.elements[2][0];
+					value.second.write[9].real = val.basis.elements[2][1];
+					value.second.write[10].real = val.basis.elements[2][2];
+					value.second.write[11].real = 0;
+					value.second.write[12].real = val.origin[0];
+					value.second.write[13].real = val.origin[1];
+					value.second.write[14].real = val.origin[2];
+					value.second.write[15].real = 1;
 				} break;
 
-				case ShaderLanguage::TYPE_SAMPLER2D: {
-
-				} break;
-
-				case ShaderLanguage::TYPE_ISAMPLER2D: {
-
-				} break;
-
-				case ShaderLanguage::TYPE_USAMPLER2D: {
-
-				} break;
-
-				case ShaderLanguage::TYPE_SAMPLERCUBE: {
+				default: {
 
 				} break;
 			}

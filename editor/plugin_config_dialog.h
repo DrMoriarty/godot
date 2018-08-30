@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  cube_grid_theme_editor_plugin.h                                      */
+/*  plugin_config_dialog.h                                               */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,64 +28,44 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef CUBE_GRID_THEME_EDITOR_PLUGIN_H
-#define CUBE_GRID_THEME_EDITOR_PLUGIN_H
+#ifndef PLUGIN_CONFIG_DIALOG_H
+#define PLUGIN_CONFIG_DIALOG_H
 
-#include "editor/editor_node.h"
-#include "scene/resources/mesh_library.h"
+#include "scene/gui/check_box.h"
+#include "scene/gui/dialogs.h"
+#include "scene/gui/line_edit.h"
+#include "scene/gui/option_button.h"
+#include "scene/gui/text_edit.h"
 
-class MeshLibraryEditor : public Control {
+class PluginConfigDialog : public ConfirmationDialog {
 
-	GDCLASS(MeshLibraryEditor, Control);
+	GDCLASS(PluginConfigDialog, ConfirmationDialog);
 
-	Ref<MeshLibrary> theme;
+	LineEdit *name_edit;
+	LineEdit *subfolder_edit;
+	TextEdit *desc_edit;
+	LineEdit *author_edit;
+	LineEdit *version_edit;
+	OptionButton *script_option_edit;
+	LineEdit *script_edit;
+	CheckBox *active_edit;
 
-	EditorNode *editor;
-	MenuButton *menu;
-	ConfirmationDialog *cd;
-	EditorFileDialog *file;
-	int to_erase;
+	bool _edit_mode;
 
-	enum {
-
-		MENU_OPTION_ADD_ITEM,
-		MENU_OPTION_REMOVE_ITEM,
-		MENU_OPTION_UPDATE_FROM_SCENE,
-		MENU_OPTION_IMPORT_FROM_SCENE
-	};
-
-	int option;
-	void _import_scene_cbk(const String &p_str);
-	void _menu_cbk(int p_option);
-	void _menu_confirm();
-
-	static void _import_scene(Node *p_scene, Ref<MeshLibrary> p_library, bool p_merge);
+	void _clear_fields();
+	void _on_confirmed();
+	void _on_cancelled();
+	void _on_required_text_changed(const String &p_text);
 
 protected:
+	virtual void _notification(int p_what);
 	static void _bind_methods();
 
 public:
-	void edit(const Ref<MeshLibrary> &p_theme);
-	static Error update_library_file(Node *p_base_scene, Ref<MeshLibrary> ml, bool p_merge = true);
+	void config(const String &p_plugin_dir_name);
 
-	MeshLibraryEditor(EditorNode *p_editor);
+	PluginConfigDialog();
+	~PluginConfigDialog();
 };
 
-class MeshLibraryEditorPlugin : public EditorPlugin {
-
-	GDCLASS(MeshLibraryEditorPlugin, EditorPlugin);
-
-	MeshLibraryEditor *theme_editor;
-	EditorNode *editor;
-
-public:
-	virtual String get_name() const { return "MeshLibrary"; }
-	bool has_main_screen() const { return false; }
-	virtual void edit(Object *p_node);
-	virtual bool handles(Object *p_node) const;
-	virtual void make_visible(bool p_visible);
-
-	MeshLibraryEditorPlugin(EditorNode *p_node);
-};
-
-#endif // CUBE_GRID_THEME_EDITOR_PLUGIN_H
+#endif // PLUGIN_CONFIG_DIALOG_H

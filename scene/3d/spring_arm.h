@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  power_haiku.h                                                        */
+/*  spring_arm.h                                                         */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,26 +28,44 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PLATFORM_HAIKU_POWER_HAIKU_H_
-#define PLATFORM_HAIKU_POWER_HAIKU_H_
+#ifndef SPRING_ARM_H
+#define SPRING_ARM_H
 
-#include <os/os.h>
+#include "scene/3d/spatial.h"
 
-class PowerHaiku {
-private:
-	int nsecs_left;
-	int percent_left;
-	OS::PowerState power_state;
+class SpringArm : public Spatial {
+	GDCLASS(SpringArm, Spatial);
 
-	bool UpdatePowerInfo();
+	Ref<Shape> shape;
+	Set<RID> excluded_objects;
+	float spring_length;
+	bool keep_child_basis;
+	float current_spring_length;
+	uint32_t mask;
+	float margin;
+
+protected:
+	void _notification(int p_what);
+	static void _bind_methods();
 
 public:
-	PowerHaiku();
-	virtual ~PowerHaiku();
+	void set_length(float p_length);
+	float get_length() const;
+	void set_shape(Ref<Shape> p_shape);
+	Ref<Shape> get_shape() const;
+	void set_mask(uint32_t p_mask);
+	uint32_t get_mask();
+	void add_excluded_object(RID p_rid);
+	bool remove_excluded_object(RID p_rid);
+	void clear_excluded_objects();
+	float get_hit_length();
+	void set_margin(float p_margin);
+	float get_margin();
 
-	OS::PowerState get_power_state();
-	int get_power_seconds_left();
-	int get_power_percent_left();
+	SpringArm();
+
+private:
+	void process_spring();
 };
 
-#endif /* PLATFORM_HAIKU_POWER_HAIKU_H_ */
+#endif

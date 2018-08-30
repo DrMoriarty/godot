@@ -29,6 +29,7 @@
 /*************************************************************************/
 
 #include "project_export.h"
+
 #include "compressed_translation.h"
 #include "editor_data.h"
 #include "editor_node.h"
@@ -231,7 +232,7 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 
 		if (error != String()) {
 
-			Vector<String> items = error.split("\n");
+			Vector<String> items = error.split("\n", false);
 			error = "";
 			for (int i = 0; i < items.size(); i++) {
 				if (i > 0)
@@ -389,7 +390,6 @@ void ProjectExportDialog::_patch_deleted() {
 void ProjectExportDialog::_update_parameters(const String &p_edited_property) {
 
 	_edit_preset(presets->get_current());
-	parameters->update_tree();
 }
 
 void ProjectExportDialog::_runnable_pressed() {
@@ -756,7 +756,7 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 
 	Error err = platform->export_project(current, export_debug->is_pressed(), p_path, 0);
 	if (err != OK) {
-		error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted: ") + platform->get_name());
+		error_dialog->set_text(TTR("Export templates for this platform are missing/corrupted:") + " " + platform->get_name());
 		error_dialog->show();
 		error_dialog->popup_centered_minsize(Size2(300, 80));
 		ERR_PRINT("Failed to export project");
@@ -842,12 +842,10 @@ ProjectExportDialog::ProjectExportDialog() {
 	settings_vb->add_child(sections);
 	sections->set_v_size_flags(SIZE_EXPAND_FILL);
 
-	parameters = memnew(PropertyEditor);
+	parameters = memnew(EditorInspector);
 	sections->add_child(parameters);
 	parameters->set_name(TTR("Options"));
-	parameters->hide_top_label();
 	parameters->set_v_size_flags(SIZE_EXPAND_FILL);
-
 	parameters->connect("property_edited", this, "_update_parameters");
 
 	VBoxContainer *resources_vb = memnew(VBoxContainer);
@@ -956,7 +954,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_error = memnew(Label);
 	main_vb->add_child(export_error);
 	export_error->hide();
-	export_error->add_color_override("font_color", get_color("error_color", "Editor"));
+	export_error->add_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_color("error_color", "Editor"));
 
 	export_templates_error = memnew(HBoxContainer);
 	main_vb->add_child(export_templates_error);
@@ -964,7 +962,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	Label *export_error2 = memnew(Label);
 	export_templates_error->add_child(export_error2);
-	export_error2->add_color_override("font_color", get_color("error_color", "Editor"));
+	export_error2->add_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_color("error_color", "Editor"));
 	export_error2->set_text(" - " + TTR("Export templates for this platform are missing:") + " ");
 
 	error_dialog = memnew(AcceptDialog);
@@ -975,6 +973,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	LinkButton *download_templates = memnew(LinkButton);
 	download_templates->set_text(TTR("Manage Export Templates"));
+	download_templates->set_v_size_flags(SIZE_SHRINK_CENTER);
 	export_templates_error->add_child(download_templates);
 	download_templates->connect("pressed", this, "_open_export_template_manager");
 

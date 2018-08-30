@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  power_haiku.cpp                                                      */
+/*  image_compress_cvtt.h                                                */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,47 +28,12 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "core/error_macros.h"
+#ifndef IMAGE_COMPRESS_CVTT_H
+#define IMAGE_COMPRESS_CVTT_H
 
-#include "power_haiku.h"
+#include "image.h"
 
-bool PowerHaiku::UpdatePowerInfo() {
+void image_compress_cvtt(Image *p_image, float p_lossy_quality, Image::CompressSource p_source);
+void image_decompress_cvtt(Image *p_image);
 
-	return false;
-}
-
-OS::PowerState PowerHaiku::get_power_state() {
-	if (UpdatePowerInfo()) {
-		return power_state;
-	} else {
-		WARN_PRINT("Power management is not implemented on this platform, defaulting to POWERSTATE_UNKNOWN");
-		return OS::POWERSTATE_UNKNOWN;
-	}
-}
-
-int PowerX11::get_power_seconds_left() {
-	if (UpdatePowerInfo()) {
-		return nsecs_left;
-	} else {
-		WARN_PRINT("Power management is not implemented on this platform, defaulting to -1");
-		return -1;
-	}
-}
-
-int PowerX11::get_power_percent_left() {
-	if (UpdatePowerInfo()) {
-		return percent_left;
-	} else {
-		WARN_PRINT("Power management is not implemented on this platform, defaulting to -1");
-		return -1;
-	}
-}
-
-PowerHaiku::PowerHaiku() :
-		nsecs_left(-1),
-		percent_left(-1),
-		power_state(OS::POWERSTATE_UNKNOWN) {
-}
-
-PowerHaiku::~PowerHaiku() {
-}
+#endif // IMAGE_COMPRESS_CVTT_H

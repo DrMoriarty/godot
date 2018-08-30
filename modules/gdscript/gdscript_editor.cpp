@@ -46,12 +46,12 @@
 void GDScriptLanguage::get_comment_delimiters(List<String> *p_delimiters) const {
 
 	p_delimiters->push_back("#");
-	p_delimiters->push_back("\"\"\" \"\"\"");
 }
 void GDScriptLanguage::get_string_delimiters(List<String> *p_delimiters) const {
 
 	p_delimiters->push_back("\" \"");
 	p_delimiters->push_back("' '");
+	p_delimiters->push_back("\"\"\" \"\"\"");
 }
 Ref<Script> GDScriptLanguage::get_template(const String &p_class_name, const String &p_base_class_name) const {
 #ifdef TOOLS_ENABLED
@@ -63,8 +63,8 @@ Ref<Script> GDScriptLanguage::get_template(const String &p_class_name, const Str
 	String _template = "extends %BASE%\n"
 					   "\n"
 					   "# Declare member variables here. Examples:\n"
-					   "# var a %INT_TYPE%= 2\n"
-					   "# var b %STRING_TYPE%= \"text\"\n"
+					   "# var a%INT_TYPE% = 2\n"
+					   "# var b%STRING_TYPE% = \"text\"\n"
 					   "\n"
 					   "# Called when the node enters the scene tree for the first time.\n"
 					   "func _ready()%VOID_RETURN%:\n"
@@ -76,9 +76,9 @@ Ref<Script> GDScriptLanguage::get_template(const String &p_class_name, const Str
 
 #ifdef TOOLS_ENABLED
 	if (EDITOR_DEF("text_editor/completion/add_type_hints", false)) {
-		_template = _template.replace("%INT_TYPE%", ": int ");
-		_template = _template.replace("%STRING_TYPE%", ": String ");
-		_template = _template.replace("%FLOAT_TYPE%", " : float");
+		_template = _template.replace("%INT_TYPE%", ": int");
+		_template = _template.replace("%STRING_TYPE%", ": String");
+		_template = _template.replace("%FLOAT_TYPE%", ": float");
 		_template = _template.replace("%VOID_RETURN%", " -> void");
 	} else {
 		_template = _template.replace("%INT_TYPE%", "");
@@ -116,11 +116,24 @@ void GDScriptLanguage::make_template(const String &p_class_name, const String &p
 	p_script->set_source_code(src);
 }
 
-bool GDScriptLanguage::validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path, List<String> *r_functions, Set<int> *r_safe_lines) const {
+bool GDScriptLanguage::validate(const String &p_script, int &r_line_error, int &r_col_error, String &r_test_error, const String &p_path, List<String> *r_functions, List<ScriptLanguage::Warning> *r_warnings, Set<int> *r_safe_lines) const {
 
 	GDScriptParser parser;
 
 	Error err = parser.parse(p_script, p_path.get_base_dir(), true, p_path, false, r_safe_lines);
+#ifdef DEBUG_ENABLED
+	if (r_warnings) {
+		for (const List<GDScriptWarning>::Element *E = parser.get_warnings().front(); E; E = E->next()) {
+			const GDScriptWarning &warn = E->get();
+			ScriptLanguage::Warning w;
+			w.line = warn.line;
+			w.code = (int)warn.code;
+			w.string_code = GDScriptWarning::get_name_from_code(warn.code);
+			w.message = warn.get_message();
+			r_warnings->push_back(w);
+		}
+	}
+#endif
 	if (err) {
 		r_line_error = parser.get_error_line();
 		r_col_error = parser.get_error_column();
@@ -179,7 +192,6 @@ int GDScriptLanguage::find_function(const String &p_function, const String &p_co
 		if (tokenizer.get_token() == GDScriptTokenizer::TK_NEWLINE) {
 			indent = tokenizer.get_token_line_indent();
 		}
-		//print_line("TOKEN: "+String(GDScriptTokenizer::get_token_name(tokenizer.get_token())));
 		if (indent == 0 && tokenizer.get_token() == GDScriptTokenizer::TK_PR_FUNCTION && tokenizer.get_token(1) == GDScriptTokenizer::TK_IDENTIFIER) {
 
 			String identifier = tokenizer.get_token_identifier(1);
@@ -188,7 +200,6 @@ int GDScriptLanguage::find_function(const String &p_function, const String &p_co
 			}
 		}
 		tokenizer.advance();
-		//print_line("NEXT: "+String(GDScriptTokenizer::get_token_name(tokenizer.get_token())));
 	}
 	return -1;
 }
@@ -455,7 +466,7 @@ String GDScriptLanguage::make_function(const String &p_class, const String &p_na
 			if (th) {
 				String type = p_args[i].get_slice(":", 1);
 				if (!type.empty() && type != "var") {
-					s += " : " + type;
+					s += ": " + type;
 				}
 			}
 		}
@@ -2442,7 +2453,7 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 		} break;
 		case GDScriptParser::COMPLETION_BUILT_IN_TYPE_CONSTANT: {
 			List<StringName> constants;
-			Variant::get_numeric_constants_for_type(parser.get_completion_built_in_constant(), &constants);
+			Variant::get_constants_for_type(parser.get_completion_built_in_constant(), &constants);
 			for (List<StringName>::Element *E = constants.front(); E; E = E->next()) {
 				options.insert(E->get().operator String());
 			}
@@ -2585,7 +2596,7 @@ Error GDScriptLanguage::complete_code(const String &p_code, const String &p_base
 						}
 						method_hint += arg;
 						if (use_type_hint && mi.arguments[i].type != Variant::NIL) {
-							method_hint += " : ";
+							method_hint += ": ";
 							if (mi.arguments[i].type == Variant::OBJECT && mi.arguments[i].class_name != StringName()) {
 								method_hint += mi.arguments[i].class_name.operator String();
 							} else {
@@ -2917,7 +2928,6 @@ void GDScriptLanguage::auto_indent_code(String &p_code, int p_from_line, int p_t
 			break;
 		}
 
-		//print_line(itos(indent_stack.size())+","+itos(tc)+": "+l);
 		lines.write[i] = l;
 	}
 
@@ -3065,7 +3075,7 @@ static Error _lookup_symbol_from_base(const GDScriptParser::DataType &p_base, co
 			case GDScriptParser::DataType::BUILTIN: {
 				base_type.has_type = false;
 
-				if (Variant::has_numeric_constant(base_type.builtin_type, p_symbol)) {
+				if (Variant::has_constant(base_type.builtin_type, p_symbol)) {
 					r_result.type = ScriptLanguage::LookupResult::RESULT_CLASS_CONSTANT;
 					r_result.class_name = Variant::get_type_name(base_type.builtin_type);
 					r_result.class_member = p_symbol;

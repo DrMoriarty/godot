@@ -99,6 +99,9 @@ public:
 	virtual ShapeType shape_get_type(RID p_shape) const;
 	virtual Variant shape_get_data(RID p_shape) const;
 
+	virtual void shape_set_margin(RID p_shape, real_t p_margin);
+	virtual real_t shape_get_margin(RID p_shape) const;
+
 	/// Not supported
 	virtual void shape_set_custom_solver_bias(RID p_shape, real_t p_bias);
 	/// Not supported
@@ -258,7 +261,8 @@ public:
 	// this function only works on physics process, errors and returns null otherwise
 	virtual PhysicsDirectBodyState *body_get_direct_state(RID p_body);
 
-	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia, MotionResult *r_result = NULL);
+	virtual bool body_test_motion(RID p_body, const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia, MotionResult *r_result = NULL, bool p_exclude_raycast_shapes = true);
+	virtual int body_test_ray_separation(RID p_body, const Transform &p_transform, bool p_infinite_inertia, Vector3 &r_recover_motion, SeparationResult *r_results, int p_result_max, float p_margin = 0.001);
 
 	/* SOFT BODY API */
 

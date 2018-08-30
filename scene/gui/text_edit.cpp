@@ -1177,7 +1177,12 @@ void TextEdit::_notification(int p_what) {
 							int yofs = ofs_y + (get_row_height() - cache.font->get_height()) / 2;
 							int w = drawer.draw_char(ci, Point2i(char_ofs + char_margin + ofs_x, yofs + ascent), str[j], str[j + 1], in_selection && override_selected_font_color ? cache.font_selected_color : color);
 							if (underlined) {
-								draw_rect(Rect2(char_ofs + char_margin + ofs_x, yofs + ascent + 2, w, 1), in_selection && override_selected_font_color ? cache.font_selected_color : color);
+								float line_width = 1.0;
+#ifdef TOOLS_ENABLED
+								line_width *= EDSCALE;
+#endif
+
+								draw_rect(Rect2(char_ofs + char_margin + ofs_x, yofs + ascent + 2, w, line_width), in_selection && override_selected_font_color ? cache.font_selected_color : color);
 							}
 						} else if (draw_tabs && str[j] == '\t') {
 							int yofs = (get_row_height() - cache.tab_icon->get_height()) / 2;
@@ -2279,9 +2284,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 			k->set_shift(false);
 		}
 
-		if (!k->get_command()) {
-			_reset_caret_blink_timer();
-		}
+		_reset_caret_blink_timer();
 
 		// save here for insert mode, just in case it is cleared in the following section
 		bool had_selection = selection.active;
@@ -5662,6 +5665,10 @@ void TextEdit::_confirm_completion() {
 	end_complex_operation();
 
 	_cancel_completion();
+
+	if (last_completion_char == '(') {
+		query_code_comple();
+	}
 }
 
 void TextEdit::_cancel_code_hint() {
@@ -5714,15 +5721,12 @@ void TextEdit::_update_completion_candidates() {
 	bool pre_keyword = false;
 	bool cancel = false;
 
-	//print_line("inquote: "+itos(inquote)+"first quote "+itos(first_quote)+" cofs-1 "+itos(cofs-1));
 	if (!inquote && first_quote == cofs - 1) {
 		//no completion here
-		//print_line("cancel!");
 		cancel = true;
 	} else if (inquote && first_quote != -1) {
 
 		s = l.substr(first_quote, cofs - first_quote);
-		//print_line("s: 1"+s);
 	} else if (cofs > 0 && l[cofs - 1] == ' ') {
 		int kofs = cofs - 1;
 		String kw;
@@ -5735,7 +5739,6 @@ void TextEdit::_update_completion_candidates() {
 		}
 
 		pre_keyword = keywords.has(kw);
-		//print_line("KW "+kw+"? "+itos(pre_keyword));
 
 	} else {
 
@@ -5777,40 +5780,23 @@ void TextEdit::_update_completion_candidates() {
 			completion_strings.write[i] = completion_strings[i].unquote().quote("'");
 		}
 
-		if (s == completion_strings[i]) {
-			// A perfect match, stop completion
-			_cancel_completion();
-			return;
+		if (completion_strings[i].begins_with(s)) {
+			completion_options.push_back(completion_strings[i]);
 		}
+	}
 
-		if (s.is_subsequence_ofi(completion_strings[i])) {
-			// don't remove duplicates if no input is provided
-			if (s != "" && completion_options.find(completion_strings[i]) != -1) {
-				continue;
-			}
-			// Calculate the similarity to keep completions in good order
-			float similarity;
-			if (completion_strings[i].to_lower().begins_with(s.to_lower())) {
-				// Substrings are the best candidates
-				similarity = 1.1;
-			} else {
-				// Otherwise compute the similarity
-				similarity = s.to_lower().similarity(completion_strings[i].to_lower());
-			}
-
-			int comp_size = completion_options.size();
-			if (comp_size == 0) {
+	if (completion_options.size() == 0) {
+		for (int i = 0; i < completion_strings.size(); i++) {
+			if (s.is_subsequence_of(completion_strings[i])) {
 				completion_options.push_back(completion_strings[i]);
-				sim_cache.push_back(similarity);
-			} else {
-				float comp_sim;
-				int pos = 0;
-				do {
-					comp_sim = sim_cache[pos++];
-				} while (pos < comp_size && similarity < comp_sim);
-				pos = similarity > comp_sim ? pos - 1 : pos; // Pos will be off by one
-				completion_options.insert(pos, completion_strings[i]);
-				sim_cache.insert(pos, similarity);
+			}
+		}
+	}
+
+	if (completion_options.size() == 0) {
+		for (int i = 0; i < completion_strings.size(); i++) {
+			if (s.is_subsequence_ofi(completion_strings[i])) {
+				completion_options.push_back(completion_strings[i]);
 			}
 		}
 	}
@@ -5818,7 +5804,12 @@ void TextEdit::_update_completion_candidates() {
 	if (completion_options.size() == 0) {
 		//no options to complete, cancel
 		_cancel_completion();
+		return;
+	}
 
+	if (completion_options.size() == 1 && s == completion_options[0]) {
+		// A perfect match, stop completion
+		_cancel_completion();
 		return;
 	}
 
@@ -6435,7 +6426,7 @@ Map<int, TextEdit::HighlighterInfo> TextEdit::_get_line_syntax_highlighting(int 
 		}
 
 		// check for dot or underscore or 'x' for hex notation in floating point number
-		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_') && !in_word && prev_is_number && !is_number) {
+		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_' || str[j] == 'f') && !in_word && prev_is_number && !is_number) {
 			is_number = true;
 			is_symbol = false;
 			is_char = false;

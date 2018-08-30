@@ -46,6 +46,17 @@ EditorPropertyNil::EditorPropertyNil() {
 }
 
 ///////////////////// TEXT /////////////////////////
+
+void EditorPropertyText::_text_entered(const String &p_string) {
+	if (updating)
+		return;
+
+	if (text->has_focus()) {
+		text->release_focus();
+		_text_changed(p_string);
+	}
+}
+
 void EditorPropertyText::_text_changed(const String &p_string) {
 	if (updating)
 		return;
@@ -61,9 +72,14 @@ void EditorPropertyText::update_property() {
 	updating = false;
 }
 
+void EditorPropertyText::set_placeholder(const String &p_string) {
+	text->set_placeholder(p_string);
+}
+
 void EditorPropertyText::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_text_changed", "txt"), &EditorPropertyText::_text_changed);
+	ClassDB::bind_method(D_METHOD("_text_entered", "txt"), &EditorPropertyText::_text_entered);
 }
 
 EditorPropertyText::EditorPropertyText() {
@@ -71,6 +87,8 @@ EditorPropertyText::EditorPropertyText() {
 	add_child(text);
 	add_focusable(text);
 	text->connect("text_changed", this, "_text_changed");
+	text->connect("text_entered", this, "_text_entered");
+
 	updating = false;
 }
 
@@ -82,7 +100,6 @@ void EditorPropertyMultilineText::_big_text_changed() {
 }
 
 void EditorPropertyMultilineText::_text_changed() {
-
 	emit_signal("property_changed", get_edited_property(), text->get_text(), true);
 }
 
@@ -241,19 +258,40 @@ void EditorPropertyPath::setup(const Vector<String> &p_extensions, bool p_folder
 	global = p_global;
 }
 
+void EditorPropertyPath::_notification(int p_what) {
+
+	if (p_what == NOTIFICATION_ENTER_TREE || p_what == NOTIFICATION_THEME_CHANGED) {
+		path_edit->set_icon(get_icon("Folder", "EditorIcons"));
+	}
+}
+
+void EditorPropertyPath::_path_focus_exited() {
+
+	_path_selected(path->get_text());
+}
+
 void EditorPropertyPath::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_path_pressed"), &EditorPropertyPath::_path_pressed);
 	ClassDB::bind_method(D_METHOD("_path_selected"), &EditorPropertyPath::_path_selected);
+	ClassDB::bind_method(D_METHOD("_path_focus_exited"), &EditorPropertyPath::_path_focus_exited);
 }
 
 EditorPropertyPath::EditorPropertyPath() {
-	path = memnew(Button);
-	path->set_clip_text(true);
-	add_child(path);
+	HBoxContainer *path_hb = memnew(HBoxContainer);
+	add_child(path_hb);
+	path = memnew(LineEdit);
+	path_hb->add_child(path);
+	path->connect("text_entered", this, "_path_selected");
+	path->connect("focus_exited", this, "_path_focus_exited");
+	path->set_h_size_flags(SIZE_EXPAND_FILL);
+
+	path_edit = memnew(Button);
+	path_edit->set_clip_text(true);
+	path_hb->add_child(path_edit);
 	add_focusable(path);
 	dialog = NULL;
-	path->connect("pressed", this, "_path_pressed");
+	path_edit->connect("pressed", this, "_path_pressed");
 	folder = false;
 	global = false;
 }
@@ -1721,12 +1759,18 @@ EditorPropertyTransform::EditorPropertyTransform() {
 
 void EditorPropertyColor::_color_changed(const Color &p_color) {
 
-	emit_signal("property_changed", get_edited_property(), p_color);
+	emit_signal("property_changed", get_edited_property(), p_color, true);
+}
+
+void EditorPropertyColor::_popup_closed() {
+
+	emit_signal("property_changed", get_edited_property(), picker->get_pick_color(), false);
 }
 
 void EditorPropertyColor::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_color_changed"), &EditorPropertyColor::_color_changed);
+	ClassDB::bind_method(D_METHOD("_popup_closed"), &EditorPropertyColor::_popup_closed);
 }
 
 void EditorPropertyColor::update_property() {
@@ -1744,6 +1788,7 @@ EditorPropertyColor::EditorPropertyColor() {
 	add_child(picker);
 	picker->set_flat(true);
 	picker->connect("color_changed", this, "_color_changed");
+	picker->connect("popup_closed", this, "_popup_closed");
 }
 
 ////////////// NODE PATH //////////////////////
@@ -2038,7 +2083,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 			ERR_BREAK(!resp);
 			if (get_edited_object() && base_type != String() && base_type == "Script") {
 				//make visual script the right type
-				res->call("set_instance_base_type", get_edited_object()->get_class());
+				resp->call("set_instance_base_type", get_edited_object()->get_class());
 			}
 
 			res = Ref<Resource>(resp);
@@ -2240,7 +2285,7 @@ void EditorPropertyResource::_sub_inspector_object_id_selected(int p_id) {
 void EditorPropertyResource::_open_editor_pressed() {
 	RES res = get_edited_object()->get(get_edited_property());
 	if (res.is_valid()) {
-		EditorNode::get_singleton()->edit_resource(res.ptr());
+		EditorNode::get_singleton()->edit_item(res.ptr());
 	}
 }
 
@@ -2763,6 +2808,9 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 			} else {
 
 				EditorPropertyText *editor = memnew(EditorPropertyText);
+				if (p_hint == PROPERTY_HINT_PLACEHOLDER_TEXT) {
+					editor->set_placeholder(p_hint_text);
+				}
 				add_property_editor(p_path, editor);
 			}
 		} break;
