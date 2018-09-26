@@ -27,14 +27,13 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "rasterizer_storage_gles2.h"
 
-#include "project_settings.h"
+#include "core/math/transform.h"
+#include "core/project_settings.h"
 #include "rasterizer_canvas_gles2.h"
 #include "rasterizer_scene_gles2.h"
-
-#include "math/transform.h"
-
 #include "servers/visual/shader_language.h"
 
 GLuint RasterizerStorageGLES2::system_fbo = 0;
@@ -52,6 +51,8 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 #else
 #define _GL_HALF_FLOAT_OES 0x8D61
 #endif
+
+#define _EXT_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 
 void RasterizerStorageGLES2::bind_quad_array() const {
 	glBindBuffer(GL_ARRAY_BUFFER, resources.quadie);
@@ -627,8 +628,8 @@ Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) 
 	return Ref<Image>(img);
 #else
 
-	ERR_EXPLAIN("Sorry, It's not posible to obtain images back in OpenGL ES");
-	return Ref<Image>();
+	ERR_EXPLAIN("Sorry, It's not possible to obtain images back in OpenGL ES");
+	ERR_FAIL_V(Ref<Image>());
 #endif
 }
 
@@ -1420,6 +1421,19 @@ Variant RasterizerStorageGLES2::material_get_param(RID p_material, const StringN
 		return material->params[p_param];
 	}
 
+	return material_get_param_default(p_material, p_param);
+}
+
+Variant RasterizerStorageGLES2::material_get_param_default(RID p_material, const StringName &p_param) const {
+	const Material *material = material_owner.get(p_material);
+	ERR_FAIL_COND_V(!material, Variant());
+
+	if (material->shader) {
+		if (material->shader->uniforms.has(p_param)) {
+			Vector<ShaderLanguage::ConstantNode::Value> default_value = material->shader->uniforms[p_param].default_value;
+			return ShaderLanguage::constant_value_to_variant(default_value, material->shader->uniforms[p_param].type);
+		}
+	}
 	return Variant();
 }
 
@@ -1552,7 +1566,7 @@ void RasterizerStorageGLES2::_update_material(Material *p_material) {
 		}
 	}
 
-	// uniforms and other thigns will be set in the use_material method in ShaderGLES2
+	// uniforms and other things will be set in the use_material method in ShaderGLES2
 
 	if (p_material->shader && p_material->shader->texture_count > 0) {
 
@@ -4213,6 +4227,16 @@ void RasterizerStorageGLES2::initialize() {
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+#ifdef GLES_OVER_GL
+	//this needs to be enabled manually in OpenGL 2.1
+
+	glEnable(_EXT_TEXTURE_CUBE_MAP_SEAMLESS);
+	glEnable(GL_POINT_SPRITE);
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+#endif
+
+	config.force_vertex_shading = GLOBAL_GET("rendering/quality/shading/force_vertex_shading");
 }
 
 void RasterizerStorageGLES2::finalize() {

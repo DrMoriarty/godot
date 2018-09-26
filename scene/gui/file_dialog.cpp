@@ -29,8 +29,8 @@
 /*************************************************************************/
 
 #include "file_dialog.h"
-#include "os/keyboard.h"
-#include "print_string.h"
+#include "core/os/keyboard.h"
+#include "core/print_string.h"
 #include "scene/gui/label.h"
 
 FileDialog::GetIconFunc FileDialog::get_icon_func = NULL;
@@ -349,7 +349,7 @@ void FileDialog::_tree_selected() {
 
 		file->set_text(d["name"]);
 	} else if (mode == MODE_OPEN_DIR) {
-		get_ok()->set_text(RTR("Select this Folder"));
+		get_ok()->set_text(RTR("Select This Folder"));
 	}
 
 	get_ok()->set_disabled(_is_open_should_be_disabled());

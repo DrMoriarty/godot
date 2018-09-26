@@ -30,17 +30,17 @@
 
 #include "project_export.h"
 
-#include "compressed_translation.h"
+#include "core/compressed_translation.h"
+#include "core/io/image_loader.h"
+#include "core/io/resource_loader.h"
+#include "core/io/resource_saver.h"
+#include "core/os/dir_access.h"
+#include "core/os/file_access.h"
+#include "core/os/os.h"
+#include "core/project_settings.h"
 #include "editor_data.h"
 #include "editor_node.h"
 #include "editor_settings.h"
-#include "io/image_loader.h"
-#include "io/resource_loader.h"
-#include "io/resource_saver.h"
-#include "os/dir_access.h"
-#include "os/file_access.h"
-#include "os/os.h"
-#include "project_settings.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/scroll_container.h"
@@ -655,16 +655,9 @@ bool ProjectExportDialog::_fill_tree(EditorFileSystemDirectory *p_dir, TreeItem 
 		file->set_cell_mode(0, TreeItem::CELL_MODE_CHECK);
 		file->set_text(0, p_dir->get_file(i));
 
-		Ref<Texture> tex;
-		if (has_icon(type, editor_icons)) {
-			tex = get_icon(type, editor_icons);
-		} else {
-			tex = get_icon("Object", editor_icons);
-		}
-
 		String path = p_dir->get_file_path(i);
 
-		file->set_icon(0, tex);
+		file->set_icon(0, EditorNode::get_singleton()->get_class_icon(type));
 		file->set_editable(0, true);
 		file->set_checked(0, current->has_export_file(path));
 		file->set_metadata(0, path);
@@ -723,6 +716,25 @@ void ProjectExportDialog::_open_export_template_manager() {
 	hide();
 }
 
+void ProjectExportDialog::_validate_export_path(const String &p_path) {
+	// Disable export via OK button or Enter key if LineEdit has an empty filename
+	bool invalid_path = (p_path.get_file().get_basename() == "");
+
+	// Check if state change before needlessly messing with signals
+	if (invalid_path && export_project->get_ok()->is_disabled())
+		return;
+	if (!invalid_path && !export_project->get_ok()->is_disabled())
+		return;
+
+	if (invalid_path) {
+		export_project->get_ok()->set_disabled(true);
+		export_project->get_line_edit()->disconnect("text_entered", export_project, "_file_entered");
+	} else {
+		export_project->get_ok()->set_disabled(false);
+		export_project->get_line_edit()->connect("text_entered", export_project, "_file_entered");
+	}
+}
+
 void ProjectExportDialog::_export_project() {
 
 	Ref<EditorExportPreset> current = EditorExport::get_singleton()->get_export_preset(presets->get_current());
@@ -732,12 +744,19 @@ void ProjectExportDialog::_export_project() {
 
 	export_project->set_access(FileDialog::ACCESS_FILESYSTEM);
 	export_project->clear_filters();
-	export_project->set_current_file(default_filename);
 
 	String extension = platform->get_binary_extension(current);
-
 	if (extension != String()) {
 		export_project->add_filter("*." + extension + " ; " + platform->get_name() + " Export");
+		export_project->set_current_file(default_filename + "." + extension);
+	} else {
+		export_project->set_current_file(default_filename);
+	}
+
+	// Ensure that signal is connected if previous attempt left it disconnected with _validate_export_path
+	if (!export_project->get_line_edit()->is_connected("text_entered", export_project, "_file_entered")) {
+		export_project->get_ok()->set_disabled(false);
+		export_project->get_line_edit()->connect("text_entered", export_project, "_file_entered");
 	}
 
 	export_project->set_mode(FileDialog::MODE_SAVE_FILE);
@@ -746,7 +765,7 @@ void ProjectExportDialog::_export_project() {
 
 void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 	// Save this name for use in future exports (but drop the file extension)
-	default_filename = p_path.get_basename().get_file();
+	default_filename = p_path.get_file().get_basename();
 	EditorSettings::get_singleton()->set_project_metadata("export_options", "default_filename", default_filename);
 
 	Ref<EditorExportPreset> current = EditorExport::get_singleton()->get_export_preset(presets->get_current());
@@ -785,11 +804,13 @@ void ProjectExportDialog::_bind_methods() {
 	ClassDB::bind_method("_export_pck_zip", &ProjectExportDialog::_export_pck_zip);
 	ClassDB::bind_method("_export_pck_zip_selected", &ProjectExportDialog::_export_pck_zip_selected);
 	ClassDB::bind_method("_open_export_template_manager", &ProjectExportDialog::_open_export_template_manager);
+	ClassDB::bind_method("_validate_export_path", &ProjectExportDialog::_validate_export_path);
 	ClassDB::bind_method("_export_project", &ProjectExportDialog::_export_project);
 	ClassDB::bind_method("_export_project_to_path", &ProjectExportDialog::_export_project_to_path);
 	ClassDB::bind_method("_custom_features_changed", &ProjectExportDialog::_custom_features_changed);
 	ClassDB::bind_method("_tab_changed", &ProjectExportDialog::_tab_changed);
 }
+
 ProjectExportDialog::ProjectExportDialog() {
 
 	set_title(TTR("Export"));
@@ -942,6 +963,9 @@ ProjectExportDialog::ProjectExportDialog() {
 	get_cancel()->set_text(TTR("Close"));
 	get_ok()->set_text(TTR("Export PCK/Zip"));
 	export_button = add_button(TTR("Export Project"), !OS::get_singleton()->get_swap_ok_cancel(), "export");
+	export_button->connect("pressed", this, "_export_project");
+	// Disable initially before we select a valid preset
+	export_button->set_disabled(true);
 
 	export_pck_zip = memnew(FileDialog);
 	export_pck_zip->add_filter("*.zip ; ZIP File");
@@ -981,7 +1005,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_project->set_access(FileDialog::ACCESS_FILESYSTEM);
 	add_child(export_project);
 	export_project->connect("file_selected", this, "_export_project_to_path");
-	export_button->connect("pressed", this, "_export_project");
+	export_project->get_line_edit()->connect("text_changed", this, "_validate_export_path");
 
 	export_debug = memnew(CheckButton);
 	export_debug->set_text(TTR("Export With Debug"));
@@ -997,10 +1021,14 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	editor_icons = "EditorIcons";
 
-	default_filename = EditorSettings::get_singleton()->get_project_metadata("export_options", "default_filename", String());
-
+	default_filename = EditorSettings::get_singleton()->get_project_metadata("export_options", "default_filename", "");
+	// If no default set, use project name
 	if (default_filename == "") {
+		// If no project name defined, use a sane default
 		default_filename = ProjectSettings::get_singleton()->get("application/config/name");
+		if (default_filename == "") {
+			default_filename = "UnnamedProject";
+		}
 	}
 }
 

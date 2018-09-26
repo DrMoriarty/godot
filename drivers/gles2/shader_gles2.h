@@ -27,11 +27,11 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #ifndef SHADER_GLES2_H
 #define SHADER_GLES2_H
 
-#include <stdio.h>
-
+// This must come first to avoid windows.h mess
 #include "platform_config.h"
 #ifndef GLES2_INCLUDE_H
 #include <GLES2/gl2.h>
@@ -39,13 +39,14 @@
 #include GLES2_INCLUDE_H
 #endif
 
-#include "camera_matrix.h"
-#include "hash_map.h"
-#include "map.h"
-#include "variant.h"
-
+#include "core/hash_map.h"
+#include "core/map.h"
+#include "core/math/camera_matrix.h"
 #include "core/pair.h"
+#include "core/variant.h"
 #include "servers/visual/shader_language.h"
+
+#include <stdio.h>
 
 class RasterizerStorageGLES2;
 
@@ -467,7 +468,8 @@ public:
 	// like forward declared nested classes.
 	void use_material(void *p_material);
 
-	uint32_t get_version() const { return new_conditional_version.version; }
+	_FORCE_INLINE_ uint32_t get_version() const { return new_conditional_version.version; }
+	_FORCE_INLINE_ bool is_version_valid() const { return version && version->ok; }
 
 	void set_uniform_camera(int p_idx, const CameraMatrix &p_mat) {
 
