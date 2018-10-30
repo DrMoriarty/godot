@@ -79,6 +79,12 @@ static int _get_datatype_size(SL::DataType p_type) {
 		case SL::TYPE_SAMPLER2D: return 16;
 		case SL::TYPE_ISAMPLER2D: return 16;
 		case SL::TYPE_USAMPLER2D: return 16;
+		case SL::TYPE_SAMPLER2DARRAY: return 16;
+		case SL::TYPE_ISAMPLER2DARRAY: return 16;
+		case SL::TYPE_USAMPLER2DARRAY: return 16;
+		case SL::TYPE_SAMPLER3D: return 16;
+		case SL::TYPE_ISAMPLER3D: return 16;
+		case SL::TYPE_USAMPLER3D: return 16;
 		case SL::TYPE_SAMPLERCUBE: return 16;
 	}
 
@@ -112,6 +118,12 @@ static int _get_datatype_alignment(SL::DataType p_type) {
 		case SL::TYPE_SAMPLER2D: return 16;
 		case SL::TYPE_ISAMPLER2D: return 16;
 		case SL::TYPE_USAMPLER2D: return 16;
+		case SL::TYPE_SAMPLER2DARRAY: return 16;
+		case SL::TYPE_ISAMPLER2DARRAY: return 16;
+		case SL::TYPE_USAMPLER2DARRAY: return 16;
+		case SL::TYPE_SAMPLER3D: return 16;
+		case SL::TYPE_ISAMPLER3D: return 16;
+		case SL::TYPE_USAMPLER3D: return 16;
 		case SL::TYPE_SAMPLERCUBE: return 16;
 	}
 
@@ -860,6 +872,7 @@ ShaderCompilerGLES3::ShaderCompilerGLES3() {
 	actions[VS::SHADER_SPATIAL].renames["SCREEN_UV"] = "screen_uv";
 	actions[VS::SHADER_SPATIAL].renames["SCREEN_TEXTURE"] = "screen_texture";
 	actions[VS::SHADER_SPATIAL].renames["DEPTH_TEXTURE"] = "depth_buffer";
+	actions[VS::SHADER_SPATIAL].renames["DEPTH"] = "gl_FragDepth";
 	actions[VS::SHADER_SPATIAL].renames["ALPHA_SCISSOR"] = "alpha_scissor";
 	actions[VS::SHADER_SPATIAL].renames["OUTPUT_IS_SRGB"] = "SHADER_IS_SRGB";
 

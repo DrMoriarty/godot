@@ -36,7 +36,6 @@
 #include "core/io/resource_loader.h"
 #include "core/io/resource_saver.h"
 #include "core/io/stream_peer_ssl.h"
-#include "core/io/zip_io.h"
 #include "core/message_queue.h"
 #include "core/os/file_access.h"
 #include "core/os/input.h"
@@ -226,12 +225,6 @@ void EditorNode::_unhandled_input(const Ref<InputEvent> &p_event) {
 			_editor_select_next();
 		} else if (ED_IS_SHORTCUT("editor/editor_prev", p_event)) {
 			_editor_select_prev();
-		}
-
-		if (k->get_scancode() == KEY_ESCAPE) {
-			for (int i = 0; i < bottom_panel_items.size(); i++) {
-				_bottom_panel_switch(false, i);
-			}
 		}
 
 		if (old_editor != editor_plugin_screen) {
@@ -1068,6 +1061,9 @@ void EditorNode::_save_scene(String p_file, int idx) {
 			set_current_version(editor_data.get_undo_redo().get_version());
 		else
 			editor_data.set_edited_scene_version(0, idx);
+
+		editor_folding.save_scene_folding(scene, p_file);
+
 		_update_title();
 		_update_scene_tabs();
 	} else {
@@ -1739,13 +1735,13 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		} break;
 		case FILE_QUICK_OPEN_SCENE: {
 
-			quick_open->popup("PackedScene", true);
+			quick_open->popup_dialog("PackedScene", true);
 			quick_open->set_title(TTR("Quick Open Scene..."));
 
 		} break;
 		case FILE_QUICK_OPEN_SCRIPT: {
 
-			quick_open->popup("Script", true);
+			quick_open->popup_dialog("Script", true);
 			quick_open->set_title(TTR("Quick Open Script..."));
 
 		} break;
@@ -2003,7 +1999,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		case RUN_PLAY_CUSTOM_SCENE: {
 			if (run_custom_filename.empty() || editor_run.get_status() == EditorRun::STATUS_STOP) {
 				_menu_option_confirm(RUN_STOP, true);
-				quick_run->popup("PackedScene", true);
+				quick_run->popup_dialog("PackedScene", true);
 				quick_run->set_title(TTR("Quick Run Scene..."));
 				play_custom_scene_button->set_pressed(false);
 			} else {
@@ -2914,6 +2910,8 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 	_update_scene_tabs();
 	_add_to_recent_scenes(lpath);
 
+	editor_folding.load_scene_folding(new_scene, lpath);
+
 	prev_scene->set_disabled(previous_scenes.size() == 0);
 	opening_prev = false;
 
@@ -3202,7 +3200,7 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 		}
 	}
 
-	if (p_fallback.length())
+	if (p_fallback.length() && gui_base->has_icon(p_fallback, "EditorIcons"))
 		return gui_base->get_icon(p_fallback, "EditorIcons");
 
 	return NULL;
@@ -3890,7 +3888,7 @@ void EditorNode::_scene_tab_closed(int p_tab) {
 }
 
 void EditorNode::_scene_tab_hover(int p_tab) {
-	if (bool(EDITOR_GET("interface/scene_tabs/show_thumbnail_on_hover")) == false) {
+	if (!bool(EDITOR_GET("interface/scene_tabs/show_thumbnail_on_hover"))) {
 		return;
 	}
 	int current_tab = scene_tabs->get_current_tab();
@@ -3899,7 +3897,9 @@ void EditorNode::_scene_tab_hover(int p_tab) {
 		tab_preview_panel->hide();
 	} else {
 		String path = editor_data.get_scene_path(p_tab);
-		EditorResourcePreview::get_singleton()->queue_resource_preview(path, this, "_thumbnail_done", p_tab);
+		if (path != String()) {
+			EditorResourcePreview::get_singleton()->queue_resource_preview(path, this, "_thumbnail_done", p_tab);
+		}
 	}
 }
 
@@ -4523,6 +4523,16 @@ void EditorNode::_bottom_panel_raise_toggled(bool p_pressed) {
 	}
 }
 
+void EditorNode::_update_video_driver_color() {
+
+	//todo probably should de-harcode this and add to editor settings
+	if (video_driver->get_text() == "GLES2") {
+		video_driver->add_color_override("font_color", Color::hex(0x5586a4ff));
+	} else if (video_driver->get_text() == "GLES3") {
+		video_driver->add_color_override("font_color", Color::hex(0xa5557dff));
+	}
+}
+
 void EditorNode::_video_driver_selected(int p_which) {
 
 	String driver = video_driver->get_item_metadata(p_which);
@@ -4536,6 +4546,20 @@ void EditorNode::_video_driver_selected(int p_which) {
 	video_driver_request = driver;
 	video_restart_dialog->popup_centered_minsize();
 	video_driver->select(video_driver_current);
+	_update_video_driver_color();
+}
+
+void EditorNode::_resource_saved(RES p_resource, const String &p_path) {
+	if (EditorFileSystem::get_singleton()) {
+		EditorFileSystem::get_singleton()->update_file(p_path);
+	}
+
+	singleton->editor_folding.save_resource_folding(p_resource, p_path);
+}
+
+void EditorNode::_resource_loaded(RES p_resource, const String &p_path) {
+
+	singleton->editor_folding.load_resource_folding(p_resource, p_path);
 }
 
 void EditorNode::_bind_methods() {
@@ -4727,6 +4751,8 @@ EditorNode::EditorNode() {
 	ResourceLoader::set_timestamp_on_load(true);
 	ResourceSaver::set_timestamp_on_save(true);
 
+	default_value_cache = memnew(EditorDefaultClassValueCache);
+
 	{ //register importers at the beginning, so dialogs are created with the right extensions
 		Ref<ResourceImporterTexture> import_texture;
 		import_texture.instance();
@@ -4838,8 +4864,9 @@ EditorNode::EditorNode() {
 	EDITOR_DEF_RST("interface/scene_tabs/show_thumbnail_on_hover", true);
 	EDITOR_DEF_RST("interface/inspector/capitalize_properties", true);
 	EDITOR_DEF_RST("interface/inspector/disable_folding", false);
+	EDITOR_DEF_RST("interface/inspector/auto_unfold_edited", true);
 	EDITOR_DEF("interface/inspector/horizontal_vector2_editing", false);
-	EDITOR_DEF("interface/inspector/horizontal_vector3_editing", true);
+	EDITOR_DEF("interface/inspector/horizontal_vector_types_editing", true);
 	EDITOR_DEF("interface/inspector/open_resources_in_current_inspector", true);
 	EDITOR_DEF("interface/inspector/resources_types_to_open_in_new_inspector", "SpatialMaterial,Script");
 	EDITOR_DEF("run/auto_save/save_before_running", true);
@@ -4977,7 +5004,7 @@ EditorNode::EditorNode() {
 	dock_select_rect_over = -1;
 	dock_popup_selected = -1;
 	for (int i = 0; i < DOCK_SLOT_MAX; i++) {
-		dock_slot[i]->set_custom_minimum_size(Size2(230, 220) * EDSCALE);
+		dock_slot[i]->set_custom_minimum_size(Size2(170, 0) * EDSCALE);
 		dock_slot[i]->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 		dock_slot[i]->set_popup(dock_select_popup);
 		dock_slot[i]->connect("pre_popup_pressed", this, "_dock_pre_popup", varray(i));
@@ -5398,6 +5425,7 @@ EditorNode::EditorNode() {
 	video_driver->set_focus_mode(Control::FOCUS_NONE);
 	video_driver->set_v_size_flags(Control::SIZE_SHRINK_CENTER);
 	video_driver->connect("item_selected", this, "_video_driver_selected");
+	video_driver->add_font_override("font", gui_base->get_font("bold", "EditorFonts"));
 	menu_hb->add_child(video_driver);
 
 	String video_drivers = ProjectSettings::get_singleton()->get_custom_property_info()["rendering/quality/driver/driver_name"].hint_string;
@@ -5413,6 +5441,8 @@ EditorNode::EditorNode() {
 			video_driver_current = i;
 		}
 	}
+
+	_update_video_driver_color();
 
 	video_restart_dialog = memnew(ConfirmationDialog);
 	video_restart_dialog->set_text(TTR("Changing the video driver requires restarting the editor."));
@@ -5490,8 +5520,8 @@ EditorNode::EditorNode() {
 	right_r_vsplit->hide();
 
 	// Add some offsets to left_r and main hsplits to make LEFT_R and RIGHT_L docks wider than minsize
-	left_r_hsplit->set_split_offset(40 * EDSCALE);
-	main_hsplit->set_split_offset(-40 * EDSCALE);
+	left_r_hsplit->set_split_offset(70 * EDSCALE);
+	main_hsplit->set_split_offset(-70 * EDSCALE);
 
 	// Define corresponding default layout
 
@@ -5506,8 +5536,8 @@ EditorNode::EditorNode() {
 	for (int i = 0; i < vsplits.size(); i++)
 		default_layout->set_value(docks_section, "dock_split_" + itos(i + 1), 0);
 	default_layout->set_value(docks_section, "dock_hsplit_1", 0);
-	default_layout->set_value(docks_section, "dock_hsplit_2", 40 * EDSCALE);
-	default_layout->set_value(docks_section, "dock_hsplit_3", -40 * EDSCALE);
+	default_layout->set_value(docks_section, "dock_hsplit_2", 70 * EDSCALE);
+	default_layout->set_value(docks_section, "dock_hsplit_3", -70 * EDSCALE);
 	default_layout->set_value(docks_section, "dock_hsplit_4", 0);
 
 	_update_layouts_menu();
@@ -5820,6 +5850,9 @@ EditorNode::EditorNode() {
 	print_handler.userdata = this;
 	add_print_handler(&print_handler);
 
+	ResourceSaver::set_save_callback(_resource_saved);
+	ResourceLoader::set_load_callback(_resource_loaded);
+
 #ifdef OSX_ENABLED
 	ED_SHORTCUT("editor/editor_2d", TTR("Open 2D Editor"), KEY_MASK_ALT | KEY_1);
 	ED_SHORTCUT("editor/editor_3d", TTR("Open 3D Editor"), KEY_MASK_ALT | KEY_2);
@@ -5848,6 +5881,7 @@ EditorNode::~EditorNode() {
 	memdelete(editor_plugins_force_input_forwarding);
 	memdelete(file_server);
 	memdelete(progress_hb);
+	memdelete(default_value_cache);
 	EditorSettings::destroy();
 }
 

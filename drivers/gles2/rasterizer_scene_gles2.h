@@ -59,6 +59,11 @@ public:
 		SHADOW_FILTER_PCF13,
 	};
 
+	enum {
+		INSTANCE_ATTRIB_BASE = 8,
+		INSTANCE_BONE_BASE = 13,
+	};
+
 	ShadowFilterMode shadow_filter_mode;
 
 	RID default_material;
@@ -204,6 +209,9 @@ public:
 		float dual_parbolloid_direction;
 		float dual_parbolloid_zfar;
 
+		bool render_no_shadows;
+
+		Vector2 screen_pixel_size;
 	} state;
 
 	/* SHADOW ATLAS API */
@@ -287,6 +295,38 @@ public:
 
 	/* REFLECTION PROBE INSTANCE */
 
+	struct ReflectionProbeInstance : public RID_Data {
+
+		RasterizerStorageGLES2::ReflectionProbe *probe_ptr;
+		RID probe;
+		RID self;
+		RID atlas;
+
+		int reflection_atlas_index;
+
+		int render_step;
+		int reflection_index;
+
+		GLuint fbo[6];
+		GLuint cubemap;
+		GLuint depth;
+
+		GLuint fbo_blur;
+
+		int current_resolution;
+		mutable bool dirty;
+
+		uint64_t last_pass;
+		uint32_t index;
+
+		Transform transform;
+	};
+
+	mutable RID_Owner<ReflectionProbeInstance> reflection_probe_instance_owner;
+
+	ReflectionProbeInstance **reflection_probe_instances;
+	int reflection_probe_count;
+
 	virtual RID reflection_probe_instance_create(RID p_probe);
 	virtual void reflection_probe_instance_set_transform(RID p_instance, const Transform &p_transform);
 	virtual void reflection_probe_release_atlas_index(RID p_instance);
@@ -313,6 +353,21 @@ public:
 
 		int canvas_max_layer;
 
+		bool fog_enabled;
+		Color fog_color;
+		Color fog_sun_color;
+		float fog_sun_amount;
+
+		bool fog_depth_enabled;
+		float fog_depth_begin;
+		float fog_depth_curve;
+		bool fog_transmit_enabled;
+		float fog_transmit_curve;
+		bool fog_height_enabled;
+		float fog_height_min;
+		float fog_height_max;
+		float fog_height_curve;
+
 		Environment() {
 			bg_mode = VS::ENV_BG_CLEAR_COLOR;
 			sky_custom_fov = 0.0;
@@ -321,6 +376,24 @@ public:
 			ambient_energy = 1.0;
 			ambient_sky_contribution = 0.0;
 			canvas_max_layer = 0;
+
+			fog_enabled = false;
+			fog_color = Color(0.5, 0.5, 0.5);
+			fog_sun_color = Color(0.8, 0.8, 0.0);
+			fog_sun_amount = 0;
+
+			fog_depth_enabled = true;
+
+			fog_depth_begin = 10;
+			fog_depth_curve = 1;
+
+			fog_transmit_enabled = true;
+			fog_transmit_curve = 1;
+
+			fog_height_enabled = false;
+			fog_height_min = 0;
+			fog_height_max = 100;
+			fog_height_curve = 1;
 		}
 	};
 
@@ -424,6 +497,7 @@ public:
 
 		enum {
 			MAX_LIGHTS = 255,
+			MAX_REFLECTION_PROBES = 255,
 			DEFAULT_MAX_ELEMENTS = 65536
 		};
 
@@ -587,6 +661,7 @@ public:
 	_FORCE_INLINE_ void _setup_geometry(RenderList::Element *p_element, RasterizerStorageGLES2::Skeleton *p_skeleton);
 	_FORCE_INLINE_ void _setup_light_type(LightInstance *p_light, ShadowAtlas *shadow_atlas);
 	_FORCE_INLINE_ void _setup_light(LightInstance *p_light, ShadowAtlas *shadow_atlas, const Transform &p_view_transform);
+	_FORCE_INLINE_ void _setup_refprobes(ReflectionProbeInstance *p_refprobe1, ReflectionProbeInstance *p_refprobe2, const Transform &p_view_transform, Environment *p_env);
 	_FORCE_INLINE_ void _render_geometry(RenderList::Element *p_element);
 
 	virtual void render_scene(const Transform &p_cam_transform, const CameraMatrix &p_cam_projection, bool p_cam_ortogonal, InstanceBase **p_cull_result, int p_cull_count, RID *p_light_cull_result, int p_light_cull_count, RID *p_reflection_probe_cull_result, int p_reflection_probe_cull_count, RID p_environment, RID p_shadow_atlas, RID p_reflection_atlas, RID p_reflection_probe, int p_reflection_probe_pass);

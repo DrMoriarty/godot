@@ -188,7 +188,7 @@ private:
 	void _file_list_gui_input(Ref<InputEvent> p_event);
 	void _tree_gui_input(Ref<InputEvent> p_event);
 
-	void _update_files(bool p_keep_selection);
+	void _update_file_list(bool p_keep_selection);
 	void _update_file_list_display_mode_button();
 	void _change_file_display();
 	void _fs_changed();
@@ -257,6 +257,8 @@ private:
 
 	void _search(EditorFileSystemDirectory *p_path, List<FileInfo> *matches, int p_max_items);
 
+	void _set_current_path_text(const String &p_path);
+
 	Variant get_drag_data_fw(const Point2 &p_point, Control *p_from);
 	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
 	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
@@ -266,7 +268,7 @@ private:
 	void _file_list_thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
 	void _tree_thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
 
-	void _update_display_mode();
+	void _update_display_mode(bool p_force = false);
 
 	Vector<String> _tree_get_selected(bool remove_self_inclusion = true);
 

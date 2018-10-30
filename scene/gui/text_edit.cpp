@@ -334,15 +334,12 @@ void TextEdit::_update_scrollbars() {
 	h_scroll->set_begin(Point2(0, size.height - hmin.height));
 	h_scroll->set_end(Point2(size.width - vmin.width, size.height));
 
-	int hscroll_rows = ((hmin.height - 1) / get_row_height()) + 1;
 	int visible_rows = get_visible_rows();
-
 	int total_rows = get_total_visible_rows();
 	if (scroll_past_end_of_file_enabled) {
 		total_rows += visible_rows - 1;
 	}
 
-	int vscroll_pixels = v_scroll->get_combined_minimum_size().width;
 	int visible_width = size.width - cache.style_normal->get_minimum_size().width;
 	int total_width = text.get_max_width(true) + vmin.x;
 
@@ -367,12 +364,12 @@ void TextEdit::_update_scrollbars() {
 
 	} else {
 
-		if (total_rows > visible_rows && total_width <= visible_width - vscroll_pixels) {
+		if (total_rows > visible_rows && total_width <= visible_width) {
 			//thanks yessopie for this clever bit of logic
 			use_hscroll = false;
 		}
 
-		if (total_rows <= visible_rows - hscroll_rows && total_width > visible_width) {
+		if (total_rows <= visible_rows && total_width > visible_width) {
 			//thanks yessopie for this clever bit of logic
 			use_vscroll = false;
 		}
@@ -649,8 +646,6 @@ void TextEdit::_notification(int p_what) {
 			int ascent = cache.font->get_ascent();
 
 			int visible_rows = get_visible_rows() + 1;
-
-			int tab_w = cache.font->get_char_size(' ').width * indent_size;
 
 			Color color = cache.font_color;
 			color.a *= readonly_alpha;
@@ -1434,9 +1429,6 @@ void TextEdit::_notification(int p_what) {
 
 			if (OS::get_singleton()->has_virtual_keyboard())
 				OS::get_singleton()->show_virtual_keyboard(get_text(), get_global_rect());
-			if (raised_from_completion) {
-				VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 1);
-			}
 		} break;
 		case NOTIFICATION_FOCUS_EXIT: {
 
@@ -1448,9 +1440,6 @@ void TextEdit::_notification(int p_what) {
 
 			if (OS::get_singleton()->has_virtual_keyboard())
 				OS::get_singleton()->hide_virtual_keyboard();
-			if (raised_from_completion) {
-				VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 0);
-			}
 		} break;
 	}
 }
@@ -1773,9 +1762,9 @@ void TextEdit::new_line_with_intendation(bool command, bool shift) {
 
 	// no need to indent if we are going upwards.
 	if (auto_indent && !(command && shift)) {
-		// indent once again if previous line will end with ':' or '{'
+        // indent once again if previous line will end with ':' or '{' and the line is not a comment
 		// (i.e. colon/brace precedes current cursor position)
-		if (cursor.column > 0 && (text[cursor.line][cursor.column - 1] == ':' || text[cursor.line][cursor.column - 1] == '{')) {
+		if (cursor.column > 0 && (text[cursor.line][cursor.column - 1] == ':' || text[cursor.line][cursor.column - 1] == '{') && !is_line_comment(cursor.line)) {
 			if (indent_using_spaces) {
 				ins += space_indent;
 			} else {
@@ -3270,7 +3259,7 @@ void TextEdit::_scroll_down(real_t p_delta) {
 	}
 
 	if (smooth_scroll_enabled) {
-		int max_v_scroll = v_scroll->get_max() - v_scroll->get_page();
+		int max_v_scroll = round(v_scroll->get_max() - v_scroll->get_page());
 		if (target_v_scroll > max_v_scroll) {
 			target_v_scroll = max_v_scroll;
 			v_scroll->set_value(target_v_scroll);
@@ -3804,7 +3793,7 @@ Vector<String> TextEdit::get_wrap_rows_text(int p_line) const {
 	int tab_offset_px = get_indent_level(p_line) * cache.font->get_char_size(' ').width;
 
 	while (col < line_text.length()) {
-		char c = line_text[col];
+		CharType c = line_text[col];
 		int w = text.get_char_width(c, line_text[col + 1], px + word_px);
 
 		int indent_ofs = (cur_wrap_index != 0 ? tab_offset_px : 0);
@@ -4410,7 +4399,7 @@ int TextEdit::_is_line_in_region(int p_line) {
 
 	// if not find the closest line we have
 	int previous_line = p_line - 1;
-	for (previous_line; previous_line > -1; previous_line--) {
+	for (; previous_line > -1; previous_line--) {
 		if (color_region_cache.has(p_line)) {
 			break;
 		}
@@ -4555,9 +4544,13 @@ void TextEdit::cut() {
 void TextEdit::copy() {
 
 	if (!selection.active) {
-		String clipboard = _base_get_text(cursor.line, 0, cursor.line, text[cursor.line].length());
-		OS::get_singleton()->set_clipboard(clipboard);
-		cut_copy_line = clipboard;
+
+		if (text[cursor.line].length() != 0) {
+
+			String clipboard = _base_get_text(cursor.line, 0, cursor.line, text[cursor.line].length());
+			OS::get_singleton()->set_clipboard(clipboard);
+			cut_copy_line = clipboard;
+		}
 	} else {
 		String clipboard = _base_get_text(selection.from_line, selection.from_column, selection.to_line, selection.to_column);
 		OS::get_singleton()->set_clipboard(clipboard);
@@ -5177,7 +5170,7 @@ bool TextEdit::can_fold(int p_line) const {
 		return false;
 	if (p_line + 1 >= text.size())
 		return false;
-	if (text[p_line].size() == 0)
+	if (text[p_line].strip_edges().size() == 0)
 		return false;
 	if (is_folded(p_line))
 		return false;
@@ -5189,7 +5182,7 @@ bool TextEdit::can_fold(int p_line) const {
 	int start_indent = get_indent_level(p_line);
 
 	for (int i = p_line + 1; i < text.size(); i++) {
-		if (text[i].size() == 0)
+		if (text[i].strip_edges().size() == 0)
 			continue;
 		int next_indent = get_indent_level(i);
 		if (is_line_comment(i)) {
@@ -5692,16 +5685,12 @@ void TextEdit::_confirm_completion() {
 
 void TextEdit::_cancel_code_hint() {
 
-	VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 0);
-	raised_from_completion = false;
 	completion_hint = "";
 	update();
 }
 
 void TextEdit::_cancel_completion() {
 
-	VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 0);
-	raised_from_completion = false;
 	if (!completion_active)
 		return;
 
@@ -5859,8 +5848,6 @@ void TextEdit::query_code_comple() {
 
 void TextEdit::set_code_hint(const String &p_hint) {
 
-	VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 1);
-	raised_from_completion = true;
 	completion_hint = p_hint;
 	completion_hint_offset = -0xFFFF;
 	update();
@@ -5868,8 +5855,6 @@ void TextEdit::set_code_hint(const String &p_hint) {
 
 void TextEdit::code_complete(const Vector<String> &p_strings, bool p_forced) {
 
-	VisualServer::get_singleton()->canvas_item_set_z_index(get_canvas_item(), 1);
-	raised_from_completion = true;
 	completion_strings = p_strings;
 	completion_active = true;
 	completion_forced = p_forced;
@@ -5891,7 +5876,7 @@ String TextEdit::get_word_at_pos(const Vector2 &p_pos) const {
 	if (select_word(s, col, beg, end)) {
 
 		bool inside_quotes = false;
-		char selected_quote = '\0';
+		CharType selected_quote = '\0';
 		int qbegin = 0, qend = 0;
 		for (int i = 0; i < s.length(); i++) {
 			if (s[i] == '"' || s[i] == '\'') {
@@ -6258,6 +6243,7 @@ void TextEdit::_bind_methods() {
 	BIND_ENUM_CONSTANT(MENU_MAX);
 
 	GLOBAL_DEF("gui/timers/text_edit_idle_detect_sec", 3);
+	ProjectSettings::get_singleton()->set_custom_property_info("gui/timers/text_edit_idle_detect_sec", PropertyInfo(Variant::REAL, "gui/timers/text_edit_idle_detect_sec", PROPERTY_HINT_RANGE, "0,10,0.01,or_greater")); // No negative numbers
 }
 
 TextEdit::TextEdit() {
@@ -6370,8 +6356,6 @@ TextEdit::TextEdit() {
 	scrolling = false;
 	target_v_scroll = 0;
 	v_scroll_speed = 80;
-
-	raised_from_completion = false;
 
 	context_menu_enabled = true;
 	menu = memnew(PopupMenu);

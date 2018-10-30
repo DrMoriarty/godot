@@ -259,6 +259,8 @@ void InspectorDock::_prepare_history() {
 		}
 		history_menu->get_popup()->add_icon_item(icon, text, i);
 	}
+
+	editor_path->update_path();
 }
 
 void InspectorDock::_select_history(int p_idx) const {
@@ -324,6 +326,21 @@ void InspectorDock::_warning_pressed() {
 
 Container *InspectorDock::get_addon_area() {
 	return this;
+}
+
+void InspectorDock::_notification(int p_what) {
+	switch (p_what) {
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+			set_theme(editor->get_gui_base()->get_theme());
+			resource_new_button->set_icon(get_icon("New", "EditorIcons"));
+			resource_load_button->set_icon(get_icon("Load", "EditorIcons"));
+			backward_button->set_icon(get_icon("Back", "EditorIcons"));
+			forward_button->set_icon(get_icon("Forward", "EditorIcons"));
+			history_menu->set_icon(get_icon("History", "EditorIcons"));
+			object_menu->set_icon(get_icon("Tools", "EditorIcons"));
+			warning->set_icon(get_icon("NodeWarning", "EditorIcons"));
+		} break;
+	}
 }
 
 void InspectorDock::_bind_methods() {
@@ -576,6 +593,7 @@ InspectorDock::InspectorDock(EditorNode *p_editor, EditorData &p_editor_data) {
 	inspector->set_undo_redo(&editor_data->get_undo_redo());
 
 	inspector->set_use_filter(true); // TODO: check me
+	inspector->set_auto_unfold_edited(bool(EDITOR_GET("interface/inspector/auto_unfold_edited")));
 
 	inspector->connect("resource_selected", this, "_resource_selected");
 	inspector->connect("property_keyed", this, "_property_keyed");

@@ -259,6 +259,10 @@ RES ResourceLoader::load(const String &p_path, const String &p_type_hint, bool p
 	}
 #endif
 
+	if (_loaded_callback) {
+		_loaded_callback(res, p_path);
+	}
+
 	return res;
 }
 
@@ -635,6 +639,12 @@ void ResourceLoader::clear_path_remaps() {
 	path_remaps.clear();
 }
 
+void ResourceLoader::set_load_callback(ResourceLoadedCallback p_callback) {
+	_loaded_callback = p_callback;
+}
+
+ResourceLoadedCallback ResourceLoader::_loaded_callback = NULL;
+
 ResourceLoadErrorNotify ResourceLoader::err_notify = NULL;
 void *ResourceLoader::err_notify_ud = NULL;
 
@@ -647,3 +657,5 @@ bool ResourceLoader::timestamp_on_load = false;
 SelfList<Resource>::List ResourceLoader::remapped_list;
 HashMap<String, Vector<String> > ResourceLoader::translation_remaps;
 HashMap<String, String> ResourceLoader::path_remaps;
+
+ResourceLoaderImport ResourceLoader::import = NULL;

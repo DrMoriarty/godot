@@ -1305,11 +1305,6 @@ void EditorFileSystem::_save_late_updated_files() {
 	}
 }
 
-void EditorFileSystem::_resource_saved(const String &p_path) {
-
-	EditorFileSystem::get_singleton()->update_file(p_path);
-}
-
 Vector<String> EditorFileSystem::_get_dependencies(const String &p_path) {
 
 	List<String> deps;
@@ -1705,6 +1700,17 @@ void EditorFileSystem::reimport_files(const Vector<String> &p_files) {
 	emit_signal("resources_reimported", p_files);
 }
 
+Error EditorFileSystem::_resource_import(const String &p_path) {
+
+	Vector<String> files;
+	files.push_back(p_path);
+
+	singleton->update_file(p_path);
+	singleton->reimport_files(files);
+
+	return OK;
+}
+
 void EditorFileSystem::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_filesystem"), &EditorFileSystem::get_filesystem);
@@ -1744,6 +1750,7 @@ void EditorFileSystem::_update_extensions() {
 
 EditorFileSystem::EditorFileSystem() {
 
+	ResourceLoader::import = _resource_import;
 	reimport_on_missing_imported_files = GLOBAL_DEF("editor/reimport_missing_imported_files", true);
 
 	singleton = this;
@@ -1760,7 +1767,6 @@ EditorFileSystem::EditorFileSystem() {
 	abort_scan = false;
 	scanning_changes = false;
 	scanning_changes_done = false;
-	ResourceSaver::set_save_callback(_resource_saved);
 
 	DirAccess *da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 	if (da->change_dir("res://.import") != OK) {

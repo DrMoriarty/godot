@@ -357,7 +357,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("text_editor/theme/color_theme", "Adaptive");
 	hints["text_editor/theme/color_theme"] = PropertyInfo(Variant::STRING, "text_editor/theme/color_theme", PROPERTY_HINT_ENUM, "Adaptive,Default,Custom");
 
-	_initial_set("text_editor/theme/line_spacing", 4);
+	_initial_set("text_editor/theme/line_spacing", 6);
 	_initial_set("text_editor/theme/selection_color", Color::html("40808080"));
 
 	_load_default_text_editor_theme();
@@ -531,7 +531,6 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	_initial_set("docks/property_editor/texture_preview_width", 48);
 	_initial_set("docks/property_editor/auto_refresh_interval", 0.3);
-	_initial_set("text_editor/help/doc_path", "");
 	_initial_set("text_editor/help/show_help_index", true);
 
 	_initial_set("filesystem/import/ask_save_before_reimport", false);

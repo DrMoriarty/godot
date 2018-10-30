@@ -89,9 +89,18 @@ VERTEX_SHADER_CODE
 		/* clang-format on */
 	}
 
+#if !defined(SKIP_TRANSFORM_USED)
+	outvec = extra_matrix * outvec;
+	outvec = modelview_matrix * outvec;
+#endif
+
 	color_interp = color;
 
-	gl_Position = projection_matrix * modelview_matrix * outvec;
+#ifdef USE_PIXEL_SNAP
+	outvec.xy = floor(outvec + 0.5).xy;
+#endif
+
+	gl_Position = projection_matrix * outvec;
 }
 
 /* clang-format off */
@@ -139,7 +148,10 @@ void main() {
 
 	vec4 color = color_interp;
 
+#if !defined(COLOR_USED)
+	//default behavior, texture by color
 	color *= texture2D(color_texture, uv_interp);
+#endif
 
 #ifdef SCREEN_UV_USED
 	vec2 screen_uv = gl_FragCoord.xy * screen_pixel_size;

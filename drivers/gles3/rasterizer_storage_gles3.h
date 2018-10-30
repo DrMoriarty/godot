@@ -43,6 +43,12 @@
 #include "shaders/cubemap_filter.glsl.gen.h"
 #include "shaders/particles.glsl.gen.h"
 
+// WebGL 2.0 has no MapBufferRange/UnmapBuffer, but offers a non-ES style BufferSubData API instead.
+#ifdef __EMSCRIPTEN__
+void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid *data);
+void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data);
+#endif
+
 class RasterizerCanvasGLES3;
 class RasterizerSceneGLES3;
 
@@ -691,7 +697,7 @@ public:
 		}
 	};
 
-	class MultiMesh;
+	struct MultiMesh;
 
 	struct Mesh : public GeometryOwner {
 
@@ -1005,6 +1011,7 @@ public:
 	virtual void reflection_probe_set_enable_box_projection(RID p_probe, bool p_enable);
 	virtual void reflection_probe_set_enable_shadows(RID p_probe, bool p_enable);
 	virtual void reflection_probe_set_cull_mask(RID p_probe, uint32_t p_layers);
+	virtual void reflection_probe_set_resolution(RID p_probe, int p_resolution);
 
 	virtual AABB reflection_probe_get_aabb(RID p_probe) const;
 	virtual VS::ReflectionProbeUpdateMode reflection_probe_get_update_mode(RID p_probe) const;

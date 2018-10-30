@@ -629,10 +629,8 @@ Rect2 Viewport::get_visible_rect() const {
 	Rect2 r;
 
 	if (size == Size2()) {
-
-		r = Rect2(Point2(), Size2(OS::get_singleton()->get_window_size().width, OS::get_singleton()->get_window_size().height));
+		r = Rect2(Point2(), OS::get_singleton()->get_window_size());
 	} else {
-
 		r = Rect2(Point2(), size);
 	}
 
@@ -701,15 +699,6 @@ void Viewport::set_canvas_transform(const Transform2D &p_transform) {
 
 	canvas_transform = p_transform;
 	VisualServer::get_singleton()->viewport_set_canvas_transform(viewport, find_world_2d()->get_canvas(), canvas_transform);
-
-	Transform2D xform = (global_canvas_transform * canvas_transform).affine_inverse();
-	Size2 ss = get_visible_rect().size;
-	/*SpatialSound2DServer::get_singleton()->listener_set_transform(internal_listener_2d, Transform2D(0, xform.xform(ss*0.5)));
-	Vector2 ss2 = ss*xform.get_scale();
-	float panrange = MAX(ss2.x,ss2.y);
-
-	SpatialSound2DServer::get_singleton()->listener_set_param(internal_listener_2d, SpatialSound2DServer::LISTENER_PARAM_PAN_RANGE, panrange);
-*/
 }
 
 Transform2D Viewport::get_canvas_transform() const {
@@ -722,15 +711,6 @@ void Viewport::_update_global_transform() {
 	Transform2D sxform = stretch_transform * global_canvas_transform;
 
 	VisualServer::get_singleton()->viewport_set_global_canvas_transform(viewport, sxform);
-
-	Transform2D xform = (sxform * canvas_transform).affine_inverse();
-	Size2 ss = get_visible_rect().size;
-	/*SpatialSound2DServer::get_singleton()->listener_set_transform(internal_listener_2d, Transform2D(0, xform.xform(ss*0.5)));
-	Vector2 ss2 = ss*xform.get_scale();
-	float panrange = MAX(ss2.x,ss2.y);
-
-	SpatialSound2DServer::get_singleton()->listener_set_param(internal_listener_2d, SpatialSound2DServer::LISTENER_PARAM_PAN_RANGE, panrange);
-*/
 }
 
 void Viewport::set_global_canvas_transform(const Transform2D &p_transform) {
@@ -2963,6 +2943,7 @@ Viewport::Viewport() {
 
 	//gui.tooltip_timer->force_parent_owned();
 	gui.tooltip_delay = GLOBAL_DEF("gui/timers/tooltip_delay_sec", 0.7);
+	ProjectSettings::get_singleton()->set_custom_property_info("gui/timers/tooltip_delay_sec", PropertyInfo(Variant::REAL, "gui/timers/tooltip_delay_sec", PROPERTY_HINT_RANGE, "0,5,0.01,or_greater")); // No negative numbers
 
 	gui.tooltip = NULL;
 	gui.tooltip_label = NULL;

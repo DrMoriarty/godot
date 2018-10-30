@@ -260,13 +260,13 @@
 	</methods>
 	<members>
 		<member name="x" type="float" setter="" getter="">
-			The vector's x component.
+			The vector's x component. Also accessible by using the index position [code][0][/code].
 		</member>
 		<member name="y" type="float" setter="" getter="">
-			The vector's y component.
+			The vector's y component. Also accessible by using the index position [code][1][/code].
 		</member>
 		<member name="z" type="float" setter="" getter="">
-			The vector's z component.
+			The vector's z component. Also accessible by using the index position [code][2][/code].
 		</member>
 	</members>
 	<constants>
@@ -280,7 +280,10 @@
 			Enumerated value for the Z axis.
 		</constant>
 		<constant name="ZERO" value="Vector3( 0, 0, 0 )">
-			Null vector.
+			Zero vector.
+		</constant>
+		<constant name="ONE" value="Vector3( 1, 1, 1 )">
+			One vector.
 		</constant>
 		<constant name="INF" value="Vector3( inf, inf, inf )">
 			Infinite vector.

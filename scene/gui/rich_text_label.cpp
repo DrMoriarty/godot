@@ -220,13 +220,14 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 				case ALIGN_LEFT: l.offset_caches.push_back(0); break;                                                                                           \
 				case ALIGN_CENTER: l.offset_caches.push_back(((p_width - margin) - used) / 2); break;                                                           \
 				case ALIGN_RIGHT: l.offset_caches.push_back(((p_width - margin) - used)); break;                                                                \
-				case ALIGN_FILL: l.offset_caches.push_back((p_width - margin) - used /*+spaces_size*/); break;                                                  \
+				case ALIGN_FILL: l.offset_caches.push_back(line_wrapped ? ((p_width - margin) - used) : 0); break;                                              \
 			}                                                                                                                                                   \
 			l.height_caches.push_back(line_height);                                                                                                             \
 			l.ascent_caches.push_back(line_ascent);                                                                                                             \
 			l.descent_caches.push_back(line_descent);                                                                                                           \
 			l.space_caches.push_back(spaces);                                                                                                                   \
 		}                                                                                                                                                       \
+		line_wrapped = false;                                                                                                                                   \
 		y += line_height + get_constant(SceneStringNames::get_singleton()->line_separation);                                                                    \
 		line_height = 0;                                                                                                                                        \
 		line_ascent = 0;                                                                                                                                        \
@@ -254,6 +255,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 		l.minimum_width = MAX(l.minimum_width, m_width);                                                                                                        \
 	}                                                                                                                                                           \
 	if (wofs + m_width > p_width) {                                                                                                                             \
+		line_wrapped = true;                                                                                                                                    \
 		if (p_mode == PROCESS_CACHE) {                                                                                                                          \
 			if (spaces > 0)                                                                                                                                     \
 				spaces -= 1;                                                                                                                                    \
@@ -298,6 +300,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 	int rchar = 0;
 	int lh = 0;
 	bool line_is_blank = true;
+	bool line_wrapped = false;
 	int fh = 0;
 
 	while (it) {
@@ -421,7 +424,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 								int cw = 0;
 
-								bool visible = visible_characters < 0 || p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - line_descent - line_ascent, line_ascent + line_descent);
+								bool visible = visible_characters < 0 || (p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - line_descent - line_ascent, line_ascent + line_descent));
 								if (visible)
 									line_is_blank = false;
 
@@ -509,7 +512,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 				ENSURE_WIDTH(img->image->get_width());
 
-				bool visible = visible_characters < 0 || p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - font->get_descent() - img->image->get_height(), img->image->get_height());
+				bool visible = visible_characters < 0 || (p_char_count < visible_characters && YRANGE_VISIBLE(y + lh - font->get_descent() - img->image->get_height(), img->image->get_height()));
 				if (visible)
 					line_is_blank = false;
 
@@ -847,8 +850,6 @@ void RichTextLabel::_notification(int p_what) {
 			bool use_outline = get_constant("shadow_as_outline");
 			Point2 shadow_ofs(get_constant("shadow_offset_x"), get_constant("shadow_offset_y"));
 
-			float x_ofs = 0;
-
 			visible_line_count = 0;
 			while (y < size.height && from_line < main->lines.size()) {
 
@@ -866,7 +867,6 @@ void RichTextLabel::_find_click(ItemFrame *p_frame, const Point2i &p_click, Item
 	if (r_click_item)
 		*r_click_item = NULL;
 
-	Size2 size = get_size();
 	Rect2 text_rect = _get_text_rect();
 	int ofs = vscroll->get_value();
 	Color font_color_shadow = get_color("font_color_shadow");
@@ -2237,7 +2237,7 @@ void RichTextLabel::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "meta_underlined"), "set_meta_underline", "is_meta_underlined");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tab_size", PROPERTY_HINT_RANGE, "0,24,1"), "set_tab_size", "get_tab_size");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text"), "set_text", "get_text");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "text", PROPERTY_HINT_MULTILINE_TEXT), "set_text", "get_text");
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scroll_active"), "set_scroll_active", "is_scroll_active");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scroll_following"), "set_scroll_follow", "is_scroll_following");

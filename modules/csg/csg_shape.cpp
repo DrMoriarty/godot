@@ -521,6 +521,11 @@ CSGBrush *CSGMesh::_build_brush() {
 
 		Array arrays = mesh->surface_get_arrays(i);
 
+		if (arrays.size() == 0) {
+			_make_dirty();
+			ERR_FAIL_COND_V(arrays.size() == 0, NULL);
+		}
+
 		PoolVector<Vector3> avertices = arrays[Mesh::ARRAY_VERTEX];
 		if (avertices.size() == 0)
 			continue;
@@ -1573,7 +1578,7 @@ CSGBrush *CSGPolygon::_build_brush() {
 	}
 	CSGBrush *brush = memnew(CSGBrush);
 
-	int face_count;
+	int face_count = 0;
 
 	switch (mode) {
 		case MODE_DEPTH: face_count = triangles.size() * 2 / 3 + (final_polygon.size()) * 2; break;

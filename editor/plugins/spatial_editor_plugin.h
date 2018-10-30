@@ -86,7 +86,7 @@ public:
 
 	Vector<Vector3> handles;
 	Vector<Vector3> secondary_handles;
-	float selectable_icon_size = -1.0f;
+	float selectable_icon_size;
 	bool billboard_handle;
 
 	bool valid;
@@ -192,7 +192,7 @@ private:
 	EditorSelection *editor_selection;
 	UndoRedo *undo_redo;
 
-	Button *preview_camera;
+	CheckBox *preview_camera;
 	ViewportContainer *viewport_container;
 
 	MenuButton *view_menu;
@@ -211,6 +211,7 @@ private:
 	Label *info_label;
 	Label *fps_label;
 	Label *cinema_label;
+	Label *locked_label;
 
 	struct _RayResult {
 
@@ -404,6 +405,7 @@ public:
 			AcceptDialog *p_accept);
 
 	Viewport *get_viewport_node() { return viewport; }
+	Camera *get_camera() { return camera; } // return the default camera object.
 
 	SpatialEditorViewport(SpatialEditor *p_spatial_editor, EditorNode *p_editor, int p_index);
 };
@@ -442,6 +444,9 @@ private:
 	bool mouseover;
 	float ratio_h;
 	float ratio_v;
+
+	bool hovering_v;
+	bool hovering_h;
 
 	bool dragging_v;
 	bool dragging_h;
@@ -707,7 +712,6 @@ public:
 
 	void register_gizmo_plugin(Ref<EditorSpatialGizmoPlugin> ref);
 
-	Camera *get_camera() { return NULL; }
 	void edit(Spatial *p_spatial);
 	void clear();
 

@@ -277,8 +277,8 @@ MethodInfo::MethodInfo(Variant::Type ret, const String &p_name, const PropertyIn
 
 MethodInfo::MethodInfo(const PropertyInfo &p_ret, const String &p_name) :
 		name(p_name),
-		flags(METHOD_FLAG_NORMAL),
 		return_val(p_ret),
+		flags(METHOD_FLAG_NORMAL),
 		id(0) {
 }
 
@@ -440,16 +440,6 @@ void Object::set(const StringName &p_name, const Variant &p_value, bool *r_valid
 		if (r_valid)
 			*r_valid = true;
 		return;
-#ifdef TOOLS_ENABLED
-	} else if (p_name == CoreStringNames::get_singleton()->_sections_unfolded) {
-		Array arr = p_value;
-		for (int i = 0; i < arr.size(); i++) {
-			editor_section_folding.insert(arr[i]);
-		}
-		if (r_valid)
-			*r_valid = true;
-		return;
-#endif
 	}
 
 	//something inside the object... :|
@@ -520,16 +510,7 @@ Variant Object::get(const StringName &p_name, bool *r_valid) const {
 		if (r_valid)
 			*r_valid = true;
 		return ret;
-#ifdef TOOLS_ENABLED
-	} else if (p_name == CoreStringNames::get_singleton()->_sections_unfolded) {
-		Array array;
-		for (Set<String>::Element *E = editor_section_folding.front(); E; E = E->next()) {
-			array.push_back(E->get());
-		}
-		if (r_valid)
-			*r_valid = true;
-		return array;
-#endif
+
 	} else {
 		//something inside the object... :|
 		bool success = _getv(p_name, ret);
@@ -657,11 +638,6 @@ void Object::get_property_list(List<PropertyInfo> *p_list, bool p_reversed) cons
 #endif
 		p_list->push_back(PropertyInfo(Variant::OBJECT, "script", PROPERTY_HINT_RESOURCE_TYPE, "Script", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_STORE_IF_NONZERO));
 	}
-#ifdef TOOLS_ENABLED
-	if (editor_section_folding.size()) {
-		p_list->push_back(PropertyInfo(Variant::ARRAY, CoreStringNames::get_singleton()->_sections_unfolded, PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL));
-	}
-#endif
 	if (!metadata.empty())
 		p_list->push_back(PropertyInfo(Variant::DICTIONARY, "__meta__", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_STORE_IF_NONZERO));
 	if (script_instance && !p_reversed) {
@@ -1254,7 +1230,10 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 			target->call(c.method, args, argc, ce);
 
 			if (ce.error != Variant::CallError::CALL_OK) {
-
+#ifdef DEBUG_ENABLED
+				if (c.flags & CONNECT_PERSIST && Engine::get_singleton()->is_editor_hint() && (script.is_null() || !Ref<Script>(script)->is_tool()))
+					continue;
+#endif
 				if (ce.error == Variant::CallError::CALL_ERROR_INVALID_METHOD && !ClassDB::class_exists(target->get_class_name())) {
 					//most likely object is not initialized yet, do not throw error.
 				} else {
@@ -2014,11 +1993,13 @@ ObjectID ObjectDB::add_instance(Object *p_object) {
 	ERR_FAIL_COND_V(p_object->get_instance_id() != 0, 0);
 
 	rw_lock->write_lock();
-	instances[++instance_counter] = p_object;
-	instance_checks[p_object] = instance_counter;
+	ObjectID instance_id = ++instance_counter;
+	instances[instance_id] = p_object;
+	instance_checks[p_object] = instance_id;
+
 	rw_lock->write_unlock();
 
-	return instance_counter;
+	return instance_id;
 }
 
 void ObjectDB::remove_instance(Object *p_object) {
@@ -2095,6 +2076,5 @@ void ObjectDB::cleanup() {
 	instances.clear();
 	instance_checks.clear();
 	rw_lock->write_unlock();
-
 	memdelete(rw_lock);
 }

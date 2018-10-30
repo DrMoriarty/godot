@@ -33,12 +33,9 @@
 #include "core/engine.h"
 #include "core/global_constants.h"
 #include "core/os/file_access.h"
-#include "editor/editor_settings.h"
 #include "gdscript_compiler.h"
 
 #ifdef TOOLS_ENABLED
-#include "core/engine.h"
-#include "core/reference.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_settings.h"
 #endif
@@ -54,12 +51,6 @@ void GDScriptLanguage::get_string_delimiters(List<String> *p_delimiters) const {
 	p_delimiters->push_back("\"\"\" \"\"\"");
 }
 Ref<Script> GDScriptLanguage::get_template(const String &p_class_name, const String &p_base_class_name) const {
-#ifdef TOOLS_ENABLED
-	bool th = EDITOR_DEF("text_editor/completion/add_type_hints", false);
-#else
-	bool th = false;
-#endif
-
 	String _template = "extends %BASE%\n"
 					   "\n"
 					   "# Declare member variables here. Examples:\n"
@@ -1113,6 +1104,7 @@ static bool _guess_expression_type(const GDScriptCompletionContext &p_context, c
 				} break;
 			}
 		} break;
+		default: {}
 	}
 
 	// It may have found a null, but that's never useful
@@ -2007,7 +1999,8 @@ static void _find_identifiers_in_base(const GDScriptCompletionContext &p_context
 
 				if (!_static) {
 					List<MethodInfo> methods;
-					ClassDB::get_method_list(type, &methods, false, true);
+					bool is_autocompleting_getters = GLOBAL_GET("debug/gdscript/completion/autocomplete_setters_and_getters").booleanize();
+					ClassDB::get_method_list(type, &methods, false, !is_autocompleting_getters);
 					for (List<MethodInfo>::Element *E = methods.front(); E; E = E->next()) {
 						if (E->get().name.begins_with("_")) {
 							continue;
@@ -3357,6 +3350,7 @@ Error GDScriptLanguage::lookup_code(const String &p_code, const String &p_symbol
 				return OK;
 			}
 		} break;
+		default: {}
 	}
 
 	return ERR_CANT_RESOLVE;

@@ -1254,13 +1254,13 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 						String s = RTR("(Other)");
 						Vector<String> strings = p_item->cells[i].text.split(",");
-						for (int i = 0; i < strings.size(); i++) {
-							int value = i;
-							if (!strings[i].get_slicec(':', 1).empty()) {
-								value = strings[i].get_slicec(':', 1).to_int();
+						for (int j = 0; j < strings.size(); j++) {
+							int value = j;
+							if (!strings[j].get_slicec(':', 1).empty()) {
+								value = strings[j].get_slicec(':', 1).to_int();
 							}
 							if (option == value) {
-								s = strings[i].get_slicec(':', 0);
+								s = strings[j].get_slicec(':', 0);
 								break;
 							}
 						}
@@ -1416,7 +1416,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 
 		while (c) {
 
-			if (cache.draw_relationship_lines == 1 && (c->get_parent() != root || c->get_parent() == root && !hide_root)) {
+			if (cache.draw_relationship_lines == 1 && (c->get_parent() != root || !hide_root)) {
 				int root_ofs = children_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				int parent_ofs = p_pos.x + ((p_item->disable_folding || hide_folding) ? cache.hseparation : cache.item_margin);
 				Point2i root_pos = Point2i(root_ofs, children_pos.y + label_h / 2) - cache.offset + p_draw_ofs;
@@ -2183,6 +2183,7 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 
 	Ref<InputEventKey> k = p_event;
 
+	bool is_command = k.is_valid() && k->get_command();
 	if (p_event->is_action("ui_right") && p_event->is_pressed()) {
 
 		if (!cursor_can_exit_tree) accept_event();
@@ -2219,13 +2220,13 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 			_go_left();
 		}
 
-	} else if (p_event->is_action("ui_up") && p_event->is_pressed() && !k->get_command()) {
+	} else if (p_event->is_action("ui_up") && p_event->is_pressed() && !is_command) {
 
 		if (!cursor_can_exit_tree) accept_event();
 
 		_go_up();
 
-	} else if (p_event->is_action("ui_down") && p_event->is_pressed() && !k->get_command()) {
+	} else if (p_event->is_action("ui_down") && p_event->is_pressed() && !is_command) {
 
 		if (!cursor_can_exit_tree) accept_event();
 
@@ -2933,7 +2934,7 @@ void Tree::_notification(int p_what) {
 
 		if (show_column_titles) {
 
-			//title butons
+			//title buttons
 			int ofs = cache.bg->get_margin(MARGIN_LEFT);
 			for (int i = 0; i < columns.size(); i++) {
 
