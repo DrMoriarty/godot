@@ -103,8 +103,9 @@ enum PropertyUsageFlags {
 	PROPERTY_USAGE_INTERNATIONALIZED = 64, //hint for internationalized strings
 	PROPERTY_USAGE_GROUP = 128, //used for grouping props in the editor
 	PROPERTY_USAGE_CATEGORY = 256,
-	PROPERTY_USAGE_STORE_IF_NONZERO = 512, //only store if nonzero
-	PROPERTY_USAGE_STORE_IF_NONONE = 1024, //only store if false
+	//those below are deprecated thanks to ClassDB's now class value cache
+	//PROPERTY_USAGE_STORE_IF_NONZERO = 512, //only store if nonzero
+	//PROPERTY_USAGE_STORE_IF_NONONE = 1024, //only store if false
 	PROPERTY_USAGE_NO_INSTANCE_STATE = 2048,
 	PROPERTY_USAGE_RESTART_IF_CHANGED = 4096,
 	PROPERTY_USAGE_SCRIPT_VARIABLE = 8192,
@@ -126,10 +127,6 @@ enum PropertyUsageFlags {
 #define ADD_SIGNAL(m_signal) ClassDB::add_signal(get_class_static(), m_signal)
 #define ADD_PROPERTY(m_property, m_setter, m_getter) ClassDB::add_property(get_class_static(), m_property, _scs_create(m_setter), _scs_create(m_getter))
 #define ADD_PROPERTYI(m_property, m_setter, m_getter, m_index) ClassDB::add_property(get_class_static(), m_property, _scs_create(m_setter), _scs_create(m_getter), m_index)
-#define ADD_PROPERTYNZ(m_property, m_setter, m_getter) ClassDB::add_property(get_class_static(), (m_property).added_usage(PROPERTY_USAGE_STORE_IF_NONZERO), _scs_create(m_setter), _scs_create(m_getter))
-#define ADD_PROPERTYINZ(m_property, m_setter, m_getter, m_index) ClassDB::add_property(get_class_static(), (m_property).added_usage(PROPERTY_USAGE_STORE_IF_NONZERO), _scs_create(m_setter), _scs_create(m_getter), m_index)
-#define ADD_PROPERTYNO(m_property, m_setter, m_getter) ClassDB::add_property(get_class_static(), (m_property).added_usage(PROPERTY_USAGE_STORE_IF_NONONE), _scs_create(m_setter), _scs_create(m_getter))
-#define ADD_PROPERTYINO(m_property, m_setter, m_getter, m_index) ClassDB::add_property(get_class_static(), (m_property).added_usage(PROPERTY_USAGE_STORE_IF_NONONE), _scs_create(m_setter), _scs_create(m_getter), m_index)
 #define ADD_GROUP(m_name, m_prefix) ClassDB::add_property_group(get_class_static(), m_name, m_prefix)
 
 struct PropertyInfo {
@@ -701,6 +698,7 @@ public:
 	bool is_connected(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method) const;
 
 	void call_deferred(const StringName &p_method, VARIANT_ARG_LIST);
+	void set_deferred(const StringName &p_property, const Variant &p_value);
 
 	void set_block_signals(bool p_block);
 	bool is_blocking_signals() const;

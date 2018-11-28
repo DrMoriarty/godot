@@ -443,6 +443,7 @@ void ScriptTextEditor::_validate_script() {
 	if (!script->get_language()->validate(text, line, col, errortxt, script->get_path(), &fnc, &warnings, &safe_lines)) {
 		String error_text = "error(" + itos(line) + "," + itos(col) + "): " + errortxt;
 		code_editor->set_error(error_text);
+		code_editor->set_error_pos(line - 1, col - 1);
 	} else {
 		code_editor->set_error("");
 		line = -1;
@@ -773,7 +774,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 		} break;
 		case EDIT_CLONE_DOWN: {
 
-			code_editor->code_lines_down();
+			code_editor->clone_lines_down();
 		} break;
 		case EDIT_TOGGLE_FOLD_LINE: {
 
@@ -1049,7 +1050,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			if (text == "")
 				text = tx->get_word_under_cursor();
 			if (text != "") {
-				emit_signal("request_help_search", text);
+				emit_signal("request_help", text);
 			}
 		} break;
 
@@ -1694,8 +1695,8 @@ void ScriptTextEditor::register_editor() {
 	ED_SHORTCUT("script_text_editor/complete_symbol", TTR("Complete Symbol"), KEY_MASK_CMD | KEY_SPACE);
 #endif
 	ED_SHORTCUT("script_text_editor/trim_trailing_whitespace", TTR("Trim Trailing Whitespace"), KEY_MASK_CMD | KEY_MASK_ALT | KEY_T);
-	ED_SHORTCUT("script_text_editor/convert_indent_to_spaces", TTR("Convert Indent To Spaces"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_Y);
-	ED_SHORTCUT("script_text_editor/convert_indent_to_tabs", TTR("Convert Indent To Tabs"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_I);
+	ED_SHORTCUT("script_text_editor/convert_indent_to_spaces", TTR("Convert Indent to Spaces"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_Y);
+	ED_SHORTCUT("script_text_editor/convert_indent_to_tabs", TTR("Convert Indent to Tabs"), KEY_MASK_CMD | KEY_MASK_SHIFT | KEY_I);
 	ED_SHORTCUT("script_text_editor/auto_indent", TTR("Auto Indent"), KEY_MASK_CMD | KEY_I);
 
 #ifdef OSX_ENABLED

@@ -2571,6 +2571,10 @@ void CSharpScript::update_exports() {
 #endif
 }
 
+bool CSharpScript::is_valid() const {
+	return true; //TODO return false if invalid
+}
+
 bool CSharpScript::has_script_signal(const StringName &p_signal) const {
 	if (_signals.has(p_signal))
 		return true;
@@ -2770,7 +2774,8 @@ Error ResourceFormatSaverCSharpScript::save(const String &p_path, const RES &p_r
 					"Compile",
 					ProjectSettings::get_singleton()->globalize_path(p_path));
 		} else {
-			ERR_PRINTS("Cannot add " + p_path + " to the C# project because it could not be created.");
+			ERR_PRINTS("Failed to create C# project");
+			ERR_PRINTS("Cannot add " + p_path + " to the C# project");
 		}
 	}
 #endif

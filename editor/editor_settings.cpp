@@ -300,6 +300,8 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["interface/editor/main_font_size"] = PropertyInfo(Variant::INT, "interface/editor/main_font_size", PROPERTY_HINT_RANGE, "10,40,1", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
 	_initial_set("interface/editor/code_font_size", 14);
 	hints["interface/editor/code_font_size"] = PropertyInfo(Variant::INT, "interface/editor/code_font_size", PROPERTY_HINT_RANGE, "8,96,1", PROPERTY_USAGE_DEFAULT);
+	_initial_set("interface/editor/main_font_antialiased", true);
+	_initial_set("interface/editor/code_font_antialiased", true);
 	_initial_set("interface/editor/main_font_hinting", 2);
 	hints["interface/editor/main_font_hinting"] = PropertyInfo(Variant::INT, "interface/editor/main_font_hinting", PROPERTY_HINT_ENUM, "None,Light,Normal", PROPERTY_USAGE_DEFAULT);
 	_initial_set("interface/editor/code_font_hinting", 2);
@@ -410,7 +412,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("text_editor/completion/add_type_hints", false);
 
 	_initial_set("docks/scene_tree/start_create_dialog_fully_expanded", false);
-	_initial_set("docks/scene_tree/draw_relationship_lines", false);
+	_initial_set("docks/scene_tree/draw_relationship_lines", true);
 	_initial_set("docks/scene_tree/relationship_line_color", Color::html("464646"));
 
 	_initial_set("editors/grid_map/pick_distance", 5000.0);
@@ -433,7 +435,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	// navigation
 	_initial_set("editors/3d/navigation/navigation_scheme", 0);
-	_initial_set("editors/3d/navigation/invert_y-axis", false);
+	_initial_set("editors/3d/navigation/invert_y_axis", false);
 	hints["editors/3d/navigation/navigation_scheme"] = PropertyInfo(Variant::INT, "editors/3d/navigation/navigation_scheme", PROPERTY_HINT_ENUM, "Godot,Maya,Modo");
 	_initial_set("editors/3d/navigation/zoom_style", 0);
 	hints["editors/3d/navigation/zoom_style"] = PropertyInfo(Variant::INT, "editors/3d/navigation/zoom_style", PROPERTY_HINT_ENUM, "Vertical, Horizontal");

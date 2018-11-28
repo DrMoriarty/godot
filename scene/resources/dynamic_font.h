@@ -71,12 +71,15 @@ public:
 		HINTING_NORMAL
 	};
 
+	bool is_antialiased() const;
+	void set_antialiased(bool p_antialiased);
 	Hinting get_hinting() const;
 	void set_hinting(Hinting p_hinting);
 
 private:
 	const uint8_t *font_mem;
 	int font_mem_size;
+	bool antialiased;
 	bool force_autohinter;
 	Hinting hinting;
 
@@ -285,7 +288,7 @@ public:
 	SelfList<DynamicFont> font_list;
 
 	static Mutex *dynamic_font_mutex;
-	static SelfList<DynamicFont>::List dynamic_fonts;
+	static SelfList<DynamicFont>::List *dynamic_fonts;
 
 	static void initialize_dynamic_fonts();
 	static void finish_dynamic_fonts();

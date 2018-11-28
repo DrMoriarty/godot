@@ -53,7 +53,7 @@ Size2 Tabs::get_minimum_size() const {
 				ms.width += get_constant("hseparation");
 		}
 
-		ms.width += font->get_string_size(tabs[i].text).width;
+		ms.width += Math::ceil(font->get_string_size(tabs[i].text).width);
 
 		if (tabs[i].disabled)
 			ms.width += tab_disabled->get_minimum_size().width;
@@ -547,7 +547,7 @@ void Tabs::_update_cache() {
 	for (int i = 0; i < tabs.size(); i++) {
 		tabs.write[i].ofs_cache = mw;
 		tabs.write[i].size_cache = get_tab_width(i);
-		tabs.write[i].size_text = font->get_string_size(tabs[i].text).width;
+		tabs.write[i].size_text = Math::ceil(font->get_string_size(tabs[i].text).width);
 		mw += tabs[i].size_cache;
 		if (tabs[i].size_cache <= min_width || i == current) {
 			size_fixed += tabs[i].size_cache;
@@ -803,7 +803,7 @@ int Tabs::get_tab_width(int p_idx) const {
 			x += get_constant("hseparation");
 	}
 
-	x += font->get_string_size(tabs[p_idx].text).width;
+	x += Math::ceil(font->get_string_size(tabs[p_idx].text).width);
 
 	if (tabs[p_idx].disabled)
 		x += tab_disabled->get_minimum_size().width;
@@ -983,7 +983,7 @@ void Tabs::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "current_tab", PROPERTY_HINT_RANGE, "-1,4096,1", PROPERTY_USAGE_EDITOR), "set_current_tab", "get_current_tab");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "tab_align", PROPERTY_HINT_ENUM, "Left,Center,Right"), "set_tab_align", "get_tab_align");
-	ADD_PROPERTYNZ(PropertyInfo(Variant::INT, "tab_close_display_policy", PROPERTY_HINT_ENUM, "Show Never,Show Active Only,Show Always"), "set_tab_close_display_policy", "get_tab_close_display_policy");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "tab_close_display_policy", PROPERTY_HINT_ENUM, "Show Never,Show Active Only,Show Always"), "set_tab_close_display_policy", "get_tab_close_display_policy");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scrolling_enabled"), "set_scrolling_enabled", "get_scrolling_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "drag_to_rearrange_enabled"), "set_drag_to_rearrange_enabled", "get_drag_to_rearrange_enabled");
 

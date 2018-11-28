@@ -1020,6 +1020,11 @@ void _OS::center_window() {
 	OS::get_singleton()->center_window();
 }
 
+void _OS::move_window_to_foreground() {
+
+	OS::get_singleton()->move_window_to_foreground();
+}
+
 bool _OS::is_debug_build() const {
 
 #ifdef DEBUG_ENABLED
@@ -1121,6 +1126,7 @@ void _OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("request_attention"), &_OS::request_attention);
 	ClassDB::bind_method(D_METHOD("get_real_window_size"), &_OS::get_real_window_size);
 	ClassDB::bind_method(D_METHOD("center_window"), &_OS::center_window);
+	ClassDB::bind_method(D_METHOD("move_window_to_foreground"), &_OS::move_window_to_foreground);
 
 	ClassDB::bind_method(D_METHOD("set_borderless_window", "borderless"), &_OS::set_borderless_window);
 	ClassDB::bind_method(D_METHOD("get_borderless_window"), &_OS::get_borderless_window);
@@ -1748,9 +1754,9 @@ String _File::get_line() const {
 	return f->get_line();
 }
 
-Vector<String> _File::get_csv_line(String delim) const {
+Vector<String> _File::get_csv_line(const String &p_delim) const {
 	ERR_FAIL_COND_V(!f, Vector<String>());
-	return f->get_csv_line(delim);
+	return f->get_csv_line(p_delim);
 }
 
 /**< use this for files WRITTEN in _big_ endian machines (ie, amiga/mac)
@@ -1847,6 +1853,11 @@ void _File::store_line(const String &p_string) {
 	f->store_line(p_string);
 }
 
+void _File::store_csv_line(const Vector<String> &p_values, const String &p_delim) {
+	ERR_FAIL_COND(!f);
+	f->store_csv_line(p_values, p_delim);
+}
+
 void _File::store_buffer(const PoolVector<uint8_t> &p_buffer) {
 
 	ERR_FAIL_COND(!f);
@@ -1930,6 +1941,7 @@ void _File::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_real"), &_File::get_real);
 	ClassDB::bind_method(D_METHOD("get_buffer", "len"), &_File::get_buffer);
 	ClassDB::bind_method(D_METHOD("get_line"), &_File::get_line);
+	ClassDB::bind_method(D_METHOD("get_csv_line", "delim"), &_File::get_csv_line, DEFVAL(","));
 	ClassDB::bind_method(D_METHOD("get_as_text"), &_File::get_as_text);
 	ClassDB::bind_method(D_METHOD("get_md5", "path"), &_File::get_md5);
 	ClassDB::bind_method(D_METHOD("get_sha256", "path"), &_File::get_sha256);
@@ -1937,7 +1949,6 @@ void _File::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_endian_swap", "enable"), &_File::set_endian_swap);
 	ClassDB::bind_method(D_METHOD("get_error"), &_File::get_error);
 	ClassDB::bind_method(D_METHOD("get_var"), &_File::get_var);
-	ClassDB::bind_method(D_METHOD("get_csv_line", "delim"), &_File::get_csv_line, DEFVAL(","));
 
 	ClassDB::bind_method(D_METHOD("store_8", "value"), &_File::store_8);
 	ClassDB::bind_method(D_METHOD("store_16", "value"), &_File::store_16);
@@ -1948,6 +1959,7 @@ void _File::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("store_real", "value"), &_File::store_real);
 	ClassDB::bind_method(D_METHOD("store_buffer", "buffer"), &_File::store_buffer);
 	ClassDB::bind_method(D_METHOD("store_line", "line"), &_File::store_line);
+	ClassDB::bind_method(D_METHOD("store_csv_line", "values", "delim"), &_File::store_csv_line, DEFVAL(","));
 	ClassDB::bind_method(D_METHOD("store_string", "string"), &_File::store_string);
 	ClassDB::bind_method(D_METHOD("store_var", "value"), &_File::store_var);
 
@@ -2860,10 +2872,10 @@ void JSONParseResult::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_error_line", "error_line"), &JSONParseResult::set_error_line);
 	ClassDB::bind_method(D_METHOD("set_result", "result"), &JSONParseResult::set_result);
 
-	ADD_PROPERTYNZ(PropertyInfo(Variant::OBJECT, "error", PROPERTY_HINT_NONE, "Error", PROPERTY_USAGE_CLASS_IS_ENUM), "set_error", "get_error");
-	ADD_PROPERTYNZ(PropertyInfo(Variant::STRING, "error_string"), "set_error_string", "get_error_string");
-	ADD_PROPERTYNZ(PropertyInfo(Variant::INT, "error_line"), "set_error_line", "get_error_line");
-	ADD_PROPERTYNZ(PropertyInfo(Variant::NIL, "result", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT), "set_result", "get_result");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "error", PROPERTY_HINT_NONE, "Error", PROPERTY_USAGE_CLASS_IS_ENUM), "set_error", "get_error");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "error_string"), "set_error_string", "get_error_string");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "error_line"), "set_error_line", "get_error_line");
+	ADD_PROPERTY(PropertyInfo(Variant::NIL, "result", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT), "set_result", "get_result");
 }
 
 void JSONParseResult::set_error(Error p_error) {

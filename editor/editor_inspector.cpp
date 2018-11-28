@@ -36,50 +36,6 @@
 #include "multi_node_edit.h"
 #include "scene/resources/packed_scene.h"
 
-EditorDefaultClassValueCache *EditorDefaultClassValueCache::singleton = NULL;
-
-EditorDefaultClassValueCache *EditorDefaultClassValueCache::get_singleton() {
-	return singleton;
-}
-
-Variant EditorDefaultClassValueCache::get_default_value(const StringName &p_class, const StringName &p_property) {
-
-	if (!default_values.has(p_class)) {
-
-		default_values[p_class] = Map<StringName, Variant>();
-
-		if (ClassDB::can_instance(p_class)) {
-
-			Object *c = ClassDB::instance(p_class);
-			List<PropertyInfo> plist;
-			c->get_property_list(&plist);
-			for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
-				if (E->get().usage & PROPERTY_USAGE_EDITOR) {
-
-					Variant v = c->get(E->get().name);
-					default_values[p_class][E->get().name] = v;
-				}
-			}
-			memdelete(c);
-		}
-	}
-
-	if (!default_values.has(p_class)) {
-		return Variant();
-	}
-
-	if (!default_values[p_class].has(p_property)) {
-		return Variant();
-	}
-
-	return default_values[p_class][p_property];
-}
-
-EditorDefaultClassValueCache::EditorDefaultClassValueCache() {
-	ERR_FAIL_COND(singleton != NULL);
-	singleton = this;
-}
-
 Size2 EditorProperty::get_minimum_size() const {
 
 	Size2 ms;
@@ -341,16 +297,12 @@ bool EditorProperty::is_read_only() const {
 	return read_only;
 }
 
-bool EditorProperty::_might_be_in_instance() {
-
-	if (!object)
-		return false;
-
-	Node *node = Object::cast_to<Node>(object);
+bool EditorPropertyRevert::may_node_be_in_instance(Node *p_node) {
 
 	Node *edited_scene = EditorNode::get_singleton()->get_edited_scene();
 
 	bool might_be = false;
+	Node *node = p_node;
 
 	while (node) {
 
@@ -372,13 +324,9 @@ bool EditorProperty::_might_be_in_instance() {
 	return might_be; // or might not be
 }
 
-bool EditorProperty::_get_instanced_node_original_property(const StringName &p_prop, Variant &value) {
+bool EditorPropertyRevert::get_instanced_node_original_property(Node *p_node, const StringName &p_prop, Variant &value) {
 
-	Node *node = Object::cast_to<Node>(object);
-
-	if (!node)
-		return false;
-
+	Node *node = p_node;
 	Node *orig = node;
 
 	Node *edited_scene = EditorNode::get_singleton()->get_edited_scene();
@@ -418,16 +366,26 @@ bool EditorProperty::_get_instanced_node_original_property(const StringName &p_p
 		node = node->get_owner();
 	}
 
+	if (!found) {
+		//if not found, try default class value
+		Variant attempt = ClassDB::class_get_default_property_value(node->get_class_name(), p_prop);
+		if (attempt.get_type() != Variant::NIL) {
+			found = true;
+			value = attempt;
+		}
+	}
+
 	return found;
 }
 
-bool EditorProperty::_is_property_different(const Variant &p_current, const Variant &p_orig, int p_usage) {
+bool EditorPropertyRevert::is_node_property_different(Node *p_node, const Variant &p_current, const Variant &p_orig) {
 
 	// this is a pretty difficult function, because a property may not be saved but may have
 	// the flag to not save if one or if zero
 
+	//make sure there is an actual state
 	{
-		Node *node = Object::cast_to<Node>(object);
+		Node *node = p_node;
 		if (!node)
 			return false;
 
@@ -459,15 +417,6 @@ bool EditorProperty::_is_property_different(const Variant &p_current, const Vari
 			return false; //pointless to check if we are not comparing against anything.
 	}
 
-	if (p_orig.get_type() == Variant::NIL) {
-		// not found (was not saved)
-		// check if it was not saved due to being zero or one
-		if (p_current.is_zero() && property_usage & PROPERTY_USAGE_STORE_IF_NONZERO)
-			return false;
-		if (p_current.is_one() && property_usage & PROPERTY_USAGE_STORE_IF_NONONE)
-			return false;
-	}
-
 	if (p_current.get_type() == Variant::REAL && p_orig.get_type() == Variant::REAL) {
 		float a = p_current;
 		float b = p_orig;
@@ -478,21 +427,46 @@ bool EditorProperty::_is_property_different(const Variant &p_current, const Vari
 	return bool(Variant::evaluate(Variant::OP_NOT_EQUAL, p_current, p_orig));
 }
 
-bool EditorProperty::_is_instanced_node_with_original_property_different() {
+bool EditorPropertyRevert::can_property_revert(Object *p_object, const StringName &p_property) {
 
-	bool mbi = _might_be_in_instance();
-	if (mbi) {
+	bool has_revert = false;
+
+	Node *node = Object::cast_to<Node>(p_object);
+
+	if (node && EditorPropertyRevert::may_node_be_in_instance(node)) {
+		//check for difference including instantiation
 		Variant vorig;
-		int usage = property_usage & (PROPERTY_USAGE_STORE_IF_NONONE | PROPERTY_USAGE_STORE_IF_NONZERO);
-		if (_get_instanced_node_original_property(property, vorig) || usage) {
-			Variant v = object->get(property);
+		if (EditorPropertyRevert::get_instanced_node_original_property(node, p_property, vorig)) {
+			Variant v = p_object->get(p_property);
 
-			if (_is_property_different(v, vorig, usage)) {
-				return true;
+			if (EditorPropertyRevert::is_node_property_different(node, v, vorig)) {
+				has_revert = true;
+			}
+		}
+	} else {
+		//check for difference against default class value instead
+		Variant default_value = ClassDB::class_get_default_property_value(p_object->get_class_name(), p_property);
+		if (default_value != Variant() && default_value != p_object->get(p_property)) {
+			has_revert = true;
+		}
+	}
+
+	if (p_object->call("property_can_revert", p_property).operator bool()) {
+
+		has_revert = true;
+	}
+
+	if (!has_revert && !p_object->get_script().is_null()) {
+		Ref<Script> scr = p_object->get_script();
+		Variant orig_value;
+		if (scr->get_property_default_value(p_property, orig_value)) {
+			if (orig_value != p_object->get(p_property)) {
+				has_revert = true;
 			}
 		}
 	}
-	return false;
+
+	return has_revert;
 }
 
 void EditorProperty::update_reload_status() {
@@ -500,32 +474,7 @@ void EditorProperty::update_reload_status() {
 	if (property == StringName())
 		return; //no property, so nothing to do
 
-	bool has_reload = false;
-
-	if (EditorDefaultClassValueCache::get_singleton()) {
-		Variant default_value = EditorDefaultClassValueCache::get_singleton()->get_default_value(object->get_class_name(), property);
-		if (default_value != Variant() && default_value != object->get(property)) {
-			has_reload = true;
-		}
-	}
-	if (_is_instanced_node_with_original_property_different()) {
-		has_reload = true;
-	}
-
-	if (object->call("property_can_revert", property).operator bool()) {
-
-		has_reload = true;
-	}
-
-	if (!has_reload && !object->get_script().is_null()) {
-		Ref<Script> scr = object->get_script();
-		Variant orig_value;
-		if (scr->get_property_default_value(property, orig_value)) {
-			if (orig_value != object->get(property)) {
-				has_reload = true;
-			}
-		}
-	}
+	bool has_reload = EditorPropertyRevert::can_property_revert(object, property);
 
 	if (has_reload != can_revert) {
 		can_revert = has_reload;
@@ -678,7 +627,7 @@ void EditorProperty::_gui_input(const Ref<InputEvent> &p_event) {
 		}
 
 		if (keying_rect.has_point(mb->get_position())) {
-			emit_signal("property_keyed", property);
+			emit_signal("property_keyed", property, use_keying_next());
 
 			if (use_keying_next()) {
 				call_deferred("emit_signal", "property_changed", property, object->get(property).operator int64_t() + 1);
@@ -690,7 +639,8 @@ void EditorProperty::_gui_input(const Ref<InputEvent> &p_event) {
 
 			Variant vorig;
 
-			if (_might_be_in_instance() && _get_instanced_node_original_property(property, vorig)) {
+			Node *node = Object::cast_to<Node>(object);
+			if (node && EditorPropertyRevert::may_node_be_in_instance(node) && EditorPropertyRevert::get_instanced_node_original_property(node, property, vorig)) {
 
 				emit_signal("property_changed", property, vorig.duplicate(true));
 				update_property();
@@ -714,13 +664,11 @@ void EditorProperty::_gui_input(const Ref<InputEvent> &p_event) {
 				}
 			}
 
-			if (EditorDefaultClassValueCache::get_singleton()) {
-				Variant default_value = EditorDefaultClassValueCache::get_singleton()->get_default_value(object->get_class_name(), property);
-				if (default_value != Variant()) {
-					emit_signal("property_changed", property, default_value);
-					update_property();
-					return;
-				}
+			Variant default_value = ClassDB::class_get_default_property_value(object->get_class_name(), property);
+			if (default_value != Variant()) {
+				emit_signal("property_changed", property, default_value);
+				update_property();
+				return;
 			}
 		}
 		if (check_rect.has_point(mb->get_position())) {
@@ -1143,10 +1091,8 @@ void EditorInspectorSection::_notification(int p_what) {
 		Color color = get_color("font_color", "Tree");
 		draw_string(font, Point2(hs, font->get_ascent() + (h - font->get_height()) / 2).floor(), label, color, get_size().width);
 
-		int ofs = 0;
 		if (arrow.is_valid()) {
 			draw_texture(arrow, Point2(get_size().width - arrow->get_width(), (h - arrow->get_height()) / 2).floor());
-			ofs += hs + arrow->get_width();
 		}
 	}
 }
@@ -1208,6 +1154,11 @@ void EditorInspectorSection::_gui_input(const Ref<InputEvent> &p_event) {
 #ifdef TOOLS_ENABLED
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
+
+		Ref<Font> font = get_font("font", "Tree");
+		if (mb->get_position().y > font->get_height()) { //clicked outside
+			return;
+		}
 
 		_test_unfold();
 
@@ -1430,28 +1381,6 @@ void EditorInspector::update_tree() {
 	}
 
 	//	TreeItem *current_category = NULL;
-
-	bool unfold_if_edited = false;
-
-	if (use_folding && auto_unfold_edited && get_tree()->get_edited_scene_root()) {
-		String path;
-		Node *node = Object::cast_to<Node>(object);
-		if (node) {
-			path = get_tree()->get_edited_scene_root()->get_filename();
-		}
-		Resource *res = Object::cast_to<Resource>(object);
-		if (res) {
-			if (res->get_path().is_resource_file()) {
-				path = res->get_path();
-			} else if (res->get_path().begins_with("res://")) { //internal resource
-				path = get_tree()->get_edited_scene_root()->get_filename();
-			}
-		}
-
-		if (!EditorNode::get_singleton()->get_editor_folding().has_folding_data(path)) {
-			unfold_if_edited = true;
-		}
-	}
 
 	String filter = search_box ? search_box->get_text() : "";
 	String group;
@@ -1772,13 +1701,6 @@ void EditorInspector::update_tree() {
 					if (current_selected && ep->property == current_selected) {
 						ep->select(current_focusable);
 					}
-
-					if (unfold_if_edited && ep->can_revert_to_default()) {
-						//if edited and there is a parent section, unfold it.
-						if (current_vbox && section_map.has(current_vbox)) {
-							section_map[current_vbox]->unfold();
-						}
-					}
 				}
 			}
 
@@ -2086,20 +2008,20 @@ void EditorInspector::_multiple_properties_changed(Vector<String> p_paths, Array
 	changing--;
 }
 
-void EditorInspector::_property_keyed(const String &p_path) {
+void EditorInspector::_property_keyed(const String &p_path, bool p_advance) {
 
 	if (!object)
 		return;
 
-	emit_signal("property_keyed", p_path, object->get(p_path), true); //second param is deprecated
+	emit_signal("property_keyed", p_path, object->get(p_path), p_advance); //second param is deprecated
 }
 
-void EditorInspector::_property_keyed_with_value(const String &p_path, const Variant &p_value) {
+void EditorInspector::_property_keyed_with_value(const String &p_path, const Variant &p_value, bool p_advance) {
 
 	if (!object)
 		return;
 
-	emit_signal("property_keyed", p_path, p_value, false); //second param is deprecated
+	emit_signal("property_keyed", p_path, p_value, p_advance); //second param is deprecated
 }
 
 void EditorInspector::_property_checked(const String &p_path, bool p_checked) {
@@ -2275,10 +2197,6 @@ String EditorInspector::get_object_class() const {
 	return object_class;
 }
 
-void EditorInspector::set_auto_unfold_edited(bool p_enable) {
-	auto_unfold_edited = p_enable;
-}
-
 void EditorInspector::_bind_methods() {
 
 	ClassDB::bind_method("_property_changed", &EditorInspector::_property_changed, DEFVAL(false));
@@ -2303,6 +2221,7 @@ void EditorInspector::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("resource_selected", PropertyInfo(Variant::OBJECT, "res"), PropertyInfo(Variant::STRING, "prop")));
 	ADD_SIGNAL(MethodInfo("object_id_selected", PropertyInfo(Variant::INT, "id")));
 	ADD_SIGNAL(MethodInfo("property_edited", PropertyInfo(Variant::STRING, "property")));
+	ADD_SIGNAL(MethodInfo("property_toggled", PropertyInfo(Variant::STRING, "property"), PropertyInfo(Variant::BOOL, "checked")));
 	ADD_SIGNAL(MethodInfo("restart_requested"));
 }
 
@@ -2334,7 +2253,6 @@ EditorInspector::EditorInspector() {
 	set_process(true);
 	property_focusable = -1;
 	use_sub_inspector_bg = false;
-	auto_unfold_edited = false;
 
 	get_v_scrollbar()->connect("value_changed", this, "_vscroll_changed");
 	update_scroll_request = -1;

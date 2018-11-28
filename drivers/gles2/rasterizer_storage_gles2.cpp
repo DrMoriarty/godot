@@ -613,8 +613,72 @@ Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) 
 	return Ref<Image>(img);
 #else
 
-	ERR_EXPLAIN("Sorry, It's not possible to obtain images back in OpenGL ES");
-	ERR_FAIL_V(Ref<Image>());
+	Image::Format real_format;
+	GLenum gl_format;
+	GLenum gl_internal_format;
+	GLenum gl_type;
+	bool compressed;
+	_get_gl_image_and_format(Ref<Image>(), texture->format, texture->flags, real_format, gl_format, gl_internal_format, gl_type, compressed);
+
+	PoolVector<uint8_t> data;
+
+	int data_size = Image::get_image_data_size(texture->alloc_width, texture->alloc_height, Image::FORMAT_RGBA8, false);
+
+	data.resize(data_size * 2); //add some memory at the end, just in case for buggy drivers
+	PoolVector<uint8_t>::Write wb = data.write();
+
+	GLuint temp_framebuffer;
+	glGenFramebuffers(1, &temp_framebuffer);
+
+	GLuint temp_color_texture;
+	glGenTextures(1, &temp_color_texture);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, temp_framebuffer);
+
+	glBindTexture(GL_TEXTURE_2D, temp_color_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->alloc_width, texture->alloc_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, temp_color_texture, 0);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+	glDepthFunc(GL_LEQUAL);
+	glColorMask(1, 1, 1, 1);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture->tex_id);
+
+	glViewport(0, 0, texture->alloc_width, texture->alloc_height);
+
+	shaders.copy.bind();
+
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	bind_quad_array();
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glReadPixels(0, 0, texture->alloc_width, texture->alloc_height, GL_RGBA, GL_UNSIGNED_BYTE, &wb[0]);
+
+	glDeleteTextures(1, &temp_color_texture);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &temp_framebuffer);
+
+	wb = PoolVector<uint8_t>::Write();
+
+	data.resize(data_size);
+
+	Image *img = memnew(Image(texture->alloc_width, texture->alloc_height, false, Image::FORMAT_RGBA8, data));
+	if (!texture->compressed) {
+		img->convert(real_format);
+	}
+
+	return Ref<Image>(img);
+
 #endif
 }
 
@@ -1061,6 +1125,10 @@ void RasterizerStorageGLES2::_update_shader(Shader *p_shader) const {
 
 	p_shader->uniforms.clear();
 
+	if (p_shader->code == String()) {
+		return; //just invalid, but no error
+	}
+
 	ShaderCompilerGLES2::GeneratedCode gen_code;
 	ShaderCompilerGLES2::IdentifierActions *actions = NULL;
 
@@ -1429,8 +1497,9 @@ Variant RasterizerStorageGLES2::material_get_param_default(RID p_material, const
 
 	if (material->shader) {
 		if (material->shader->uniforms.has(p_param)) {
-			Vector<ShaderLanguage::ConstantNode::Value> default_value = material->shader->uniforms[p_param].default_value;
-			return ShaderLanguage::constant_value_to_variant(default_value, material->shader->uniforms[p_param].type);
+			ShaderLanguage::ShaderNode::Uniform uniform = material->shader->uniforms[p_param];
+			Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+			return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.hint);
 		}
 	}
 	return Variant();
@@ -1538,7 +1607,7 @@ void RasterizerStorageGLES2::_update_material(Material *p_material) {
 		if (p_material->shader && p_material->shader->mode == VS::SHADER_SPATIAL) {
 
 			if (p_material->shader->spatial.blend_mode == Shader::Spatial::BLEND_MODE_MIX &&
-					(!p_material->shader->spatial.uses_alpha || (p_material->shader->spatial.uses_alpha && p_material->shader->spatial.depth_draw_mode == Shader::Spatial::DEPTH_DRAW_ALPHA_PREPASS))) {
+					(!p_material->shader->spatial.uses_alpha || p_material->shader->spatial.depth_draw_mode == Shader::Spatial::DEPTH_DRAW_ALPHA_PREPASS)) {
 				can_cast_shadow = true;
 			}
 
@@ -1559,7 +1628,7 @@ void RasterizerStorageGLES2::_update_material(Material *p_material) {
 				}
 
 				for (Map<RasterizerScene::InstanceBase *, int>::Element *E = p_material->instance_owners.front(); E; E = E->next()) {
-					E->key()->base_material_changed();
+					E->key()->base_changed(false, true);
 				}
 			}
 		}
@@ -1946,7 +2015,7 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 	}
 
 	mesh->surfaces.push_back(surface);
-	mesh->instance_change_notify();
+	mesh->instance_change_notify(true, false);
 
 	info.vertex_mem += surface->total_data_size;
 }
@@ -2016,7 +2085,7 @@ void RasterizerStorageGLES2::mesh_surface_set_material(RID p_mesh, int p_surface
 		_material_add_geometry(mesh->surfaces[p_surface]->material, mesh->surfaces[p_surface]);
 	}
 
-	mesh->instance_material_change_notify();
+	mesh->instance_change_notify(false, true);
 }
 
 RID RasterizerStorageGLES2::mesh_surface_get_material(RID p_mesh, int p_surface) const {
@@ -2124,13 +2193,11 @@ void RasterizerStorageGLES2::mesh_remove_surface(RID p_mesh, int p_surface) {
 
 	info.vertex_mem -= surface->total_data_size;
 
-	mesh->instance_material_change_notify();
-
 	memdelete(surface);
 
 	mesh->surfaces.remove(p_surface);
 
-	mesh->instance_change_notify();
+	mesh->instance_change_notify(true, true);
 }
 
 int RasterizerStorageGLES2::mesh_get_surface_count(RID p_mesh) const {
@@ -2704,7 +2771,7 @@ void RasterizerStorageGLES2::update_dirty_multimeshes() {
 		multimesh->dirty_aabb = false;
 		multimesh->dirty_data = false;
 
-		multimesh->instance_change_notify();
+		multimesh->instance_change_notify(true, false);
 
 		multimesh_update_list.remove(multimesh_update_list.first());
 	}
@@ -2809,7 +2876,7 @@ void RasterizerStorageGLES2::immediate_end(RID p_immediate) {
 	ERR_FAIL_COND(!im->building);
 
 	im->building = false;
-	im->instance_change_notify();
+	im->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::immediate_clear(RID p_immediate) {
@@ -2818,7 +2885,7 @@ void RasterizerStorageGLES2::immediate_clear(RID p_immediate) {
 	ERR_FAIL_COND(im->building);
 
 	im->chunks.clear();
-	im->instance_change_notify();
+	im->instance_change_notify(true, false);
 }
 
 AABB RasterizerStorageGLES2::immediate_get_aabb(RID p_immediate) const {
@@ -2832,7 +2899,7 @@ void RasterizerStorageGLES2::immediate_set_material(RID p_immediate, RID p_mater
 	ERR_FAIL_COND(!im);
 
 	im->material = p_material;
-	im->instance_material_change_notify();
+	im->instance_change_notify(false, true);
 }
 
 RID RasterizerStorageGLES2::immediate_get_material(RID p_immediate) const {
@@ -3043,7 +3110,7 @@ void RasterizerStorageGLES2::update_dirty_skeletons() {
 		}
 
 		for (Set<RasterizerScene::InstanceBase *>::Element *E = skeleton->instances.front(); E; E = E->next()) {
-			E->get()->base_changed();
+			E->get()->base_changed(true, false);
 		}
 
 		skeleton_update_list.remove(skeleton_update_list.first());
@@ -3108,7 +3175,7 @@ void RasterizerStorageGLES2::light_set_param(RID p_light, VS::LightParam p_param
 		case VS::LIGHT_PARAM_SHADOW_NORMAL_BIAS:
 		case VS::LIGHT_PARAM_SHADOW_BIAS: {
 			light->version++;
-			light->instance_change_notify();
+			light->instance_change_notify(true, false);
 		} break;
 		default: {}
 	}
@@ -3123,7 +3190,7 @@ void RasterizerStorageGLES2::light_set_shadow(RID p_light, bool p_enabled) {
 	light->shadow = p_enabled;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::light_set_shadow_color(RID p_light, const Color &p_color) {
@@ -3154,7 +3221,7 @@ void RasterizerStorageGLES2::light_set_cull_mask(RID p_light, uint32_t p_mask) {
 	light->cull_mask = p_mask;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::light_set_reverse_cull_face_mode(RID p_light, bool p_enabled) {
@@ -3164,7 +3231,7 @@ void RasterizerStorageGLES2::light_set_reverse_cull_face_mode(RID p_light, bool 
 	light->reverse_cull = p_enabled;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::light_omni_set_shadow_mode(RID p_light, VS::LightOmniShadowMode p_mode) {
@@ -3174,7 +3241,7 @@ void RasterizerStorageGLES2::light_omni_set_shadow_mode(RID p_light, VS::LightOm
 	light->omni_shadow_mode = p_mode;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 VS::LightOmniShadowMode RasterizerStorageGLES2::light_omni_get_shadow_mode(RID p_light) {
@@ -3191,7 +3258,7 @@ void RasterizerStorageGLES2::light_omni_set_shadow_detail(RID p_light, VS::Light
 	light->omni_shadow_detail = p_detail;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::light_directional_set_shadow_mode(RID p_light, VS::LightDirectionalShadowMode p_mode) {
@@ -3201,7 +3268,7 @@ void RasterizerStorageGLES2::light_directional_set_shadow_mode(RID p_light, VS::
 	light->directional_shadow_mode = p_mode;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::light_directional_set_blend_splits(RID p_light, bool p_enable) {
@@ -3211,7 +3278,7 @@ void RasterizerStorageGLES2::light_directional_set_blend_splits(RID p_light, boo
 	light->directional_blend_splits = p_enable;
 
 	light->version++;
-	light->instance_change_notify();
+	light->instance_change_notify(true, false);
 }
 
 bool RasterizerStorageGLES2::light_directional_get_blend_splits(RID p_light) const {
@@ -3330,7 +3397,7 @@ void RasterizerStorageGLES2::reflection_probe_set_update_mode(RID p_probe, VS::R
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->update_mode = p_mode;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::reflection_probe_set_intensity(RID p_probe, float p_intensity) {
@@ -3371,7 +3438,7 @@ void RasterizerStorageGLES2::reflection_probe_set_max_distance(RID p_probe, floa
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->max_distance = p_distance;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 void RasterizerStorageGLES2::reflection_probe_set_extents(RID p_probe, const Vector3 &p_extents) {
 
@@ -3379,7 +3446,7 @@ void RasterizerStorageGLES2::reflection_probe_set_extents(RID p_probe, const Vec
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->extents = p_extents;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 void RasterizerStorageGLES2::reflection_probe_set_origin_offset(RID p_probe, const Vector3 &p_offset) {
 
@@ -3387,7 +3454,7 @@ void RasterizerStorageGLES2::reflection_probe_set_origin_offset(RID p_probe, con
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->origin_offset = p_offset;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::reflection_probe_set_as_interior(RID p_probe, bool p_enable) {
@@ -3411,7 +3478,7 @@ void RasterizerStorageGLES2::reflection_probe_set_enable_shadows(RID p_probe, bo
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->enable_shadows = p_enable;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 void RasterizerStorageGLES2::reflection_probe_set_cull_mask(RID p_probe, uint32_t p_layers) {
 
@@ -3419,7 +3486,7 @@ void RasterizerStorageGLES2::reflection_probe_set_cull_mask(RID p_probe, uint32_
 	ERR_FAIL_COND(!reflection_probe);
 
 	reflection_probe->cull_mask = p_layers;
-	reflection_probe->instance_change_notify();
+	reflection_probe->instance_change_notify(true, false);
 }
 
 void RasterizerStorageGLES2::reflection_probe_set_resolution(RID p_probe, int p_resolution) {
@@ -3603,7 +3670,7 @@ void RasterizerStorageGLES2::lightmap_capture_set_bounds(RID p_capture, const AA
 	LightmapCapture *capture = lightmap_capture_data_owner.getornull(p_capture);
 	ERR_FAIL_COND(!capture);
 	capture->bounds = p_bounds;
-	capture->instance_change_notify();
+	capture->instance_change_notify(true, false);
 }
 AABB RasterizerStorageGLES2::lightmap_capture_get_bounds(RID p_capture) const {
 
@@ -3624,7 +3691,7 @@ void RasterizerStorageGLES2::lightmap_capture_set_octree(RID p_capture, const Po
 		PoolVector<uint8_t>::Read r = p_octree.read();
 		copymem(w.ptr(), r.ptr(), p_octree.size());
 	}
-	capture->instance_change_notify();
+	capture->instance_change_notify(true, false);
 }
 PoolVector<uint8_t> RasterizerStorageGLES2::lightmap_capture_get_octree(RID p_capture) const {
 
@@ -3773,6 +3840,10 @@ RID RasterizerStorageGLES2::particles_get_draw_pass_mesh(RID p_particles, int p_
 }
 
 void RasterizerStorageGLES2::update_particles() {
+}
+
+bool RasterizerStorageGLES2::particles_is_inactive(RID p_particles) const {
+	return true;
 }
 
 ////////
@@ -4394,6 +4465,7 @@ void RasterizerStorageGLES2::initialize() {
 		}
 	}
 
+	config.keep_original_textures = false;
 	config.shrink_textures_x2 = false;
 
 	config.float_texture_supported = config.extensions.has("GL_ARB_texture_float") || config.extensions.has("GL_OES_texture_float");
@@ -4541,6 +4613,7 @@ void RasterizerStorageGLES2::initialize() {
 #endif
 
 	config.force_vertex_shading = GLOBAL_GET("rendering/quality/shading/force_vertex_shading");
+	config.use_fast_texture_filter = GLOBAL_GET("rendering/quality/filters/use_nearest_mipmap_filter");
 }
 
 void RasterizerStorageGLES2::finalize() {

@@ -193,6 +193,7 @@ void ShaderTextEditor::_validate_script() {
 	if (err != OK) {
 		String error_text = "error(" + itos(sl.get_error_line()) + "): " + sl.get_error_text();
 		set_error(error_text);
+		set_error_pos(sl.get_error_line() - 1, 0);
 		for (int i = 0; i < get_text_edit()->get_line_count(); i++)
 			get_text_edit()->set_line_as_marked(i, false);
 		get_text_edit()->set_line_as_marked(sl.get_error_line() - 1, true);
@@ -263,7 +264,7 @@ void ShaderEditor::_menu_option(int p_option) {
 			shader_editor->delete_lines();
 		} break;
 		case EDIT_CLONE_DOWN: {
-			shader_editor->code_lines_down();
+			shader_editor->clone_lines_down();
 		} break;
 		case EDIT_TOGGLE_COMMENT: {
 

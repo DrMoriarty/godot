@@ -68,7 +68,6 @@ public:
 
 	enum Flags {
 		FLAG_ALIGN_Y_TO_VELOCITY,
-		FLAG_ANIM_LOOP,
 		FLAG_MAX
 	};
 
@@ -87,6 +86,7 @@ private:
 		Transform2D transform;
 		Color color;
 		float custom[4];
+		float rotation;
 		Vector2 velocity;
 		bool active;
 		float angle_rand;
@@ -168,7 +168,6 @@ private:
 	PoolVector<Color> emission_colors;
 	int emission_point_count;
 
-	bool anim_loop;
 	Vector2 gravity;
 
 	void _particles_process(float p_delta);

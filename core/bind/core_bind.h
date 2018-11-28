@@ -185,6 +185,7 @@ public:
 	virtual bool is_window_always_on_top() const;
 	virtual void request_attention();
 	virtual void center_window();
+	virtual void move_window_to_foreground();
 
 	virtual void set_borderless_window(bool p_borderless);
 	virtual bool get_borderless_window() const;
@@ -454,6 +455,7 @@ public:
 
 	PoolVector<uint8_t> get_buffer(int p_length) const; ///< get an array of bytes
 	String get_line() const;
+	Vector<String> get_csv_line(const String &p_delim = ",") const;
 	String get_as_text() const;
 	String get_md5(const String &p_path) const;
 	String get_sha256(const String &p_path) const;
@@ -479,11 +481,10 @@ public:
 
 	void store_string(const String &p_string);
 	void store_line(const String &p_string);
+	void store_csv_line(const Vector<String> &p_values, const String &p_delim = ",");
 
 	virtual void store_pascal_string(const String &p_string);
 	virtual String get_pascal_string();
-
-	Vector<String> get_csv_line(String delim = ",") const;
 
 	void store_buffer(const PoolVector<uint8_t> &p_buffer); ///< store an array of bytes
 
