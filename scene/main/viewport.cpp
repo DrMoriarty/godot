@@ -189,7 +189,7 @@ Viewport::GUI::GUI() {
 	dragging = false;
 	mouse_focus = NULL;
 	mouse_click_grabber = NULL;
-	mouse_focus_button = -1;
+	mouse_focus_mask = 0;
 	key_focus = NULL;
 	mouse_over = NULL;
 
@@ -671,15 +671,7 @@ void Viewport::_notification(int p_what) {
 		case SceneTree::NOTIFICATION_WM_FOCUS_OUT: {
 			if (gui.mouse_focus) {
 				//if mouse is being pressed, send a release event
-				Ref<InputEventMouseButton> mb;
-				mb.instance();
-				mb->set_position(gui.mouse_focus->get_local_mouse_position());
-				mb->set_global_position(gui.mouse_focus->get_local_mouse_position());
-				mb->set_button_index(gui.mouse_focus_button);
-				mb->set_pressed(false);
-				Control *c = gui.mouse_focus;
-				gui.mouse_focus = NULL;
-				c->call_multilevel(SceneStringNames::get_singleton()->_gui_input, mb);
+				_drop_mouse_focus();
 			}
 		} break;
 	}
@@ -1686,10 +1678,10 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 		if (mb->is_pressed()) {
 
 			Size2 pos = mpos;
-			if (gui.mouse_focus && mb->get_button_index() != gui.mouse_focus_button) {
+			if (gui.mouse_focus_mask) {
 
-				//do not steal mouse focus and stuff
-
+				//do not steal mouse focus and stuff while a focus mask exists
+				gui.mouse_focus_mask |= 1 << (mb->get_button_index() - 1); //add the button to the mask
 			} else {
 
 				bool is_handled = false;
@@ -1734,7 +1726,8 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				*/
 
 				gui.mouse_focus = _gui_find_control(pos);
-				gui.mouse_focus_button = mb->get_button_index();
+				gui.mouse_focus_mask = 1 << (mb->get_button_index() - 1);
+				gui.last_mouse_focus = gui.mouse_focus;
 
 				if (!gui.mouse_focus) {
 					return;
@@ -1755,7 +1748,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 			mb->set_position(pos);
 
 #ifdef DEBUG_ENABLED
-			if (ScriptDebugger::get_singleton()) {
+			if (ScriptDebugger::get_singleton() && gui.mouse_focus) {
 
 				Array arr;
 				arr.push_back(gui.mouse_focus->get_path());
@@ -1788,7 +1781,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				}
 			}
 
-			if (gui.mouse_focus->can_process()) {
+			if (gui.mouse_focus && gui.mouse_focus->can_process()) {
 				_gui_call_input(gui.mouse_focus, mb);
 			}
 
@@ -1837,6 +1830,8 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				//change mouse accordingly
 			}
 
+			gui.mouse_focus_mask &= ~(1 << (mb->get_button_index() - 1)); //remove from mask
+
 			if (!gui.mouse_focus) {
 				//release event is only sent if a mouse focus (previously pressed button) exists
 				return;
@@ -1852,12 +1847,11 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 			Control *mouse_focus = gui.mouse_focus;
 
 			//disable mouse focus if needed before calling input, this makes popups on mouse press event work better, as the release will never be received otherwise
-			if (mb->get_button_index() == gui.mouse_focus_button) {
+			if (gui.mouse_focus_mask == 0) {
 				gui.mouse_focus = NULL;
-				gui.mouse_focus_button = -1;
 			}
 
-			if (mouse_focus->can_process()) {
+			if (mouse_focus && mouse_focus->can_process()) {
 				_gui_call_input(mouse_focus, mb);
 			}
 
@@ -1900,6 +1894,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 							if (gui.drag_data.get_type() != Variant::NIL) {
 
 								gui.mouse_focus = NULL;
+								gui.mouse_focus_mask = 0;
 								break;
 							} else {
 								if (gui.drag_preview != NULL) {
@@ -1961,10 +1956,9 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 
 				// If the mouse is over a menu button, this menu will open automatically
 				// if there is already a pop-up menu open at the same hierarchical level.
-				if (popup_menu_parent && menu_button &&
-						popup_menu_parent->get_icon().is_null() &&
-						menu_button->get_icon().is_null() &&
-						(popup_menu->get_parent()->get_parent()->is_a_parent_of(menu_button) ||
+				if (popup_menu_parent && menu_button && popup_menu_parent->is_switch_on_hover() &&
+						!menu_button->is_disabled() && menu_button->is_switch_on_hover() &&
+						(popup_menu_parent->get_parent()->is_a_parent_of(menu_button) ||
 								menu_button->get_parent()->is_a_parent_of(popup_menu))) {
 
 					popup_menu->notification(Control::NOTIFICATION_MODAL_CLOSE);
@@ -2071,7 +2065,7 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 
 		OS::get_singleton()->set_cursor_shape((OS::CursorShape)cursor_shape);
 
-		if (over->can_process()) {
+		if (over && over->can_process()) {
 			_gui_call_input(over, mm);
 		}
 
@@ -2121,14 +2115,14 @@ void Viewport::_gui_input_event(Ref<InputEvent> p_event) {
 				set_input_as_handled();
 				return;
 			}
-		} else if (gui.mouse_focus) {
+		} else if (touch_event->get_index() == 0 && gui.last_mouse_focus) {
 
-			if (gui.mouse_focus->can_process()) {
+			if (gui.last_mouse_focus->can_process()) {
 
 				touch_event = touch_event->xformed_by(Transform2D()); //make a copy
 				touch_event->set_position(gui.focus_inv_xform.xform(pos));
 
-				_gui_call_input(gui.mouse_focus, touch_event);
+				_gui_call_input(gui.last_mouse_focus, touch_event);
 			}
 			set_input_as_handled();
 			return;
@@ -2412,7 +2406,7 @@ void Viewport::_gui_unfocus_control(Control *p_control) {
 void Viewport::_gui_hid_control(Control *p_control) {
 
 	if (gui.mouse_focus == p_control) {
-		gui.mouse_focus = NULL;
+		_drop_mouse_focus();
 	}
 
 	/* ???
@@ -2439,8 +2433,10 @@ void Viewport::_gui_hid_control(Control *p_control) {
 
 void Viewport::_gui_remove_control(Control *p_control) {
 
-	if (gui.mouse_focus == p_control)
+	if (gui.mouse_focus == p_control) {
 		gui.mouse_focus = NULL;
+		gui.mouse_focus_mask = 0;
+	}
 	if (gui.key_focus == p_control)
 		gui.key_focus = NULL;
 	if (gui.mouse_over == p_control)
@@ -2489,6 +2485,27 @@ void Viewport::_gui_accept_event() {
 		set_input_as_handled();
 }
 
+void Viewport::_drop_mouse_focus() {
+
+	Control *c = gui.mouse_focus;
+	int mask = gui.mouse_focus_mask;
+	gui.mouse_focus = NULL;
+	gui.mouse_focus_mask = 0;
+
+	for (int i = 0; i < 3; i++) {
+
+		if (mask & (1 << i)) {
+			Ref<InputEventMouseButton> mb;
+			mb.instance();
+			mb->set_position(c->get_local_mouse_position());
+			mb->set_global_position(c->get_local_mouse_position());
+			mb->set_button_index(i + 1);
+			mb->set_pressed(false);
+			c->call_multilevel(SceneStringNames::get_singleton()->_gui_input, mb);
+		}
+	}
+}
+
 List<Control *>::Element *Viewport::_gui_show_modal(Control *p_control) {
 
 	gui.modal_stack.push_back(p_control);
@@ -2498,15 +2515,8 @@ List<Control *>::Element *Viewport::_gui_show_modal(Control *p_control) {
 		p_control->_modal_set_prev_focus_owner(0);
 
 	if (gui.mouse_focus && !p_control->is_a_parent_of(gui.mouse_focus) && !gui.mouse_click_grabber) {
-		Ref<InputEventMouseButton> mb;
-		mb.instance();
-		mb->set_position(gui.mouse_focus->get_local_mouse_position());
-		mb->set_global_position(gui.mouse_focus->get_local_mouse_position());
-		mb->set_button_index(gui.mouse_focus_button);
-		mb->set_pressed(false);
-		Control *c = gui.mouse_focus;
-		gui.mouse_focus = NULL;
-		c->call_multilevel(SceneStringNames::get_singleton()->_gui_input, mb);
+
+		_drop_mouse_focus();
 	}
 
 	return gui.modal_stack.back();
@@ -2536,24 +2546,45 @@ void Viewport::_post_gui_grab_click_focus() {
 
 		if (gui.mouse_focus == focus_grabber)
 			return;
-		Ref<InputEventMouseButton> mb;
-		mb.instance();
 
-		//send unclic
-
+		int mask = gui.mouse_focus_mask;
 		Point2 click = gui.mouse_focus->get_global_transform_with_canvas().affine_inverse().xform(gui.last_mouse_pos);
-		mb->set_position(click);
-		mb->set_button_index(gui.mouse_focus_button);
-		mb->set_pressed(false);
-		gui.mouse_focus->call_multilevel(SceneStringNames::get_singleton()->_gui_input, mb);
+
+		for (int i = 0; i < 3; i++) {
+
+			if (mask & (1 << i)) {
+
+				Ref<InputEventMouseButton> mb;
+				mb.instance();
+
+				//send unclic
+
+				mb->set_position(click);
+				mb->set_button_index(i + 1);
+				mb->set_pressed(false);
+				gui.mouse_focus->call_multilevel(SceneStringNames::get_singleton()->_gui_input, mb);
+			}
+		}
 
 		gui.mouse_focus = focus_grabber;
 		gui.focus_inv_xform = gui.mouse_focus->get_global_transform_with_canvas().affine_inverse();
 		click = gui.mouse_focus->get_global_transform_with_canvas().affine_inverse().xform(gui.last_mouse_pos);
-		mb->set_position(click);
-		mb->set_button_index(gui.mouse_focus_button);
-		mb->set_pressed(true);
-		gui.mouse_focus->call_deferred(SceneStringNames::get_singleton()->_gui_input, mb);
+
+		for (int i = 0; i < 3; i++) {
+
+			if (mask & (1 << i)) {
+
+				Ref<InputEventMouseButton> mb;
+				mb.instance();
+
+				//send clic
+
+				mb->set_position(click);
+				mb->set_button_index(i + 1);
+				mb->set_pressed(true);
+				gui.mouse_focus->call_deferred(SceneStringNames::get_singleton()->_gui_input, mb);
+			}
+		}
 	}
 }
 

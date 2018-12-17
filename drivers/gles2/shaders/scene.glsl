@@ -84,6 +84,8 @@ uniform highp mat4 world_transform;
 
 uniform highp float time;
 
+uniform highp vec2 viewport_size;
+
 #ifdef RENDER_DEPTH
 uniform float light_bias;
 uniform float light_normal_bias;
@@ -677,6 +679,8 @@ uniform highp mat4 world_transform;
 
 uniform highp float time;
 
+uniform highp vec2 viewport_size;
+
 #if defined(SCREEN_UV_USED)
 uniform vec2 screen_pixel_size;
 #endif
@@ -1119,7 +1123,7 @@ LIGHT_SHADER_CODE
 	float NdotL = dot(N, L);
 	float cNdotL = max(NdotL, 0.0); // clamped NdotL
 	float NdotV = dot(N, V);
-	float cNdotV = max(NdotV, 0.0);
+	float cNdotV = max(abs(NdotV), 1e-6);
 
 #if defined(DIFFUSE_BURLEY) || defined(SPECULAR_BLINN) || defined(SPECULAR_SCHLICK_GGX) || defined(LIGHT_USE_CLEARCOAT)
 	vec3 H = normalize(V + L);
@@ -1380,6 +1384,7 @@ void main() {
 		discard;
 #endif
 	highp vec3 vertex = vertex_interp;
+	vec3 view = -normalize(vertex_interp);
 	vec3 albedo = vec3(1.0);
 	vec3 transmission = vec3(0.0);
 	float metallic = 0.0;
@@ -1453,7 +1458,7 @@ FRAGMENT_SHADER_CODE
 	vec3 diffuse_light = vec3(0.0, 0.0, 0.0);
 	vec3 ambient_light = vec3(0.0, 0.0, 0.0);
 
-	vec3 eye_position = -normalize(vertex_interp);
+	vec3 eye_position = view;
 
 #if defined(ALPHA_SCISSOR_USED)
 	if (alpha < alpha_scissor) {
