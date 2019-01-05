@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -435,7 +435,7 @@ void Viewport::_notification(int p_what) {
 						}
 					}
 
-					if (!has_mouse_motion) {
+					if (!has_mouse_motion && physics_has_last_mousepos) {
 						Ref<InputEventMouseMotion> mm;
 						mm.instance();
 						mm->set_global_position(physics_last_mousepos);
@@ -465,6 +465,7 @@ void Viewport::_notification(int p_what) {
 
 						pos = mm->get_position();
 						motion_tested = true;
+						physics_has_last_mousepos = true;
 						physics_last_mousepos = pos;
 						physics_last_mouse_state.alt = mm->get_alt();
 						physics_last_mouse_state.shift = mm->get_shift();
@@ -643,7 +644,7 @@ void Viewport::_notification(int p_what) {
 					}
 				}
 
-				if (!motion_tested && camera && physics_last_mousepos != Vector2(1e20, 1e20)) {
+				if (!motion_tested && camera && physics_has_last_mousepos) {
 
 					//test anyway for mouseenter/exit because objects might move
 					Vector3 from = camera->project_ray_origin(physics_last_mousepos);
@@ -3105,7 +3106,8 @@ Viewport::Viewport() {
 	physics_object_picking = false;
 	physics_object_capture = 0;
 	physics_object_over = 0;
-	physics_last_mousepos = Vector2(1e20, 1e20);
+	physics_has_last_mousepos = false;
+	physics_last_mousepos = Vector2(Math_INF, Math_INF);
 
 	shadow_atlas_size = 0;
 	for (int i = 0; i < 4; i++) {

@@ -5,9 +5,9 @@
 /*							 GODOT ENGINE								 */
 /*						https://godotengine.org							 */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.				 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)	 */
-/*																		 */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the		 */
 /* "Software"), to deal in the Software without restriction, including	 */
@@ -277,6 +277,13 @@ void ScriptTextEditor::_toggle_warning_pannel(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 		warnings_panel->set_visible(!warnings_panel->is_visible());
+	}
+}
+
+void ScriptTextEditor::_error_pressed(const Ref<InputEvent> &p_event) {
+	Ref<InputEventMouseButton> mb = p_event;
+	if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
+		code_editor->goto_error();
 	}
 }
 
@@ -1195,6 +1202,7 @@ void ScriptTextEditor::_bind_methods() {
 	ClassDB::bind_method("_lookup_symbol", &ScriptTextEditor::_lookup_symbol);
 	ClassDB::bind_method("_text_edit_gui_input", &ScriptTextEditor::_text_edit_gui_input);
 	ClassDB::bind_method("_toggle_warning_pannel", &ScriptTextEditor::_toggle_warning_pannel);
+	ClassDB::bind_method("_error_pressed", &ScriptTextEditor::_error_pressed);
 	ClassDB::bind_method("_warning_clicked", &ScriptTextEditor::_warning_clicked);
 	ClassDB::bind_method("_color_changed", &ScriptTextEditor::_color_changed);
 
@@ -1531,6 +1539,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	warnings_panel->set_focus_mode(FOCUS_CLICK);
 	warnings_panel->hide();
 
+	code_editor->get_error_label()->connect("gui_input", this, "_error_pressed");
 	code_editor->get_warning_label()->connect("gui_input", this, "_toggle_warning_pannel");
 	code_editor->get_warning_count_label()->connect("gui_input", this, "_toggle_warning_pannel");
 	warnings_panel->connect("meta_clicked", this, "_warning_clicked");

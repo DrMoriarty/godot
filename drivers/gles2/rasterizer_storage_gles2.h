@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,6 +76,8 @@ public:
 		bool keep_original_textures;
 
 		bool force_vertex_shading;
+
+		bool use_rgba_2d_shadows;
 	} config;
 
 	struct Resources {
@@ -86,6 +88,7 @@ public:
 		GLuint aniso_tex;
 
 		GLuint radical_inverse_vdc_cache_tex;
+		bool use_rgba_2d_shadows;
 
 		GLuint quadie;
 
@@ -261,6 +264,7 @@ public:
 				alloc_width(0),
 				alloc_height(0),
 				format(Image::FORMAT_L8),
+				type(VS::TEXTURE_TYPE_2D),
 				target(0),
 				data_size(0),
 				total_data_size(0),
@@ -400,7 +404,6 @@ public:
 
 			int blend_mode;
 
-			/*
 			enum LightMode {
 				LIGHT_MODE_NORMAL,
 				LIGHT_MODE_UNSHADED,
@@ -408,7 +411,6 @@ public:
 			};
 
 			int light_mode;
-			*/
 
 			bool uses_screen_texture;
 			bool uses_screen_uv;
@@ -837,6 +839,8 @@ public:
 		SelfList<Skeleton> update_list;
 		Set<RasterizerScene::InstanceBase *> instances;
 
+		Transform2D base_transform_2d;
+
 		Skeleton() :
 				use_2d(false),
 				size(0),
@@ -1161,9 +1165,30 @@ public:
 
 	/* CANVAS SHADOW */
 
+	struct CanvasLightShadow : public RID_Data {
+
+		int size;
+		int height;
+		GLuint fbo;
+		GLuint depth;
+		GLuint distance; //for older devices
+	};
+
+	RID_Owner<CanvasLightShadow> canvas_light_shadow_owner;
+
 	virtual RID canvas_light_shadow_buffer_create(int p_width);
 
 	/* LIGHT SHADOW MAPPING */
+
+	struct CanvasOccluder : public RID_Data {
+
+		GLuint vertex_id; // 0 means, unconfigured
+		GLuint index_id; // 0 means, unconfigured
+		PoolVector<Vector2> lines;
+		int len;
+	};
+
+	RID_Owner<CanvasOccluder> canvas_occluder_owner;
 
 	virtual RID canvas_light_occluder_create();
 	virtual void canvas_light_occluder_set_polylines(RID p_occluder, const PoolVector<Vector2> &p_lines);

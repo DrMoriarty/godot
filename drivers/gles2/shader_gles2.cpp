@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -364,14 +364,14 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 	strings.push_back(fragment_code1.get_data());
 
 	if (cc) {
-		code_string = cc->fragment.ascii();
+		code_string = cc->light.ascii();
 		strings.push_back(code_string.get_data());
 	}
 
 	strings.push_back(fragment_code2.get_data());
 
 	if (cc) {
-		code_string2 = cc->light.ascii();
+		code_string2 = cc->fragment.ascii();
 		strings.push_back(code_string2.get_data());
 	}
 
@@ -588,22 +588,24 @@ void ShaderGLES2::setup(
 			fragment_code0 = code.substr(0, cpos).ascii();
 			code = code.substr(cpos + globals_tag.length(), code.length());
 
-			cpos = code.find(code_tag);
+			cpos = code.find(light_code_tag);
 
-			if (cpos == -1) {
-				fragment_code1 = code.ascii();
-			} else {
+			String code2;
+
+			if (cpos != -1) {
 
 				fragment_code1 = code.substr(0, cpos).ascii();
-				String code2 = code.substr(cpos + code_tag.length(), code.length());
+				code2 = code.substr(cpos + light_code_tag.length(), code.length());
+			} else {
+				code2 = code;
+			}
 
-				cpos = code2.find(light_code_tag);
-				if (cpos == -1) {
-					fragment_code2 = code2.ascii();
-				} else {
-					fragment_code2 = code2.substr(0, cpos).ascii();
-					fragment_code3 = code2.substr(cpos + light_code_tag.length(), code2.length()).ascii();
-				}
+			cpos = code2.find(code_tag);
+			if (cpos == -1) {
+				fragment_code2 = code2.ascii();
+			} else {
+				fragment_code2 = code2.substr(0, cpos).ascii();
+				fragment_code3 = code2.substr(cpos + code_tag.length(), code2.length()).ascii();
 			}
 		}
 	}

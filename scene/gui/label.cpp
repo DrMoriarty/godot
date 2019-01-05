@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -244,7 +244,7 @@ void Label::_notification(int p_what) {
 							CharType n = xl_text[i + pos + 1];
 							if (uppercase) {
 								c = String::char_uppercase(c);
-								n = String::char_uppercase(c);
+								n = String::char_uppercase(n);
 							}
 
 							float move = font->draw_char(ci, Point2(x_ofs_shadow, y_ofs) + shadow_ofs, c, n, font_color_shadow, false);
@@ -265,7 +265,7 @@ void Label::_notification(int p_what) {
 						CharType n = xl_text[i + pos + 1];
 						if (uppercase) {
 							c = String::char_uppercase(c);
-							n = String::char_uppercase(c);
+							n = String::char_uppercase(n);
 						}
 
 						x_ofs += drawer.draw_char(ci, Point2(x_ofs, y_ofs), c, n, font_color);
@@ -395,7 +395,7 @@ void Label::regenerate_word_cache() {
 
 	for (int i = 0; i <= xl_text.length(); i++) {
 
-		CharType current = i < xl_text.length() ? xl_text[i] : ' '; //always a space at the end, so the algo works
+		CharType current = i < xl_text.length() ? xl_text[i] : L' '; //always a space at the end, so the algo works
 
 		if (uppercase)
 			current = String::char_uppercase(current);

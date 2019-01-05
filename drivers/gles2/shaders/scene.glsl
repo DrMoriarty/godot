@@ -2,6 +2,7 @@
 [vertex]
 
 #ifdef USE_GLES_OVER_GL
+#define lowp
 #define mediump
 #define highp
 #else
@@ -353,6 +354,10 @@ void main() {
 	uv2_interp = uv2_attrib;
 #endif
 
+#ifdef OVERRIDE_POSITION
+	highp vec4 position;
+#endif
+
 #if !defined(SKIP_TRANSFORM_USED) && defined(VERTEX_WORLD_COORDS_USED)
 	vertex = world_matrix * vertex;
 	normal = normalize((world_matrix * vec4(normal, 0.0)).xyz);
@@ -640,7 +645,12 @@ VERTEX_SHADER_CODE
 #endif //fog
 
 #endif //use vertex lighting
+
+#ifdef OVERRIDE_POSITION
+	gl_Position = position;
+#else
 	gl_Position = projection_matrix * vec4(vertex_interp, 1.0);
+#endif
 }
 
 /* clang-format off */
@@ -653,6 +663,7 @@ VERTEX_SHADER_CODE
 #endif
 
 #ifdef USE_GLES_OVER_GL
+#define lowp
 #define mediump
 #define highp
 #else
@@ -1252,7 +1263,7 @@ LIGHT_SHADER_CODE
 		float YdotH = dot(B, H);
 		float D = D_GGX_anisotropic(cNdotH, ax, ay, XdotH, YdotH, cNdotH);
 		//float G = G_GGX_anisotropic_2cos(cNdotL, ax, ay, XdotH, YdotH) * G_GGX_anisotropic_2cos(cNdotV, ax, ay, XdotH, YdotH);
-		float G = V_GGX_anisotropic(ax, ay, dot(T, V), dot(T, L), dot(B, V), dot(B, L), cNdotV, cNdotL))
+		float G = V_GGX_anisotropic(ax, ay, dot(T, V), dot(T, L), dot(B, V), dot(B, L), cNdotV, cNdotL);
 
 #else
 		float alpha = roughness * roughness;
@@ -1913,7 +1924,6 @@ FRAGMENT_SHADER_CODE
 #ifdef USE_SHADOW
 	{
 		highp vec4 splane = shadow_coord;
-		splane.xyz /= splane.w;
 
 		float shadow = sample_shadow(light_shadow_atlas, splane);
 		light_att *= shadow;

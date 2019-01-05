@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1121,9 +1121,10 @@ public:
 			r_features->push_back("etc");
 		else*/
 		String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
-		if (driver == "GLES2") {
+		if (driver == "GLES2" || driver == "GLES3") {
 			r_features->push_back("etc");
-		} else {
+		}
+		if (driver == "GLES3") {
 			r_features->push_back("etc2");
 		}
 
@@ -1157,6 +1158,9 @@ public:
 			r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, launcher_icons[i].option_id, PROPERTY_HINT_FILE, "*.png"), ""));
 		}
 
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/debug", PROPERTY_HINT_GLOBAL_FILE, "*.keystore"), ""));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/debug_user"), ""));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/debug_password"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/release", PROPERTY_HINT_GLOBAL_FILE, "*.keystore"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/release_user"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "keystore/release_password"), ""));
@@ -1417,12 +1421,15 @@ public:
 			err += "OpenJDK 8 jarsigner not configured in the Editor Settings.\n";
 		}
 
-		String dk = EditorSettings::get_singleton()->get("export/android/debug_keystore");
+		String dk = p_preset->get("keystore/debug");
 
 		if (!FileAccess::exists(dk)) {
 
-			valid = false;
-			err += "Debug keystore not configured in the Editor Settings.\n";
+			dk = EditorSettings::get_singleton()->get("export/android/debug_keystore");
+			if (!FileAccess::exists(dk)) {
+				valid = false;
+				err += "Debug keystore not configured in the Editor Settings nor in the preset.\n";
+			}
 		}
 
 		bool apk_expansion = p_preset->get("apk_expansion/enable");
@@ -1564,7 +1571,7 @@ public:
 				_fix_resources(p_preset, data);
 			}
 
-			if (file == "res/drawable/icon.png") {
+			if (file == "res/drawable-nodpi-v4/icon.png") {
 				bool found = false;
 				for (unsigned int i = 0; i < sizeof(launcher_icons) / sizeof(launcher_icons[0]); ++i) {
 					String icon_path = String(p_preset->get(launcher_icons[i].option_id)).strip_edges();
@@ -1772,9 +1779,17 @@ public:
 			String password;
 			String user;
 			if (p_debug) {
-				keystore = EditorSettings::get_singleton()->get("export/android/debug_keystore");
-				password = EditorSettings::get_singleton()->get("export/android/debug_keystore_pass");
-				user = EditorSettings::get_singleton()->get("export/android/debug_keystore_user");
+
+				keystore = p_preset->get("keystore/debug");
+				password = p_preset->get("keystore/debug_password");
+				user = p_preset->get("keystore/debug_user");
+
+				if (keystore.empty()) {
+
+					keystore = EditorSettings::get_singleton()->get("export/android/debug_keystore");
+					password = EditorSettings::get_singleton()->get("export/android/debug_keystore_pass");
+					user = EditorSettings::get_singleton()->get("export/android/debug_keystore_user");
+				}
 
 				ep.step("Signing debug APK...", 103);
 
