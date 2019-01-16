@@ -573,10 +573,10 @@ bool CanvasItemEditor::_get_bone_shape(Vector<Vector2> *shape, Vector<Vector2> *
 	Node2D *from_node = Object::cast_to<Node2D>(ObjectDB::get_instance(bone->key().from));
 	Node2D *to_node = Object::cast_to<Node2D>(ObjectDB::get_instance(bone->key().to));
 
-	if (!from_node->is_inside_tree())
-		return false; //may have been removed
 	if (!from_node)
 		return false;
+	if (!from_node->is_inside_tree())
+		return false; //may have been removed
 
 	if (!to_node && bone->get().length == 0)
 		return false;
@@ -2033,16 +2033,19 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 
 			// Find the item to select
 			CanvasItem *canvas_item = NULL;
-			Vector<_SelectResult> selection;
-
-			// Retrieve the items
-			_get_canvas_items_at_pos(click, selection);
 
 			// Retrieve the bones
+			Vector<_SelectResult> selection = Vector<_SelectResult>();
 			_get_bones_at_pos(click, selection);
-
 			if (!selection.empty()) {
 				canvas_item = selection[0].item;
+			} else {
+				// Retrieve the canvas items
+				selection = Vector<_SelectResult>();
+				_get_canvas_items_at_pos(click, selection);
+				if (!selection.empty()) {
+					canvas_item = selection[0].item;
+				}
 			}
 
 			if (!canvas_item) {

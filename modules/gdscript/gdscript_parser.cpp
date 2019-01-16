@@ -4559,6 +4559,10 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				member.line = tokenizer->get_token_line();
 				member.usages = 0;
 				member.rpc_mode = rpc_mode;
+#ifdef TOOLS_ENABLED
+				Variant::CallError ce;
+				member.default_value = Variant::construct(member._export.type, NULL, 0, ce);
+#endif
 
 				if (current_class->constant_expressions.has(member.identifier)) {
 					_set_error("A constant named '" + String(member.identifier) + "' already exists in this class (at line: " +
@@ -6224,7 +6228,7 @@ GDScriptParser::DataType GDScriptParser::_reduce_node_type(Node *p_node) {
 					if (check_types && index_type.has_type) {
 						if (base_type.kind == DataType::BUILTIN) {
 							// Check if indexing is valid
-							bool error = index_type.kind != DataType::BUILTIN;
+							bool error = index_type.kind != DataType::BUILTIN && base_type.builtin_type != Variant::DICTIONARY;
 							if (!error) {
 								switch (base_type.builtin_type) {
 									// Expect int or real as index
@@ -6767,10 +6771,10 @@ GDScriptParser::DataType GDScriptParser::_reduce_function_call_type(const Operat
 				valid = _get_function_signature(base_type, callee_name, return_type, arg_types,
 						default_args_count, is_static, is_vararg);
 
-				if (valid) {
-					return_type = original_type;
-					return_type.is_meta_type = false;
-				}
+				return_type = original_type;
+				return_type.is_meta_type = false;
+
+				valid = true; // There's always an initializer, we can asume this is true
 			}
 
 			if (!valid) {
@@ -6829,6 +6833,7 @@ GDScriptParser::DataType GDScriptParser::_reduce_function_call_type(const Operat
 		} break;
 	}
 
+#ifdef DEBUG_ENABLED
 	if (!check_types) {
 		return return_type;
 	}
@@ -6854,11 +6859,9 @@ GDScriptParser::DataType GDScriptParser::_reduce_function_call_type(const Operat
 
 		if (!par_type.has_type) {
 			_mark_line_as_unsafe(p_call->line);
-#ifdef DEBUG_ENABLED
 			if (par_type.may_yield && p_call->arguments[i]->type == Node::TYPE_OPERATOR) {
 				_add_warning(GDScriptWarning::FUNCTION_MAY_YIELD, p_call->line, _find_function_name(static_cast<OperatorNode *>(p_call->arguments[i])));
 			}
-#endif // DEBUG_ENABLED
 		} else if (!_is_type_compatible(arg_types[i - arg_diff], par_type, true)) {
 			// Supertypes are acceptable for dynamic compliance
 			if (!_is_type_compatible(par_type, arg_types[i - arg_diff])) {
@@ -6871,13 +6874,13 @@ GDScriptParser::DataType GDScriptParser::_reduce_function_call_type(const Operat
 				_mark_line_as_unsafe(p_call->line);
 			}
 		} else {
-#ifdef DEBUG_ENABLED
 			if (arg_type.kind == DataType::BUILTIN && arg_type.builtin_type == Variant::INT && par_type.kind == DataType::BUILTIN && par_type.builtin_type == Variant::REAL) {
 				_add_warning(GDScriptWarning::NARROWING_CONVERSION, p_call->line, callee_name);
 			}
-#endif // DEBUG_ENABLED
 		}
 	}
+
+#endif // DEBUG_ENABLED
 
 	return return_type;
 }
@@ -8110,6 +8113,7 @@ Error GDScriptParser::_parse(const String &p_base_path) {
 	check_types = false;
 #endif
 
+#ifdef DEBUG_ENABLED
 	// Resolve all class-level stuff before getting into function blocks
 	_check_class_level_types(main_class);
 
@@ -8124,7 +8128,6 @@ Error GDScriptParser::_parse(const String &p_base_path) {
 		return ERR_PARSE_ERROR;
 	}
 
-#ifdef DEBUG_ENABLED
 	// Resolve warning ignores
 	Vector<Pair<int, String> > warning_skips = tokenizer->get_warning_skips();
 	bool warning_is_error = GLOBAL_GET("debug/gdscript/warnings/treat_warnings_as_errors").booleanize();

@@ -452,7 +452,6 @@ void register_scene_types() {
 	ClassDB::register_class<Curve3D>();
 	ClassDB::register_class<Path>();
 	ClassDB::register_class<PathFollow>();
-	ClassDB::register_class<OrientedPathFollow>();
 	ClassDB::register_class<VisibilityNotifier>();
 	ClassDB::register_class<VisibilityEnabler>();
 	ClassDB::register_class<WorldEnvironment>();
@@ -746,27 +745,20 @@ void unregister_scene_types() {
 
 	DynamicFont::finish_dynamic_fonts();
 
-	if (resource_saver_text.is_valid()) {
-		ResourceSaver::remove_resource_format_saver(resource_saver_text);
-		resource_saver_text.unref();
-	}
-	if (resource_loader_text.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_loader_text);
-		resource_loader_text.unref();
-	}
+	ResourceSaver::remove_resource_format_saver(resource_saver_text);
+	resource_saver_text.unref();
 
-	if (resource_saver_shader.is_valid()) {
-		ResourceSaver::remove_resource_format_saver(resource_saver_shader);
-		resource_saver_shader.unref();
-	}
-	if (resource_loader_shader.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_loader_shader);
-		resource_loader_shader.unref();
-	}
-	if (resource_loader_bmfont.is_valid()) {
-		ResourceLoader::remove_resource_format_loader(resource_loader_bmfont);
-		resource_loader_bmfont.unref();
-	}
+	ResourceLoader::remove_resource_format_loader(resource_loader_text);
+	resource_loader_text.unref();
+
+	ResourceSaver::remove_resource_format_saver(resource_saver_shader);
+	resource_saver_shader.unref();
+
+	ResourceLoader::remove_resource_format_loader(resource_loader_shader);
+	resource_loader_shader.unref();
+
+	ResourceLoader::remove_resource_format_loader(resource_loader_bmfont);
+	resource_loader_bmfont.unref();
 
 	SpatialMaterial::finish_shaders();
 	ParticlesMaterial::finish_shaders();
