@@ -24,12 +24,15 @@
 # Nicola Gramola <nicola.gramola@gmail.com>, 2018.
 # Davide Wayan Mores <moresdavidewayan@gmail.com>, 2018.
 # Alessandro Zoppi <alessandro.zoppi@live.it>, 2019.
+# Hairic95 <hairic95@gmail.com>, 2019.
+# Christian Biffi <creixx@virgilio.it>, 2019.
+# Giuseppe Guerra <me@nyodev.xyz>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-01-04 04:09+0000\n"
-"Last-Translator: Alessandro Zoppi <alessandro.zoppi@live.it>\n"
+"PO-Revision-Date: 2019-01-26 13:31+0000\n"
+"Last-Translator: Giuseppe Guerra <me@nyodev.xyz>\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/godot-engine/"
 "godot/it/>\n"
 "Language: it\n"
@@ -37,7 +40,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.4-dev\n"
+"X-Generator: Weblate 3.5-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -92,9 +95,8 @@ msgid "Balanced"
 msgstr "Bilanciato"
 
 #: editor/animation_bezier_editor.cpp
-#, fuzzy
 msgid "Mirror"
-msgstr "Specchia X"
+msgstr "Specchia"
 
 #: editor/animation_bezier_editor.cpp
 msgid "Insert Key Here"
@@ -144,7 +146,7 @@ msgstr "Proprietà:"
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "3D Transform Track"
-msgstr "Tipo Transform"
+msgstr "Trasformazione 3D"
 
 #: editor/animation_track_editor.cpp
 msgid "Call Method Track"
@@ -152,7 +154,7 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Bezier Curve Track"
-msgstr ""
+msgstr "Traccia Curva di Bezier"
 
 #: editor/animation_track_editor.cpp
 msgid "Audio Playback Track"
@@ -164,19 +166,16 @@ msgid "Animation Playback Track"
 msgstr "Ferma il playback dell'animazione. (S)"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Add Track"
-msgstr "Anim Aggiungi Traccia"
+msgstr "Aggiungi Traccia"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation Length Time (seconds)"
-msgstr "Lunghezza animazone (in secondi)."
+msgstr "Durata animazione (in secondi)"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation Looping"
-msgstr "Zoom Animazione."
+msgstr "Ripeti Animazione"
 
 #: editor/animation_track_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
@@ -194,9 +193,8 @@ msgid "Anim Clips:"
 msgstr "Clips"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Toggle this track on/off."
-msgstr "Abilita modalità senza distrazioni."
+msgstr "Attiva/Disattiva la traccia."
 
 #: editor/animation_track_editor.cpp
 msgid "Update Mode (How this property is set)"
@@ -212,14 +210,12 @@ msgid "Loop Wrap Mode (Interpolate end with beginning on loop)"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Remove this track."
-msgstr "Rimuovi traccia selezionata."
+msgstr "Rimuovi questa traccia."
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Time (s): "
-msgstr "Tempo(i) di Crossfade:"
+msgstr "Tempo (s): "
 
 #: editor/animation_track_editor.cpp
 msgid "Continuous"
@@ -234,13 +230,13 @@ msgid "Trigger"
 msgstr "Attivazione"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Capture"
-msgstr "Texture"
+msgstr "Cattura"
 
 #: editor/animation_track_editor.cpp
+#, fuzzy
 msgid "Nearest"
-msgstr ""
+msgstr "Più vicino"
 
 #: editor/animation_track_editor.cpp editor/plugins/curve_editor_plugin.cpp
 #: editor/property_editor.cpp
@@ -249,7 +245,7 @@ msgstr "Lineare"
 
 #: editor/animation_track_editor.cpp
 msgid "Cubic"
-msgstr ""
+msgstr "Cubico"
 
 #: editor/animation_track_editor.cpp
 #, fuzzy
@@ -355,7 +351,7 @@ msgstr ""
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Method not found in object: "
-msgstr "VariableGet non trovato nello script: "
+msgstr "Metodo non trovato nell'oggetto: "
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Move Keys"
@@ -364,7 +360,7 @@ msgstr "Anim Sposta Key"
 #: editor/animation_track_editor.cpp
 #, fuzzy
 msgid "Clipboard is empty"
-msgstr "Clipboard risorse vuota!"
+msgstr "Gli appunti sono vuoti"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Scale Keys"
@@ -403,9 +399,8 @@ msgid "Edit"
 msgstr "Modifica"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation properties."
-msgstr "AnimazioneAlbero"
+msgstr "Proprietà animazione."
 
 #: editor/animation_track_editor.cpp
 #, fuzzy
@@ -434,19 +429,16 @@ msgid "Duplicate Transposed"
 msgstr "Duplica Transposto"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Delete Selection"
-msgstr "Elimina selezionati"
+msgstr "Elimina la selezione"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Go to Next Step"
-msgstr "Vai a Step Successivo"
+msgstr "Vai allo Step Successivo"
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Go to Previous Step"
-msgstr "Vai a Step Precedente"
+msgstr "Vai allo Step Precedente"
 
 #: editor/animation_track_editor.cpp
 msgid "Optimize Animation"
@@ -590,9 +582,8 @@ msgid "Warnings:"
 msgstr "Avvertimento"
 
 #: editor/code_editor.cpp
-#, fuzzy
 msgid "Font Size:"
-msgstr "Dimensione Font sorgente:"
+msgstr "Dimensione Font:"
 
 #: editor/code_editor.cpp
 msgid "Line:"
@@ -700,17 +691,15 @@ msgstr "Disconnetti"
 #: editor/connections_dialog.cpp
 #, fuzzy
 msgid "Connect Signal: "
-msgstr "Connessione Segnali:"
+msgstr "Connetti il segnale: "
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Edit Connection: "
-msgstr "Modifica Connessioni"
+msgstr "Modifica Connessione: "
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Are you sure you want to remove all connections from the \"%s\" signal?"
-msgstr "Sei sicuro di voler eseguire più di un progetto?"
+msgstr "Sei sicuro di voler rimuovere tutte le connessioni dal segnale \"%s\"?"
 
 #: editor/connections_dialog.cpp editor/editor_help.cpp editor/node_dock.cpp
 msgid "Signals"
@@ -721,9 +710,8 @@ msgid "Are you sure you want to remove all connections from this signal?"
 msgstr ""
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Disconnect All"
-msgstr "Disconnetti"
+msgstr "Disconnetti tutto"
 
 #: editor/connections_dialog.cpp
 #, fuzzy
@@ -731,9 +719,8 @@ msgid "Edit..."
 msgstr "Modifica"
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Go To Method"
-msgstr "Metodi"
+msgstr "Vai al metodo"
 
 #: editor/create_dialog.cpp
 msgid "Change %s Type"
@@ -1339,8 +1326,29 @@ msgid "Storing File:"
 msgstr "Memorizzazione File:"
 
 #: editor/editor_export.cpp
+#, fuzzy
+msgid "No export template found at the expected path:"
+msgstr ""
+"Nessun template di esportazione trovato.\n"
+"Scarica ed installa i template di esportazione."
+
+#: editor/editor_export.cpp
 msgid "Packing"
 msgstr "Impacchettando"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Custom debug template not found."
+msgstr "Pacchetto di debug personalizzato non trovato."
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Custom release template not found."
+msgstr "Pacchetto di release personalizzato non trovato."
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
 msgid "Template file not found:"
@@ -1355,9 +1363,8 @@ msgid "File Exists, Overwrite?"
 msgstr "File Esistente, Sovrascrivere?"
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
-#, fuzzy
 msgid "Select This Folder"
-msgstr "Seleziona Metodo"
+msgstr "Seleziona questa cartella"
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
 msgid "Copy Path"
@@ -1370,7 +1377,6 @@ msgstr "Mostra nel File Manager"
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Show in File Manager"
 msgstr "Mostra nel File Manager"
 
@@ -1515,19 +1521,16 @@ msgid "Methods"
 msgstr "Metodi"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Methods:"
-msgstr "Metodi"
+msgstr "Metodi:"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Theme Properties"
-msgstr "Proprietà"
+msgstr "Proprietà del tema"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Theme Properties:"
-msgstr "Proprietà:"
+msgstr "Proprietà del tema:"
 
 #: editor/editor_help.cpp modules/visual_script/visual_script_editor.cpp
 msgid "Signals:"
@@ -1554,14 +1557,12 @@ msgid "Constants:"
 msgstr "Costanti:"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Class Description"
-msgstr "Descrizione"
+msgstr "Descrizione della classe"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Class Description:"
-msgstr "Descrizione:"
+msgstr "Descrizione della classe:"
 
 #: editor/editor_help.cpp
 msgid "Online Tutorials:"
@@ -1578,12 +1579,10 @@ msgstr ""
 "$url2]richiedendone una[/url][/color]."
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Property Descriptions"
-msgstr "Descrizione Proprietà:"
+msgstr "Descrizione Proprietà"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Property Descriptions:"
 msgstr "Descrizione Proprietà:"
 
@@ -1596,12 +1595,10 @@ msgstr ""
 "$color][url=$url]aggiungendone una[/url][/color]!"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Method Descriptions"
-msgstr "Descrizione Metodo:"
+msgstr "Descrizione Metodo"
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Method Descriptions:"
 msgstr "Descrizione Metodo:"
 
@@ -1619,39 +1616,32 @@ msgid "Search Help"
 msgstr "Cerca Aiuto"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Display All"
-msgstr "Mostra Normale"
+msgstr "Mostra Tutto"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Classes Only"
-msgstr "Classi"
+msgstr "Solo le classi"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Methods Only"
-msgstr "Metodi"
+msgstr "Solo i metodi"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Signals Only"
-msgstr "Segnali"
+msgstr "Solo i segnali"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Constants Only"
-msgstr "Costanti"
+msgstr "Solo le costanti"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Properties Only"
-msgstr "Proprietà"
+msgstr "Solo le proprietà"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Theme Properties Only"
-msgstr "Proprietà"
+msgstr "Solo le proprietà del tema"
 
 #: editor/editor_help_search.cpp
 #, fuzzy
@@ -1659,9 +1649,8 @@ msgid "Member Type"
 msgstr "Membri"
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Class"
-msgstr "Classe:"
+msgstr "Classe"
 
 #: editor/editor_inspector.cpp editor/project_settings_editor.cpp
 msgid "Property:"
@@ -2037,13 +2026,12 @@ msgid "Unable to load addon script from path: '%s'."
 msgstr "Impossibile caricare uno script aggiuntivo dal percorso: '%s'."
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid ""
 "Unable to load addon script from path: '%s' There seems to be an error in "
 "the code, please check the syntax."
 msgstr ""
-"Impossibile caricare uno script aggiuntivo dal percorso: Lo script '%s' non "
-"è in tool mode."
+"Impossibile caricare uno script aggiuntivo dal percorso: '%s' Sembra esserci "
+"un errore nel codice, controlla la sintassi."
 
 #: editor/editor_node.cpp
 msgid ""
@@ -2099,19 +2087,16 @@ msgstr "Default"
 
 #: editor/editor_node.cpp editor/editor_properties.cpp
 #: editor/plugins/script_editor_plugin.cpp editor/property_editor.cpp
-#, fuzzy
 msgid "Show in FileSystem"
-msgstr "Mostra nel File System"
+msgstr "Mostra nel FileSystem"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Play This Scene"
 msgstr "Esegui Scena"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Close Tab"
-msgstr "Chiudi le altre schede"
+msgstr "Chiudi scheda"
 
 #: editor/editor_node.cpp
 msgid "Switch Scene Tab"
@@ -2186,7 +2171,6 @@ msgid "Save Scene"
 msgstr "Salva Scena"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Save All Scenes"
 msgstr "Salva tutte le Scene"
 
@@ -2245,9 +2229,8 @@ msgid "Tools"
 msgstr "Strumenti"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Open Project Data Folder"
-msgstr "Aprire Gestione Progetti?"
+msgstr "Apri la cartella del progetto"
 
 #: editor/editor_node.cpp
 msgid "Quit to Project List"
@@ -3419,6 +3402,19 @@ msgstr "Preset..."
 #: editor/import_dock.cpp
 msgid "Reimport"
 msgstr "Reimporta"
+
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr ""
+
+#: editor/import_dock.cpp
+msgid "Changing the type of an imported file requires editor restart."
+msgstr ""
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
@@ -6928,7 +6924,7 @@ msgstr "Rimuovi Punto Percorso"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "You haven't selected a texture to remove."
-msgstr ""
+msgstr "Non hai selezionato una texture da rimuovere."
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Create from scene? This will overwrite all current tiles."
@@ -7391,6 +7387,38 @@ msgid "Browse"
 msgstr "Sfoglia"
 
 #: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
+
+#: editor/project_manager.cpp
 msgid "Unnamed Project"
 msgstr "Progetto Senza Nome"
 
@@ -7647,7 +7675,7 @@ msgstr "Aggiungi Evento"
 
 #: editor/project_settings_editor.cpp
 msgid "Button"
-msgstr ""
+msgstr "Bottone"
 
 #: editor/project_settings_editor.cpp
 msgid "Left Button."
@@ -8129,6 +8157,18 @@ msgstr "Sposta Nodi In Genitore"
 #: editor/scene_tree_dock.cpp
 msgid "Duplicate Node(s)"
 msgstr "Duplica Nodo(i)"
+
+#: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
@@ -9436,6 +9476,90 @@ msgstr ""
 msgid "Set %s"
 msgstr "Imposta parametri"
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr ""
+
+#: platform/android/export/export.cpp
+#, fuzzy
+msgid "Invalid package name:"
+msgstr "Nome classe invalido"
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "The character '%s' is not allowed in Identifier."
+msgstr "Il nome non è un identificatore valido:"
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "Invalid Identifier:"
+msgstr "Il nome non è un identificatore valido:"
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr ""
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr "Esegui nel Browser"
@@ -9473,6 +9597,64 @@ msgstr "Impossibile leggere file:\n"
 #, fuzzy
 msgid "Using default boot splash image."
 msgstr "Impossibile leggere file:\n"
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid package unique name."
+msgstr "Nome unico invalido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid product GUID."
+msgstr "GUID prodotto invalido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr "GUID publisher invalido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid background color."
+msgstr "Colore di background invalido."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr ""
+"Dimensioni dell'immagine dello Store Logo invalide (dovrebbero essere 50x50)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr ""
+"Dimensioni non valide dell'immagine del logo quadrato 44x44 (dovrebbero "
+"essere 44x44)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr ""
+"Dimensioni non valide dell'immagine del logo quadrato 71x71 (dovrebbero "
+"essere 71x71)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr ""
+"Dimensioni non valide dell'immagine del logo quadrato 150x150 (dovrebbero "
+"essere 150x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr ""
+"Dimensioni non valide dell'immagine del logo quadrato 310x310 (dovrebbero "
+"essere 310x310)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr ""
+"Dimensioni non valide dell'immagine del logo quadrato 310x150 (dovrebbero "
+"essere 310x150)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
+msgstr ""
+"Dimensioni non valide dell'immagine dello splash screen (dovrebbero essere "
+"620x300)."
 
 #: scene/2d/animated_sprite.cpp
 msgid ""
@@ -9642,7 +9824,7 @@ msgstr ""
 
 #: scene/3d/arvr_nodes.cpp
 msgid "ARVRCamera must have an ARVROrigin node as its parent"
-msgstr "ARVRCamera deve avere un nodo ARVROrigin come suo genitore."
+msgstr "ARVRCamera deve avere un nodo ARVROrigin come suo nodo padre"
 
 #: scene/3d/arvr_nodes.cpp
 msgid "ARVRController must have an ARVROrigin node as its parent"
@@ -9789,16 +9971,9 @@ msgstr ""
 "Path2D."
 
 #: scene/3d/path.cpp
-#, fuzzy
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr ""
-"PathFollow2D funziona solamente quando impostato come figlio di un nodo "
-"Path2D."
-
-#: scene/3d/path.cpp
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr ""
 
 #: scene/3d/physics_body.cpp
@@ -10014,6 +10189,12 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Varyings can only be assigned in vertex function."
 msgstr ""
+
+#, fuzzy
+#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
+#~ msgstr ""
+#~ "PathFollow2D funziona solamente quando impostato come figlio di un nodo "
+#~ "Path2D."
 
 #, fuzzy
 #~ msgid "Split already exists."
@@ -11258,66 +11439,6 @@ msgstr ""
 
 #~ msgid "Error creating the package signature."
 #~ msgstr "Errore di creazione della firma del pacchetto."
-
-#~ msgid ""
-#~ "No export templates found.\n"
-#~ "Download and install export templates."
-#~ msgstr ""
-#~ "Nessun template di esportazione trovato.\n"
-#~ "Scarica ed installa i template di esportazione."
-
-#~ msgid "Custom debug package not found."
-#~ msgstr "Pacchetto di debug personalizzato non trovato."
-
-#~ msgid "Custom release package not found."
-#~ msgstr "Pacchetto di release personalizzato non trovato."
-
-#~ msgid "Invalid unique name."
-#~ msgstr "Nome unico invalido."
-
-#~ msgid "Invalid product GUID."
-#~ msgstr "GUID prodotto invalido."
-
-#~ msgid "Invalid publisher GUID."
-#~ msgstr "GUID publisher invalido."
-
-#~ msgid "Invalid background color."
-#~ msgstr "Colore di background invalido."
-
-#~ msgid "Invalid Store Logo image dimensions (should be 50x50)."
-#~ msgstr ""
-#~ "Dimensioni dell'immagine dello Store Logo invalide (dovrebbero essere "
-#~ "50x50)."
-
-#~ msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine del logo quadrato 44x44 (dovrebbero "
-#~ "essere 44x44)."
-
-#~ msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine del logo quadrato 71x71 (dovrebbero "
-#~ "essere 71x71)."
-
-#~ msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine del logo quadrato 150x150 (dovrebbero "
-#~ "essere 150x150)."
-
-#~ msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine del logo quadrato 310x310 (dovrebbero "
-#~ "essere 310x310)."
-
-#~ msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine del logo quadrato 310x150 (dovrebbero "
-#~ "essere 310x150)."
-
-#~ msgid "Invalid splash screen image dimensions (should be 620x300)."
-#~ msgstr ""
-#~ "Dimensioni non valide dell'immagine dello splash screen (dovrebbero "
-#~ "essere 620x300)."
 
 #~ msgid "RAW Mode"
 #~ msgstr "Modalità RAW"

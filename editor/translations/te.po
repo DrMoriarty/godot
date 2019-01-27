@@ -1,47 +1,41 @@
-# Bulgarian translation of the Godot Engine editor
+# Telugu translation of the Godot Engine editor
 # Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.
 # Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)
 # This file is distributed under the same license as the Godot source code.
-# Bojidar Marinov <bojidar.marinov.bg@gmail.com>, 2016.
-# Иван Пенев (Адмирал АнимЕ) <aeternus.arcis@gmail.com>, 2016-2017.
-# Любомир Василев <lyubomirv@abv.bg>, 2018.
-# MaresPW <marespw206@gmail.com>, 2018.
-# PakoSt <kokotekilata@gmail.com>, 2018.
+# suresh p <suresh9247@gmail.com>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-12-13 14:38+0100\n"
-"Last-Translator: PakoSt <kokotekilata@gmail.com>\n"
-"Language-Team: Bulgarian <https://hosted.weblate.org/projects/godot-engine/"
-"godot/bg/>\n"
-"Language: bg\n"
-"MIME-Version: 1.0\n"
+"PO-Revision-Date: 2019-01-16 20:20+0000\n"
+"Last-Translator: suresh p <suresh9247@gmail.com>\n"
+"Language-Team: Telugu <https://hosted.weblate.org/projects/godot-engine/"
+"godot/te/>\n"
+"Language: te\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Weblate 3.4-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
 msgid "Invalid type argument to convert(), use TYPE_* constants."
 msgstr ""
-"Невалиден агрумент тип на convert(), използвайте константите започващи с "
-"TYPE_*."
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/mono/glue/gd_glue.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
 msgid "Not enough bytes for decoding bytes, or invalid format."
-msgstr "Недостатъчно байтове за разкодиране или недействителен формат."
+msgstr "డీకోడింగ్ బైట్లు కోసం తగినన్ని బైట్లు లేవు . లేదా చెల్లని ఫార్మాట్(Format)."
 
 #: core/math/expression.cpp
+#, fuzzy
 msgid "Invalid input %i (not passed) in expression"
-msgstr ""
+msgstr "వ్యక్తీకరణలో చెల్లని ఇన్పుట్% i (ఆమోదించబడలేదు)"
 
 #: core/math/expression.cpp
+#, fuzzy
 msgid "self can't be used because instance is null (not passed)"
-msgstr ""
+msgstr "తనకు తానుగా ఉపయోగించుకోలేదు ఎందుకంటే instance ఒక శూన్యం (ఆమోదించబడలేదు )"
 
 #: core/math/expression.cpp
 msgid "Invalid operands to operator %s, %s and %s."
@@ -57,7 +51,7 @@ msgstr ""
 
 #: core/math/expression.cpp
 msgid "Invalid arguments to construct '%s'"
-msgstr "Невалидени агрументи за конструкция '%s'"
+msgstr ""
 
 #: core/math/expression.cpp
 msgid "On call to '%s':"
@@ -65,18 +59,16 @@ msgstr ""
 
 #: editor/animation_bezier_editor.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
-#, fuzzy
 msgid "Free"
-msgstr "Свободен"
+msgstr ""
 
 #: editor/animation_bezier_editor.cpp
 msgid "Balanced"
 msgstr ""
 
 #: editor/animation_bezier_editor.cpp
-#, fuzzy
 msgid "Mirror"
-msgstr "Отрази (огледално)"
+msgstr ""
 
 #: editor/animation_bezier_editor.cpp
 msgid "Insert Key Here"
@@ -143,18 +135,16 @@ msgid "Animation Playback Track"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Add Track"
-msgstr "Добавяне на нови пътечки."
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Animation Length Time (seconds)"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation Looping"
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
@@ -186,14 +176,12 @@ msgid "Loop Wrap Mode (Interpolate end with beginning on loop)"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Remove this track."
-msgstr "Премахване на пътечката."
+msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Time (s): "
-msgstr "Стъпка (сек.):"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Continuous"
@@ -205,7 +193,7 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Trigger"
-msgstr "Спусък"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Capture"
@@ -218,7 +206,7 @@ msgstr ""
 #: editor/animation_track_editor.cpp editor/plugins/curve_editor_plugin.cpp
 #: editor/property_editor.cpp
 msgid "Linear"
-msgstr "Линейно"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Cubic"
@@ -238,14 +226,12 @@ msgid "Insert Key"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Duplicate Key(s)"
-msgstr "Направи дупликат на Key(s)"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Delete Key(s)"
-msgstr "Изтрий Key(s)"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Remove Anim Track"
@@ -266,7 +252,7 @@ msgstr ""
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 #: editor/plugins/particles_editor_plugin.cpp editor/script_create_dialog.cpp
 msgid "Create"
-msgstr "Създаване"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Anim Insert"
@@ -354,14 +340,12 @@ msgid "Group tracks by node or display them as plain list."
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Snap (s): "
-msgstr "Стъпка (сек.):"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Animation step value."
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/animation_track_editor.cpp editor/editor_properties.cpp
 #: editor/plugins/polygon_2d_editor_plugin.cpp
@@ -374,16 +358,15 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Animation properties."
-msgstr "Характеристики на анимацията."
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Copy Tracks"
 msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Paste Tracks"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Scale Selection"
@@ -403,29 +386,27 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Delete Selection"
-msgstr "Изтрий Селекцията"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Go to Next Step"
-msgstr "Отиди на Следваща Стъпка"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
-#, fuzzy
 msgid "Go to Previous Step"
-msgstr "Отиди на Предишна Стъпка"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Optimize Animation"
-msgstr "Оптимизиране на анимацията"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Clean-Up Animation"
-msgstr "Почистване на анимацията"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Pick the node that will be animated:"
-msgstr "Избери възелa, който да бъде анимиран:"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Use Bezier Curves"
@@ -449,7 +430,7 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Optimize"
-msgstr "Оптимизирай"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Remove invalid keys"
@@ -469,7 +450,7 @@ msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Clean-Up"
-msgstr "Почистване"
+msgstr ""
 
 #: editor/animation_track_editor.cpp
 msgid "Scale Ratio:"
@@ -485,11 +466,11 @@ msgstr ""
 #: editor/plugins/sprite_frames_editor_plugin.cpp editor/property_editor.cpp
 #: scene/gui/line_edit.cpp scene/gui/text_edit.cpp
 msgid "Copy"
-msgstr "Копиране"
+msgstr ""
 
 #: editor/array_property_edit.cpp
 msgid "Resize Array"
-msgstr "Преоразмеряване на масива"
+msgstr ""
 
 #: editor/array_property_edit.cpp
 msgid "Change Array Value Type"
@@ -501,20 +482,19 @@ msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Go to Line"
-msgstr "Отиди на Ред"
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Line Number:"
-msgstr "Номер на Реда:"
+msgstr ""
 
 #: editor/code_editor.cpp editor/editor_help.cpp
 msgid "No Matches"
-msgstr "Няма Съвпадения"
+msgstr ""
 
 #: editor/code_editor.cpp
-#, fuzzy
 msgid "Replaced %d occurrence(s)."
-msgstr "Готово - %d заместване(ния)."
+msgstr ""
 
 #: editor/code_editor.cpp editor/find_in_files.cpp
 msgid "Match Case"
@@ -522,31 +502,31 @@ msgstr ""
 
 #: editor/code_editor.cpp editor/find_in_files.cpp
 msgid "Whole Words"
-msgstr "Цели Думи"
+msgstr ""
 
 #: editor/code_editor.cpp editor/rename_dialog.cpp
 msgid "Replace"
-msgstr "Преименувай"
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Replace All"
-msgstr "Преименувай Всички"
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Selection Only"
-msgstr "Само Селекцията"
+msgstr ""
 
 #: editor/code_editor.cpp editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/texture_region_editor_plugin.cpp
 #: editor/plugins/tile_set_editor_plugin.cpp scene/gui/graph_edit.cpp
 msgid "Zoom In"
-msgstr "Приближи"
+msgstr ""
 
 #: editor/code_editor.cpp editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/texture_region_editor_plugin.cpp
 #: editor/plugins/tile_set_editor_plugin.cpp scene/gui/graph_edit.cpp
 msgid "Zoom Out"
-msgstr "Отдалечи"
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Reset Zoom"
@@ -554,20 +534,19 @@ msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Warnings:"
-msgstr "Предупреждения:"
+msgstr ""
 
 #: editor/code_editor.cpp
-#, fuzzy
 msgid "Font Size:"
-msgstr "Изглед Отпред."
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Line:"
-msgstr "Ред:"
+msgstr ""
 
 #: editor/code_editor.cpp
 msgid "Col:"
-msgstr "Колона:"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Method in target Node must be specified!"
@@ -587,7 +566,7 @@ msgstr ""
 #: editor/groups_editor.cpp editor/plugins/item_list_editor_plugin.cpp
 #: editor/plugins/theme_editor_plugin.cpp editor/project_settings_editor.cpp
 msgid "Add"
-msgstr "Добави"
+msgstr ""
 
 #: editor/connections_dialog.cpp editor/dependency_editor.cpp
 #: editor/groups_editor.cpp editor/plugins/animation_player_editor_plugin.cpp
@@ -596,7 +575,7 @@ msgstr "Добави"
 #: editor/plugins/theme_editor_plugin.cpp editor/project_manager.cpp
 #: editor/project_settings_editor.cpp
 msgid "Remove"
-msgstr "Премахни"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Add Extra Call Argument:"
@@ -634,40 +613,40 @@ msgstr ""
 #: editor/run_settings_dialog.cpp editor/settings_config_dialog.cpp
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Close"
-msgstr "Затваряне"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Connect"
-msgstr "Свържи"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Connect '%s' to '%s'"
-msgstr "Свържи '%s' с '%s'"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Disconnect '%s' from '%s'"
-msgstr "Разкачи '%s' от '%s'"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Disconnect all from signal: '%s'"
-msgstr "Разкачи всички сигнали: '%s'"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Connect..."
-msgstr "Свържи..."
+msgstr ""
 
 #: editor/connections_dialog.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Disconnect"
-msgstr "Разкачи"
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Connect Signal: "
-msgstr "Свържи Сигнала: "
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Edit Connection: "
-msgstr "Промени Връзката: "
+msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Are you sure you want to remove all connections from the \"%s\" signal?"
@@ -683,17 +662,15 @@ msgstr ""
 
 #: editor/connections_dialog.cpp
 msgid "Disconnect All"
-msgstr "Разкачи Всички"
+msgstr ""
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Edit..."
-msgstr "Изнасяне..."
+msgstr ""
 
 #: editor/connections_dialog.cpp
-#, fuzzy
 msgid "Go To Method"
-msgstr "Методи"
+msgstr ""
 
 #: editor/create_dialog.cpp
 msgid "Change %s Type"
@@ -706,35 +683,35 @@ msgstr ""
 
 #: editor/create_dialog.cpp
 msgid "Create New %s"
-msgstr "Създайте нов/а  %s"
+msgstr ""
 
 #: editor/create_dialog.cpp editor/editor_file_dialog.cpp
 #: editor/filesystem_dock.cpp
 msgid "Favorites:"
-msgstr "Любими:"
+msgstr ""
 
 #: editor/create_dialog.cpp editor/editor_file_dialog.cpp
 msgid "Recent:"
-msgstr "Скорошни:"
+msgstr ""
 
 #: editor/create_dialog.cpp editor/plugins/asset_library_editor_plugin.cpp
 #: editor/plugins/script_editor_plugin.cpp editor/project_manager.cpp
 #: editor/property_selector.cpp editor/quick_open.cpp
 #: modules/visual_script/visual_script_property_selector.cpp
 msgid "Search:"
-msgstr "Търсене:"
+msgstr ""
 
 #: editor/create_dialog.cpp editor/plugins/script_editor_plugin.cpp
 #: editor/property_selector.cpp editor/quick_open.cpp
 #: modules/visual_script/visual_script_property_selector.cpp
 msgid "Matches:"
-msgstr "Съвпадащи:"
+msgstr ""
 
 #: editor/create_dialog.cpp editor/plugin_config_dialog.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp editor/property_selector.cpp
 #: modules/visual_script/visual_script_property_selector.cpp
 msgid "Description:"
-msgstr "Описание:"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Search Replacement For:"
@@ -759,7 +736,7 @@ msgstr ""
 #: editor/dependency_editor.cpp
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "Dependencies"
-msgstr "Зависимости"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Resource"
@@ -772,7 +749,7 @@ msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Dependencies:"
-msgstr "Зависимости:"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Fix Broken"
@@ -794,7 +771,7 @@ msgstr ""
 #: modules/visual_script/visual_script_property_selector.cpp
 #: scene/gui/file_dialog.cpp
 msgid "Open"
-msgstr "Отвори"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Owners Of:"
@@ -802,7 +779,7 @@ msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Remove selected files from the project? (no undo)"
-msgstr "Премахни селектираните файлове от проекта? (необратимо)"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid ""
@@ -813,32 +790,31 @@ msgstr ""
 
 #: editor/dependency_editor.cpp editor/export_template_manager.cpp
 msgid "Cannot remove:"
-msgstr "Не може да се премахне:"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Error loading:"
-msgstr "Грешка при зареждане:"
+msgstr ""
 
 #: editor/dependency_editor.cpp
-#, fuzzy
 msgid "Load failed due to missing dependencies:"
-msgstr "Сцената не успя да се зареди заради липсващи зависимости:"
+msgstr ""
 
 #: editor/dependency_editor.cpp editor/editor_node.cpp
 msgid "Open Anyway"
-msgstr "Отвори Въпреки това"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Which action should be taken?"
-msgstr "Кое действие да се изпълни?"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Fix Dependencies"
-msgstr "Поправи Зависимостите"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Errors loading!"
-msgstr "Грешки при зареждането!"
+msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Permanently delete %d item(s)? (No undo!)"
@@ -858,7 +834,7 @@ msgstr ""
 
 #: editor/dependency_editor.cpp
 msgid "Delete selected files?"
-msgstr "Изтрий избраните файлове?"
+msgstr ""
 
 #: editor/dependency_editor.cpp editor/editor_audio_buses.cpp
 #: editor/editor_file_dialog.cpp editor/editor_node.cpp
@@ -866,7 +842,7 @@ msgstr "Изтрий избраните файлове?"
 #: editor/project_export.cpp editor/project_settings_editor.cpp
 #: editor/scene_tree_dock.cpp
 msgid "Delete"
-msgstr "Изтрий"
+msgstr ""
 
 #: editor/dictionary_property_edit.cpp
 msgid "Change Dictionary Key"
@@ -878,7 +854,7 @@ msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Thanks from the Godot community!"
-msgstr "Благодаря! От общността на Godot!"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Godot Engine contributors"
@@ -886,16 +862,15 @@ msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Project Founders"
-msgstr "Основатели на проекта"
+msgstr ""
 
 #: editor/editor_about.cpp
-#, fuzzy
 msgid "Lead Developer"
-msgstr "Главен Разработчик"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Project Manager "
-msgstr "Ръководител на проекта "
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Developers"
@@ -903,7 +878,7 @@ msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Authors"
-msgstr "Автори"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Platinum Sponsors"
@@ -935,7 +910,7 @@ msgstr ""
 
 #: editor/editor_about.cpp
 msgid "License"
-msgstr "Лиценз"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Thirdparty License"
@@ -951,11 +926,11 @@ msgstr ""
 
 #: editor/editor_about.cpp
 msgid "All Components"
-msgstr "Всички компоненти"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Components"
-msgstr "Компоненти"
+msgstr ""
 
 #: editor/editor_about.cpp
 msgid "Licenses"
@@ -967,7 +942,7 @@ msgstr ""
 
 #: editor/editor_asset_installer.cpp
 msgid "Uncompressing Assets"
-msgstr "Разархивиране на активи"
+msgstr ""
 
 #: editor/editor_asset_installer.cpp editor/project_manager.cpp
 msgid "Package installed successfully!"
@@ -976,12 +951,12 @@ msgstr ""
 #: editor/editor_asset_installer.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Success!"
-msgstr "Готово!"
+msgstr ""
 
 #: editor/editor_asset_installer.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Install"
-msgstr "Инсталиране"
+msgstr ""
 
 #: editor/editor_asset_installer.cpp
 msgid "Package Installer"
@@ -1049,7 +1024,7 @@ msgstr ""
 
 #: editor/editor_audio_buses.cpp
 msgid "Bus options"
-msgstr "Настройки на шината"
+msgstr ""
 
 #: editor/editor_audio_buses.cpp editor/filesystem_dock.cpp
 #: editor/plugins/animation_player_editor_plugin.cpp editor/scene_tree_dock.cpp
@@ -1078,7 +1053,7 @@ msgstr ""
 
 #: editor/editor_audio_buses.cpp
 msgid "Delete Audio Bus"
-msgstr "Изтриване звуковата шина"
+msgstr ""
 
 #: editor/editor_audio_buses.cpp
 msgid "Duplicate Audio Bus"
@@ -1203,9 +1178,8 @@ msgid "File does not exist."
 msgstr ""
 
 #: editor/editor_autoload_settings.cpp
-#, fuzzy
 msgid "Not in resource path."
-msgstr "Обектът не е базиран на ресурсен файл"
+msgstr ""
 
 #: editor/editor_autoload_settings.cpp
 msgid "Add AutoLoad"
@@ -1214,7 +1188,7 @@ msgstr ""
 #: editor/editor_autoload_settings.cpp editor/editor_file_dialog.cpp
 #: editor/plugins/animation_tree_editor_plugin.cpp scene/gui/file_dialog.cpp
 msgid "Path:"
-msgstr "Път:"
+msgstr ""
 
 #: editor/editor_autoload_settings.cpp
 msgid "Node Name:"
@@ -1231,15 +1205,15 @@ msgstr ""
 
 #: editor/editor_data.cpp
 msgid "Updating Scene"
-msgstr "Обновяване на сцената"
+msgstr ""
 
 #: editor/editor_data.cpp
 msgid "Storing local changes..."
-msgstr "Запазване на локалните промени..."
+msgstr ""
 
 #: editor/editor_data.cpp
 msgid "Updating scene..."
-msgstr "Обновяване на сцената..."
+msgstr ""
 
 #: editor/editor_data.cpp editor/editor_properties.cpp
 msgid "[empty]"
@@ -1251,32 +1225,32 @@ msgstr ""
 
 #: editor/editor_dir_dialog.cpp
 msgid "Please select a base directory first"
-msgstr "Моля, първо изберете основна папка"
+msgstr ""
 
 #: editor/editor_dir_dialog.cpp
 msgid "Choose a Directory"
-msgstr "Избери Директория"
+msgstr ""
 
 #: editor/editor_dir_dialog.cpp editor/editor_file_dialog.cpp
 #: editor/filesystem_dock.cpp scene/gui/file_dialog.cpp
 msgid "Create Folder"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/editor_dir_dialog.cpp editor/editor_file_dialog.cpp
 #: editor/editor_plugin_settings.cpp editor/filesystem_dock.cpp
 #: editor/plugins/theme_editor_plugin.cpp editor/project_export.cpp
 #: scene/gui/file_dialog.cpp
 msgid "Name:"
-msgstr "Име:"
+msgstr ""
 
 #: editor/editor_dir_dialog.cpp editor/editor_file_dialog.cpp
 #: editor/filesystem_dock.cpp scene/gui/file_dialog.cpp
 msgid "Could not create folder."
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: editor/editor_dir_dialog.cpp
 msgid "Choose"
-msgstr "Избери"
+msgstr ""
 
 #: editor/editor_export.cpp
 msgid "Storing File:"
@@ -1308,35 +1282,32 @@ msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Select Current Folder"
-msgstr "Избиране на текущата папка"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "File Exists, Overwrite?"
-msgstr "Файлът съществува. Искате ли да го презапишете?"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
-#, fuzzy
 msgid "Select This Folder"
-msgstr "Изберете метод"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
 msgid "Copy Path"
 msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Open in File Manager"
-msgstr "Диспечер на проектите"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Show in File Manager"
-msgstr "Покажи във Файлов Мениджър"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/filesystem_dock.cpp
 msgid "New Folder..."
-msgstr "Нова папка..."
+msgstr ""
 
 #: editor/editor_file_dialog.cpp
 msgid "Refresh"
@@ -1344,38 +1315,38 @@ msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "All Recognized"
-msgstr "Всички Разпознати"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "All Files (*)"
-msgstr "Всички Файлове (*)"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Open a File"
-msgstr "Отвори Файл"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Open File(s)"
-msgstr "Отвори Файл(ове)"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Open a Directory"
-msgstr "Отвори Директория"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Open a File or Directory"
-msgstr "Отвори Файл или Директория"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/editor_node.cpp
 #: editor/editor_properties.cpp editor/inspector_dock.cpp
 #: editor/plugins/animation_player_editor_plugin.cpp
 #: editor/plugins/script_editor_plugin.cpp scene/gui/file_dialog.cpp
 msgid "Save"
-msgstr "Запазване"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Save a File"
-msgstr "Запазване на файл"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp
 msgid "Go Back"
@@ -1391,11 +1362,11 @@ msgstr ""
 
 #: editor/editor_file_dialog.cpp
 msgid "Toggle Hidden Files"
-msgstr "Покажи Скрити Файлове"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp
 msgid "Toggle Favorite"
-msgstr "Покажи Любими"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp
 msgid "Toggle Mode"
@@ -1415,11 +1386,11 @@ msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Go to parent folder"
-msgstr "Към горната папка"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Directories & Files:"
-msgstr "Папки и файлове:"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp editor/plugins/sprite_editor_plugin.cpp
 #: editor/plugins/style_box_editor_plugin.cpp
@@ -1428,11 +1399,11 @@ msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "File:"
-msgstr "Файл:"
+msgstr ""
 
 #: editor/editor_file_dialog.cpp scene/gui/file_dialog.cpp
 msgid "Must use a valid extension."
-msgstr "Трябва да се използва правилно разширение."
+msgstr ""
 
 #: editor/editor_file_system.cpp
 msgid "ScanSources"
@@ -1440,7 +1411,7 @@ msgstr ""
 
 #: editor/editor_file_system.cpp
 msgid "(Re)Importing Assets"
-msgstr "Извършва се повторно внасяне"
+msgstr ""
 
 #: editor/editor_help.cpp editor/plugins/spatial_editor_plugin.cpp
 msgid "Top"
@@ -1448,11 +1419,11 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Class:"
-msgstr "Клас:"
+msgstr ""
 
 #: editor/editor_help.cpp editor/scene_tree_editor.cpp
 msgid "Inherits:"
-msgstr "Наследява:"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Inherited by:"
@@ -1460,7 +1431,7 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Brief Description:"
-msgstr "Кратко Описание:"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Properties"
@@ -1472,22 +1443,19 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Methods"
-msgstr "Методи"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Methods:"
-msgstr "Методи"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Theme Properties"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Theme Properties:"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/editor_help.cpp modules/visual_script/visual_script_editor.cpp
 msgid "Signals:"
@@ -1495,7 +1463,7 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Enumerations"
-msgstr "Изброени типове"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Enumerations:"
@@ -1507,21 +1475,19 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Constants"
-msgstr "Константи"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Constants:"
-msgstr "Константи:"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Class Description"
-msgstr "Описание"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Class Description:"
-msgstr "Описание:"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Online Tutorials:"
@@ -1535,14 +1501,12 @@ msgid ""
 msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Property Descriptions"
-msgstr "Кратко Описание:"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Property Descriptions:"
-msgstr "Кратко Описание:"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid ""
@@ -1551,14 +1515,12 @@ msgid ""
 msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Method Descriptions"
-msgstr "Описание"
+msgstr ""
 
 #: editor/editor_help.cpp
-#, fuzzy
 msgid "Method Descriptions:"
-msgstr "Описание:"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid ""
@@ -1569,50 +1531,43 @@ msgstr ""
 #: editor/editor_help_search.cpp editor/editor_node.cpp
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Search Help"
-msgstr "Търси в Помощ"
+msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Display All"
-msgstr "Преименувай Всички"
+msgstr ""
 
 #: editor/editor_help_search.cpp
 msgid "Classes Only"
 msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Methods Only"
-msgstr "Методи"
+msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Signals Only"
-msgstr "Само Селекцията"
+msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Constants Only"
-msgstr "Константи"
+msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Properties Only"
-msgstr "Изберете свойство"
+msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Theme Properties Only"
-msgstr "Изберете свойство"
+msgstr ""
 
 #: editor/editor_help_search.cpp
 msgid "Member Type"
 msgstr ""
 
 #: editor/editor_help_search.cpp
-#, fuzzy
 msgid "Class"
-msgstr "Клас:"
+msgstr ""
 
 #: editor/editor_inspector.cpp editor/project_settings_editor.cpp
 msgid "Property:"
@@ -1638,12 +1593,11 @@ msgstr ""
 #: modules/gdnative/gdnative_library_editor_plugin.cpp scene/gui/line_edit.cpp
 #: scene/gui/text_edit.cpp
 msgid "Clear"
-msgstr "Изчистване"
+msgstr ""
 
 #: editor/editor_log.cpp
-#, fuzzy
 msgid "Clear Output"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Project export failed with error code %d."
@@ -1656,7 +1610,7 @@ msgstr ""
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 #: scene/gui/dialogs.cpp
 msgid "OK"
-msgstr "Добре"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/animation_player_editor_plugin.cpp
 msgid "Save Resource As..."
@@ -1664,15 +1618,15 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Can't open file for writing:"
-msgstr "Файлът не може да бъде отворен за записване:"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Requested file format unknown:"
-msgstr "Форматът на избрания файл е неразпознат:"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Error while saving."
-msgstr "Грешка при записване."
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 msgid "Can't open '%s'. The file could have been moved or deleted."
@@ -1680,27 +1634,27 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Error while parsing '%s'."
-msgstr "Грешка при анализа на „%s“."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Unexpected end of file '%s'."
-msgstr "Неочакван край на файла '%s'."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Missing '%s' or its dependencies."
-msgstr "Липсва „%s“ или съответните зависимости."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Error while loading '%s'."
-msgstr "Грешка при зареждането на „%s“."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Saving Scene"
-msgstr "Запазване на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Analyzing"
-msgstr "Анализира се"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Creating Thumbnail"
@@ -1820,7 +1774,6 @@ msgstr ""
 #: editor/editor_node.cpp
 msgid "Current scene was never saved, please save it prior to running."
 msgstr ""
-"Сегашната сцена никога не е била запазена, моля, запазете я преди изпълнение."
 
 #: editor/editor_node.cpp
 msgid "Could not start subprocess!"
@@ -1828,7 +1781,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open Scene"
-msgstr "Отваряне на сцена"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open Base Scene"
@@ -1836,7 +1789,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Quick Open Scene..."
-msgstr "Бързо отваряне на сцена..."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Quick Open Script..."
@@ -1844,7 +1797,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save & Close"
-msgstr "Запазване и затваряне"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save changes to '%s' before closing?"
@@ -1852,11 +1805,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save Scene As..."
-msgstr "Запазване на сцената като..."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "No"
-msgstr "Не"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Yes"
@@ -1864,11 +1817,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "This scene has never been saved. Save before running?"
-msgstr "Тази сцена не е била запазвана преди. Запази преди да пуснеш?"
+msgstr ""
 
 #: editor/editor_node.cpp editor/scene_tree_dock.cpp
 msgid "This operation can't be done without a scene."
-msgstr "Операцията не може да се извърши без сцена."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Export Mesh Library"
@@ -1888,11 +1841,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Current scene not saved. Open anyway?"
-msgstr "Текущата сцена не е запазена. Отвори въпреки това?"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Can't reload a scene that was never saved."
-msgstr "Сцена, която никога не е била запазвана, не може да се презареди."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Revert"
@@ -1904,24 +1857,23 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Quick Run Scene..."
-msgstr "Бързо пускане на сцена..."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Quit"
-msgstr "Изход"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Exit the editor?"
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Open Project Manager?"
-msgstr "Диспечер на проектите"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save & Quit"
-msgstr "Запазване и изход"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save changes to the following scene(s) before quitting?"
@@ -1939,7 +1891,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Pick a Main Scene"
-msgstr "Изберете главна сцена"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Unable to enable addon plugin at: '%s' parsing of config failed."
@@ -1950,9 +1902,8 @@ msgid "Unable to find script field for addon plugin at: 'res://addons/%s'."
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Unable to load addon script from path: '%s'."
-msgstr "Грешка при зареждането на шрифта."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid ""
@@ -1983,12 +1934,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Scene '%s' has broken dependencies:"
-msgstr "Сцената '%s' има нарушени зависимости:"
+msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Clear Recent Scenes"
-msgstr "Затваряне на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save Layout"
@@ -2005,19 +1955,16 @@ msgstr ""
 
 #: editor/editor_node.cpp editor/editor_properties.cpp
 #: editor/plugins/script_editor_plugin.cpp editor/property_editor.cpp
-#, fuzzy
 msgid "Show in FileSystem"
-msgstr "Покажи във Файлова Система"
+msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Play This Scene"
-msgstr "Възпроизвеждане на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Close Tab"
-msgstr "Затваряне"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Switch Scene Tab"
@@ -2028,9 +1975,8 @@ msgid "%d more files or folders"
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "%d more folders"
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "%d more files"
@@ -2049,13 +1995,12 @@ msgid "Toggle distraction-free mode."
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Add a new scene."
-msgstr "Добавяне на нови пътечки."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Scene"
-msgstr "Сцена"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Go to previously opened scene."
@@ -2063,11 +2008,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Next tab"
-msgstr "Следващ подпрозорец"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Previous tab"
-msgstr "Предишен подпрозорец"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Filter Files..."
@@ -2079,7 +2024,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "New Scene"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "New Inherited Scene..."
@@ -2087,20 +2032,19 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open Scene..."
-msgstr "Отваряне на сцена..."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Save Scene"
-msgstr "Запазване на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Save All Scenes"
-msgstr "Запазване на всички сцени"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Close Scene"
-msgstr "Затваряне на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 msgid "Open Recent"
@@ -2138,33 +2082,32 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Project"
-msgstr "Проект"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Project Settings"
-msgstr "Настройки на проекта"
+msgstr ""
 
 #: editor/editor_node.cpp editor/project_export.cpp
 msgid "Export"
-msgstr "Изнасяне"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/tile_set_editor_plugin.cpp
 msgid "Tools"
-msgstr "Сечива"
+msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Open Project Data Folder"
-msgstr "Диспечер на проектите"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Quit to Project List"
-msgstr "Изход до списъка с проекти"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 #: editor/project_export.cpp
 msgid "Debug"
-msgstr "Отстраняване на грешки"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Deploy with Remote Debug"
@@ -2240,7 +2183,7 @@ msgstr ""
 
 #: editor/editor_node.cpp editor/settings_config_dialog.cpp
 msgid "Editor Settings"
-msgstr "Настройки на редактора"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Editor Layout"
@@ -2251,18 +2194,16 @@ msgid "Toggle Fullscreen"
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Open Editor Data/Settings Folder"
-msgstr "Настройки на редактора"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open Editor Data Folder"
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Open Editor Settings Folder"
-msgstr "Настройки на редактора"
+msgstr ""
 
 #: editor/editor_node.cpp editor/project_export.cpp
 msgid "Manage Export Templates"
@@ -2278,7 +2219,7 @@ msgstr ""
 #: editor/plugins/shader_editor_plugin.cpp editor/plugins/text_editor.cpp
 #: editor/project_settings_editor.cpp editor/rename_dialog.cpp
 msgid "Search"
-msgstr "Търсене"
+msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/script_editor_plugin.cpp
 msgid "Online Docs"
@@ -2294,15 +2235,15 @@ msgstr ""
 
 #: editor/editor_node.cpp editor/plugins/asset_library_editor_plugin.cpp
 msgid "Community"
-msgstr ""
+msgstr "సంఘం"
 
 #: editor/editor_node.cpp
 msgid "About"
-msgstr "Относно"
+msgstr "గురించి"
 
 #: editor/editor_node.cpp
 msgid "Play the project."
-msgstr "Възпроизвеждане на проекта."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Play"
@@ -2310,15 +2251,15 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Pause the scene"
-msgstr "Преустановяване на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Pause Scene"
-msgstr "Преустановяване на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Stop the scene."
-msgstr "Спиране на сцената."
+msgstr ""
 
 #: editor/editor_node.cpp editor/editor_profiler.cpp
 msgid "Stop"
@@ -2326,19 +2267,19 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Play the edited scene."
-msgstr "Възпроизвеждане на редактирана сцена."
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Play Scene"
-msgstr "Възпроизвеждане на сцената"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Play custom scene"
-msgstr "Възпроизвеждане на сцена по избор"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Play Custom Scene"
-msgstr "Възпроизвеждане на сцена по избор"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Changing the video driver requires restarting the editor."
@@ -2346,9 +2287,8 @@ msgstr ""
 
 #: editor/editor_node.cpp editor/project_settings_editor.cpp
 #: editor/settings_config_dialog.cpp
-#, fuzzy
 msgid "Save & Restart"
-msgstr "Запазване и повторно внасяне"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Spins when the editor window repaints!"
@@ -2356,7 +2296,7 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Update Always"
-msgstr "Обновявай Винаги"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Update Changes"
@@ -2369,7 +2309,7 @@ msgstr ""
 #: editor/editor_node.cpp editor/plugins/asset_library_editor_plugin.cpp
 #: editor/project_manager.cpp
 msgid "Import"
-msgstr "Внасяне"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "FileSystem"
@@ -2377,15 +2317,15 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Inspector"
-msgstr "Инспектор"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Node"
-msgstr "Възел"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Expand Bottom Panel"
-msgstr "Разшири Долния Панел"
+msgstr ""
 
 #: editor/editor_node.cpp scene/resources/visual_shader.cpp
 msgid "Output"
@@ -2393,19 +2333,19 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Don't Save"
-msgstr "Не Запазвай"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Import Templates From ZIP File"
-msgstr "Внасяне на шаблони от архив във формат ZIP"
+msgstr ""
 
 #: editor/editor_node.cpp editor/project_export.cpp
 msgid "Export Project"
-msgstr "Изнасяне на проекта"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Export Library"
-msgstr "Изнасяне на библиотеката"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Merge With Existing"
@@ -2413,16 +2353,15 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Password:"
-msgstr "Парола:"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open & Run a Script"
 msgstr ""
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "New Inherited"
-msgstr "Нов скрипт"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Load Errors"
@@ -2442,11 +2381,11 @@ msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open Script Editor"
-msgstr "Отвори Кодов Редактор"
+msgstr ""
 
 #: editor/editor_node.cpp editor/project_manager.cpp
 msgid "Open Asset Library"
-msgstr "Отваряне на библиотеката"
+msgstr ""
 
 #: editor/editor_node.cpp
 msgid "Open the next Editor"
@@ -2465,13 +2404,12 @@ msgid "Thumbnail..."
 msgstr ""
 
 #: editor/editor_plugin_settings.cpp
-#, fuzzy
 msgid "Edit Plugin"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/editor_plugin_settings.cpp
 msgid "Installed Plugins:"
-msgstr "Инсталирани приставки:"
+msgstr ""
 
 #: editor/editor_plugin_settings.cpp editor/plugin_config_dialog.cpp
 msgid "Update"
@@ -2480,7 +2418,7 @@ msgstr ""
 #: editor/editor_plugin_settings.cpp editor/plugin_config_dialog.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Version:"
-msgstr "Версия:"
+msgstr ""
 
 #: editor/editor_plugin_settings.cpp editor/plugin_config_dialog.cpp
 msgid "Author:"
@@ -2593,7 +2531,7 @@ msgstr ""
 
 #: editor/editor_properties.cpp editor/property_editor.cpp
 msgid "New Script"
-msgstr "Нов скрипт"
+msgstr ""
 
 #: editor/editor_properties.cpp editor/property_editor.cpp
 msgid "New %s"
@@ -2615,7 +2553,7 @@ msgstr ""
 #: editor/plugins/tile_map_editor_plugin.cpp editor/property_editor.cpp
 #: scene/gui/line_edit.cpp scene/gui/text_edit.cpp
 msgid "Paste"
-msgstr "Поставяне"
+msgstr ""
 
 #: editor/editor_properties.cpp editor/property_editor.cpp
 msgid "Convert To %s"
@@ -2625,9 +2563,8 @@ msgstr ""
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
-#, fuzzy
 msgid "Open Editor"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/editor_properties.cpp editor/property_editor.cpp
 msgid "Selected node is not a Viewport!"
@@ -2646,9 +2583,8 @@ msgid "New Key:"
 msgstr ""
 
 #: editor/editor_properties_array_dict.cpp
-#, fuzzy
 msgid "New Value:"
-msgstr "Стойност"
+msgstr ""
 
 #: editor/editor_properties_array_dict.cpp
 msgid "Add Key/Value Pair"
@@ -2699,7 +2635,7 @@ msgstr ""
 
 #: editor/editor_sub_scene.cpp
 msgid "Scene Path:"
-msgstr "Път на сцената:"
+msgstr ""
 
 #: editor/editor_sub_scene.cpp
 msgid "Import From Node:"
@@ -2714,9 +2650,8 @@ msgid "Uninstall"
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "(Installed)"
-msgstr "Инсталирани приставки:"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
@@ -2752,9 +2687,8 @@ msgid "No version.txt found inside templates."
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Error creating path for templates:"
-msgstr "Имаше грешка при изнасяне на проекта!"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Extracting Export Templates"
@@ -2762,7 +2696,7 @@ msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Importing:"
-msgstr "Внасяне:"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid ""
@@ -2787,9 +2721,8 @@ msgstr ""
 
 #: editor/export_template_manager.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
-#, fuzzy
 msgid "Request Failed."
-msgstr "Запитване..."
+msgstr ""
 
 #: editor/export_template_manager.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
@@ -2812,14 +2745,12 @@ msgid ""
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Error requesting url: "
-msgstr "Имаше грешка при внасянето:"
+msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Connecting to Mirror..."
-msgstr "Свързване..."
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Disconnected"
@@ -2836,31 +2767,28 @@ msgstr ""
 #: editor/export_template_manager.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Connecting..."
-msgstr "Свързване..."
+msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Can't Connect"
-msgstr "Създаване на нов проект"
+msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Connected"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Requesting..."
-msgstr "Запитване..."
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Downloading"
-msgstr "Изтегляне"
+msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Connection Error"
-msgstr "Свързване..."
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "SSL Handshake Error"
@@ -2871,9 +2799,8 @@ msgid "Current Version:"
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Installed Versions:"
-msgstr "Инсталирани приставки:"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Install From File"
@@ -2884,18 +2811,16 @@ msgid "Remove Template"
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Select template file"
-msgstr "Избиране на всичко"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Export Template Manager"
 msgstr ""
 
 #: editor/export_template_manager.cpp
-#, fuzzy
 msgid "Download Templates"
-msgstr "Шаблони"
+msgstr ""
 
 #: editor/export_template_manager.cpp
 msgid "Select mirror from list: (Shift+Click: Open in Browser)"
@@ -2906,9 +2831,8 @@ msgid "Can't open file_type_cache.cch for writing, not saving file type cache!"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Favorites"
-msgstr "Любими:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Cannot navigate to '%s' as it has not been found in the file system!"
@@ -2935,19 +2859,16 @@ msgid "Cannot move a folder into itself."
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Error moving:"
-msgstr "Имаше грешка при внасянето:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Error duplicating:"
-msgstr "Имаше грешка при внасянето:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Unable to update dependencies:"
-msgstr "Сцената '%s' има нарушени зависимости:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp editor/scene_tree_editor.cpp
 msgid "No name provided."
@@ -2963,44 +2884,39 @@ msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "A file or folder with this name already exists."
-msgstr "Вече съществува файл или папка с това име."
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Renaming file:"
-msgstr "Имаше грешка при внасянето:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Renaming folder:"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Duplicating file:"
-msgstr "Имаше грешка при внасянето:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Duplicating folder:"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Open Scene(s)"
-msgstr "Отваряне на сцена"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Instance"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Add to favorites"
-msgstr "Любими:"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Remove from favorites"
-msgstr "Премахни Всички Breakpoint-ове"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Edit Dependencies..."
@@ -3023,23 +2939,20 @@ msgid "Move To..."
 msgstr ""
 
 #: editor/filesystem_dock.cpp editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "New Script..."
-msgstr "Нов скрипт"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "New Resource..."
-msgstr "Нова папка..."
+msgstr ""
 
 #: editor/filesystem_dock.cpp editor/script_editor_debugger.cpp
 msgid "Expand All"
 msgstr ""
 
 #: editor/filesystem_dock.cpp editor/script_editor_debugger.cpp
-#, fuzzy
 msgid "Collapse All"
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
@@ -3061,14 +2974,12 @@ msgid "Re-Scan Filesystem"
 msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Toggle split mode"
-msgstr "Покажи Любими"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
-#, fuzzy
 msgid "Search files"
-msgstr "Търсене"
+msgstr ""
 
 #: editor/filesystem_dock.cpp
 msgid "Instance the selected scene(s) as child of the selected node."
@@ -3097,81 +3008,73 @@ msgid "Create Script"
 msgstr ""
 
 #: editor/find_in_files.cpp
-#, fuzzy
 msgid "Find in Files"
-msgstr "Намери във файлове"
+msgstr ""
 
 #: editor/find_in_files.cpp
-#, fuzzy
 msgid "Find:"
-msgstr "Намери: "
+msgstr ""
 
 #: editor/find_in_files.cpp
-#, fuzzy
 msgid "Folder:"
-msgstr "Папка: "
+msgstr ""
 
 #: editor/find_in_files.cpp
-#, fuzzy
 msgid "Filters:"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/find_in_files.cpp editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp
 msgid "Find..."
-msgstr "Намери..."
+msgstr ""
 
 #: editor/find_in_files.cpp editor/plugins/script_text_editor.cpp
 msgid "Replace..."
-msgstr "Замести..."
+msgstr ""
 
 #: editor/find_in_files.cpp editor/progress_dialog.cpp scene/gui/dialogs.cpp
 msgid "Cancel"
-msgstr "Отказ"
+msgstr ""
 
 #: editor/find_in_files.cpp
 msgid "Find: "
-msgstr "Намери: "
+msgstr ""
 
 #: editor/find_in_files.cpp
 msgid "Replace: "
-msgstr "Замести: "
+msgstr ""
 
 #: editor/find_in_files.cpp
 msgid "Replace all (no undo)"
 msgstr ""
 
 #: editor/find_in_files.cpp
-#, fuzzy
 msgid "Searching..."
-msgstr "Търсене"
+msgstr ""
 
 #: editor/find_in_files.cpp
 msgid "Search complete"
-msgstr "Търсенето е завършено"
+msgstr ""
 
 #: editor/groups_editor.cpp
-#, fuzzy
 msgid "Group name already exists."
-msgstr "Група с това име вече съществува."
+msgstr ""
 
 #: editor/groups_editor.cpp
-#, fuzzy
 msgid "Invalid group name."
-msgstr "невалидно име на Група."
+msgstr ""
 
 #: editor/groups_editor.cpp editor/node_dock.cpp
 msgid "Groups"
-msgstr "Групи"
+msgstr ""
 
 #: editor/groups_editor.cpp
 msgid "Nodes not in Group"
 msgstr ""
 
 #: editor/groups_editor.cpp editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Filter nodes"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/groups_editor.cpp
 msgid "Nodes in Group"
@@ -3190,63 +3093,53 @@ msgid "Manage Groups"
 msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import as Single Scene"
-msgstr "Внасяне на сцената..."
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Animations"
-msgstr "Внеси с Анимации поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Materials"
-msgstr "Внеси с Материалите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Objects"
-msgstr "Внеси с Обектите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Objects+Materials"
-msgstr "Внеси с Обектите и Материалите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Objects+Animations"
-msgstr "Внеси с Обектите и Анимациите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Materials+Animations"
-msgstr "Внеси с Материалите и Анимациите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import with Separate Objects+Materials+Animations"
-msgstr "Внеси с Обектите, Материалите и Анимациите поотделно"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import as Multiple Scenes"
-msgstr "Внеси като Няколко Сцени"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
-#, fuzzy
 msgid "Import as Multiple Scenes+Materials"
-msgstr "Внеси като Няколко Сцени и Материали"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
 #: editor/plugins/mesh_library_editor_plugin.cpp
 msgid "Import Scene"
-msgstr "Внасяне на сцена"
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
 msgid "Importing Scene..."
-msgstr "Внасяне на сцената..."
+msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
 msgid "Generating Lightmaps"
@@ -3274,26 +3167,23 @@ msgstr ""
 
 #: editor/import/resource_importer_scene.cpp
 msgid "Saving..."
-msgstr "Запазване..."
+msgstr ""
 
 #: editor/import_dock.cpp
-#, fuzzy
 msgid "Set as Default for '%s'"
-msgstr "Задай по Подразбиране за '%s'"
+msgstr ""
 
 #: editor/import_dock.cpp
-#, fuzzy
 msgid "Clear Default for '%s'"
-msgstr "Изчисти по Подразбиране за '%s'"
+msgstr ""
 
 #: editor/import_dock.cpp
-#, fuzzy
 msgid " Files"
-msgstr "Файл:"
+msgstr ""
 
 #: editor/import_dock.cpp
 msgid "Import As:"
-msgstr "Внасяне като:"
+msgstr ""
 
 #: editor/import_dock.cpp editor/property_editor.cpp
 msgid "Preset..."
@@ -3301,7 +3191,7 @@ msgstr ""
 
 #: editor/import_dock.cpp
 msgid "Reimport"
-msgstr "Повторно внасяне"
+msgstr ""
 
 #: editor/import_dock.cpp
 msgid "Save scenes, re-import and restart"
@@ -3317,23 +3207,21 @@ msgid ""
 msgstr ""
 
 #: editor/inspector_dock.cpp
-#, fuzzy
 msgid "Failed to load resource."
-msgstr "Неуспешно зареждане на ресурсите."
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Expand All Properties"
 msgstr ""
 
 #: editor/inspector_dock.cpp
-#, fuzzy
 msgid "Collapse All Properties"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/inspector_dock.cpp editor/plugins/animation_player_editor_plugin.cpp
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Save As..."
-msgstr "Запази Като..."
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Copy Params"
@@ -3360,9 +3248,8 @@ msgid "Make Sub-Resources Unique"
 msgstr ""
 
 #: editor/inspector_dock.cpp
-#, fuzzy
 msgid "Open in Help"
-msgstr "Отвори в Помощника"
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Create a new resource in memory and edit it."
@@ -3389,18 +3276,16 @@ msgid "History of recently edited objects."
 msgstr ""
 
 #: editor/inspector_dock.cpp
-#, fuzzy
 msgid "Object properties."
-msgstr "Характеристики на обекта."
+msgstr ""
 
 #: editor/inspector_dock.cpp
-#, fuzzy
 msgid "Filter properties"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Changes may be lost!"
-msgstr "Промените могат да бъдат загубени!"
+msgstr ""
 
 #: editor/multi_node_edit.cpp
 msgid "MultiNode Set"
@@ -3411,48 +3296,41 @@ msgid "Select a Node to edit Signals and Groups."
 msgstr ""
 
 #: editor/plugin_config_dialog.cpp
-#, fuzzy
 msgid "Edit a Plugin"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
-#, fuzzy
 msgid "Create a Plugin"
-msgstr "Създаване"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
-#, fuzzy
 msgid "Plugin Name:"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
 msgid "Subfolder:"
-msgstr "Подпапка:"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
-#, fuzzy
 msgid "Language:"
-msgstr "Внасяне на езици:"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
-#, fuzzy
 msgid "Script Name:"
-msgstr "Име:"
+msgstr ""
 
 #: editor/plugin_config_dialog.cpp
 msgid "Activate now?"
-msgstr "Активирай сега?"
+msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Create Polygon"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
 msgid "Edit Polygon"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
 msgid "Insert Point"
@@ -3463,32 +3341,26 @@ msgid "Edit Polygon (Remove Point)"
 msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
 msgid "Remove Polygon And Point"
-msgstr "Преместване на Полигон"
+msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "Create points."
-msgstr "Създай точки."
+msgstr ""
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
-#, fuzzy
 msgid ""
 "Edit points.\n"
 "LMB: Move Point\n"
 "RMB: Erase Point"
 msgstr ""
-"Промени съществуващ полигон:\n"
-"LMB: Премести Точка.\n"
-"Ctrl+LMB: Раздели Сегмент.\n"
-"RMB: Изтрии Точка."
 
 #: editor/plugins/abstract_polygon_2d_editor.cpp
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 msgid "Erase points."
-msgstr "Изтрий точки."
+msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
@@ -3496,15 +3368,14 @@ msgstr "Изтрий точки."
 #: editor/plugins/animation_state_machine_editor.cpp
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Add Animation"
-msgstr "Добави Анимация"
+msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Load..."
-msgstr "Зареди..."
+msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
@@ -3528,9 +3399,8 @@ msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp
-#, fuzzy
 msgid "Select and move points, create points with RMB."
-msgstr "Селектирай и мести точки, създай точки с RMB."
+msgstr ""
 
 #: editor/plugins/animation_blend_space_1d_editor.cpp
 #: editor/plugins/animation_blend_space_2d_editor.cpp scene/gui/graph_edit.cpp
@@ -3546,18 +3416,16 @@ msgstr ""
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Open Animation Node"
-msgstr "Отвори Анимационен Възел"
+msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "Triangle already exists"
 msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
-#, fuzzy
 msgid "BlendSpace2D does not belong to an AnimationTree node."
-msgstr "BlendSpace2D не принадлежи на възел тип AnimationTree."
+msgstr ""
 
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 msgid "No triangles exist, so no blending can take place."
@@ -3582,9 +3450,8 @@ msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Filters"
-msgstr "Промени Филтрите"
+msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 msgid "Output node can't be added to the blend tree."
@@ -3612,20 +3479,17 @@ msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/visual_shader_editor_plugin.cpp
-#, fuzzy
 msgid "Add Node..."
-msgstr "Добави Възел..."
+msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/root_motion_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Filtered Tracks:"
-msgstr "Файл:"
+msgstr ""
 
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
-#, fuzzy
 msgid "Enable filtering"
-msgstr "Позволи филтриране"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Toggle Autoplay"
@@ -3633,7 +3497,7 @@ msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "New Animation Name:"
-msgstr "Ново Име на Анимация:"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "New Anim"
@@ -3641,11 +3505,11 @@ msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Change Animation Name:"
-msgstr "Промени Името на Анимацията:"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Delete Animation?"
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 #: editor/plugins/sprite_frames_editor_plugin.cpp
@@ -3686,9 +3550,8 @@ msgid "No animation to copy!"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#, fuzzy
 msgid "No animation resource on clipboard!"
-msgstr "Обектът не е базиран на ресурсен файл"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Pasted Animation"
@@ -3700,7 +3563,7 @@ msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "No animation to edit!"
-msgstr "Няма анимация за променяне!"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Play selected animation backwards from current pos. (A)"
@@ -3732,7 +3595,7 @@ msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Animation Tools"
-msgstr "Анимационни Инструменти"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 #: editor/plugins/canvas_item_editor_plugin.cpp
@@ -3744,9 +3607,8 @@ msgid "New"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Transitions..."
-msgstr "Преходи"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Open in Inspector"
@@ -3769,14 +3631,12 @@ msgid "Enable Onion Skinning"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#, fuzzy
 msgid "Directions"
-msgstr "Описание:"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#, fuzzy
 msgid "Past"
-msgstr "Поставяне"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Future"
@@ -3811,9 +3671,8 @@ msgid "Include Gizmos (3D)"
 msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
-#, fuzzy
 msgid "Pin AnimationPlayer"
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Create New Animation"
@@ -3829,7 +3688,7 @@ msgstr ""
 #: editor/plugins/sprite_frames_editor_plugin.cpp editor/property_editor.cpp
 #: editor/script_create_dialog.cpp
 msgid "Error!"
-msgstr "Грешка!"
+msgstr ""
 
 #: editor/plugins/animation_player_editor_plugin.cpp
 msgid "Blend Times:"
@@ -3868,9 +3727,8 @@ msgid "Start and end nodes are needed for a sub-transition."
 msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "No playback resource set at path: %s."
-msgstr "Обектът не е базиран на ресурсен файл"
+msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
 msgid ""
@@ -3880,19 +3738,16 @@ msgid ""
 msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Create new nodes."
-msgstr "Създай нови възли."
+msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Connect nodes."
-msgstr "Свържи възли."
+msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Remove selected node or transition."
-msgstr "Премахни селектирания възел или преход."
+msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
 msgid "Toggle autoplay this animation on start, restart or seek to zero."
@@ -3903,24 +3758,22 @@ msgid "Set the end animation. This is useful for sub-transitions."
 msgstr ""
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Transition: "
-msgstr "Преход"
+msgstr ""
 
 #: editor/plugins/animation_tree_editor_plugin.cpp
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
-#, fuzzy
 msgid "AnimationTree"
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "New name:"
-msgstr "Ново име:"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 #: editor/plugins/multimesh_editor_plugin.cpp
 msgid "Scale:"
-msgstr "Мащаб:"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Fade In (s):"
@@ -3939,9 +3792,8 @@ msgid "Mix"
 msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
-#, fuzzy
 msgid "Auto Restart:"
-msgstr "Автоматично Рестартиране:"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Restart (s):"
@@ -4002,7 +3854,7 @@ msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Animation Node"
-msgstr "Анимационен Възел"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "OneShot Node"
@@ -4038,23 +3890,23 @@ msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Import Animations..."
-msgstr "Внасяне на анимации..."
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Edit Node Filters"
-msgstr "Промени Възлови Филтри"
+msgstr ""
 
 #: editor/plugins/animation_tree_player_editor_plugin.cpp
 msgid "Filters..."
-msgstr "Филтри..."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Contents:"
-msgstr "Съдържание:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "View Files"
-msgstr "Преглед на файловете"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Can't resolve hostname:"
@@ -4062,7 +3914,7 @@ msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Connection error, please try again."
-msgstr "Грешка във връзката, моля опитай отново."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Can't connect to host:"
@@ -4074,11 +3926,11 @@ msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Request failed, return code:"
-msgstr "Заявката се провали, върнат код:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Request failed, too many redirects"
-msgstr "Заявката се провали, твърде много пренасочвания"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Bad download hash, assuming file has been tampered with."
@@ -4086,15 +3938,15 @@ msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Expected:"
-msgstr "Очаквано:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Got:"
-msgstr "Получено:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Failed sha256 hash check"
-msgstr "Неуспешна проверка на sha256 hash"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Asset Download Error:"
@@ -4102,19 +3954,19 @@ msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Downloading (%s / %s)..."
-msgstr "Изтегляне (%s / %s)..."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Downloading..."
-msgstr "Изтегля се..."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Resolving..."
-msgstr "Уреждане на връзката..."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Error making request"
-msgstr "Имаше грешка при направата на заявката за изтегляне"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Idle"
@@ -4122,71 +3974,70 @@ msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Retry"
-msgstr "Опитай пак"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Download Error"
-msgstr "Грешка при изтеглянето"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
-#, fuzzy
 msgid "Download for this asset is already in progress!"
-msgstr "Този актив вече се сваля!"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "First"
-msgstr "Начална"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Previous"
-msgstr "Предишна"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Next"
-msgstr "Следваща"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Last"
-msgstr "Последна"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "All"
-msgstr "Всички"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 #: editor/project_settings_editor.cpp
 msgid "Plugins"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp editor/project_manager.cpp
 msgid "Sort:"
-msgstr "Подреждане:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Reverse"
-msgstr "В обратен ред"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 #: editor/project_settings_editor.cpp
 msgid "Category:"
-msgstr "Категория:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Site:"
-msgstr "Място:"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Support..."
-msgstr "Поддръжка..."
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Official"
-msgstr "Официална"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Testing"
-msgstr "Тестова"
+msgstr ""
 
 #: editor/plugins/asset_library_editor_plugin.cpp
 msgid "Assets ZIP File"
@@ -4216,7 +4067,7 @@ msgstr ""
 #: editor/plugins/camera_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp editor/rename_dialog.cpp
 msgid "Preview"
-msgstr "Преглед"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Configure Snap"
@@ -4231,43 +4082,40 @@ msgid "Grid Step:"
 msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Rotation Offset:"
-msgstr "Изместване при Завъртане:"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Rotation Step:"
-msgstr "Съпка при Завъртане:"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move vertical guide"
-msgstr "Пемести вертикална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Create new vertical guide"
-msgstr "Създай нова вертикална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Remove vertical guide"
-msgstr "Премахни вертикална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Move horizontal guide"
-msgstr "Премести хоризонтална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Create new horizontal guide"
-msgstr "Създай нова хоризонтална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Remove horizontal guide"
-msgstr "Премахни хоризонтална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Create new horizontal and vertical guides"
-msgstr "Създай нова хоризонтална и вертикална помощна линия"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move pivot"
@@ -4318,21 +4166,20 @@ msgstr ""
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/texture_region_editor_plugin.cpp
 #: editor/plugins/tile_set_editor_plugin.cpp scene/gui/graph_edit.cpp
-#, fuzzy
 msgid "Zoom Reset"
-msgstr "Оригинално увеличение"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Select Mode"
-msgstr "Режим на Селектиране"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Drag: Rotate"
-msgstr "Дърпане: Завъртане"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Alt+Drag: Move"
-msgstr "Alt+Дърпане: Преместване"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Press 'v' to Change Pivot, 'Shift+v' to Drag Pivot (while moving)."
@@ -4344,16 +4191,15 @@ msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Move Mode"
-msgstr "Режим на Преместване"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Rotate Mode"
-msgstr "Режим на Завъртане"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Scale Mode"
-msgstr "Режим на Селектиране"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -4361,8 +4207,6 @@ msgid ""
 "Show a list of all objects at the position clicked\n"
 "(same as Alt+RMB in select mode)."
 msgstr ""
-"Покажи списък с всички обекти на кликнатата позиция\n"
-"(същото като Alt+RMB в режим на селектиране)."
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Click to change object's rotation pivot."
@@ -4370,7 +4214,7 @@ msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Pan Mode"
-msgstr "Панорамен режим на Отместване (на работния прозорец)"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Toggle snapping."
@@ -4436,26 +4280,24 @@ msgstr ""
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Lock the selected object in place (can't be moved)."
-msgstr "Заключи селектирания обект на място (за да не може да се премества)."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Unlock the selected object (can be moved)."
-msgstr "Отключи селектирания обект (за да може да се премества)."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Makes sure the object's children are not selectable."
-msgstr "Гарантирай че децата на този обект няма да могат да бъдат селектирани."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Restores the object's children's ability to be selected."
-msgstr "Възвръщане на способността да се селектират децата на обекта."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Skeleton Options"
-msgstr "Само Селекцията"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Show Bones"
@@ -4463,26 +4305,24 @@ msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Make IK Chain"
-msgstr "Направи IK Връзка"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Clear IK Chain"
-msgstr "Изчисти IK Връзка"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Make Custom Bone(s) from Node(s)"
 msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Clear Custom Bones"
-msgstr "Възпроизвеждане на сцена по избор"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
-#, fuzzy
 msgid "View"
-msgstr "Изглед"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/polygon_2d_editor_plugin.cpp
@@ -4515,12 +4355,11 @@ msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Center Selection"
-msgstr "Центрирай върху Селекцията"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid "Frame Selection"
-msgstr "Покажи Селекцията (вмести в целия прозорец)"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Layout"
@@ -4552,11 +4391,11 @@ msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Add %s"
-msgstr "Добави %s"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Adding %s..."
-msgstr "Добавяне на %s..."
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Cannot instantiate multiple nodes without root."
@@ -4565,7 +4404,7 @@ msgstr ""
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp editor/scene_tree_dock.cpp
 msgid "Create Node"
-msgstr "Създай Възел"
+msgstr ""
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp editor/scene_tree_dock.cpp
@@ -4583,9 +4422,8 @@ msgid ""
 msgstr ""
 
 #: editor/plugins/collision_polygon_editor_plugin.cpp
-#, fuzzy
 msgid "Create Polygon3D"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/collision_polygon_editor_plugin.cpp
 msgid "Edit Poly"
@@ -4654,9 +4492,8 @@ msgid "Remove point"
 msgstr ""
 
 #: editor/plugins/curve_editor_plugin.cpp
-#, fuzzy
 msgid "Left linear"
-msgstr "Линейно"
+msgstr ""
 
 #: editor/plugins/curve_editor_plugin.cpp
 msgid "Right linear"
@@ -4757,11 +4594,11 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Could not create outline!"
-msgstr "Не можа да се създаде очертание!"
+msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Create Outline"
-msgstr "Създай Очертание"
+msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Mesh"
@@ -4789,11 +4626,11 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "View UV1"
-msgstr "Покажи UV1"
+msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "View UV2"
-msgstr "Покажи UV2"
+msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Unwrap UV2 for Lightmap/AO"
@@ -4805,7 +4642,7 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Outline Size:"
-msgstr "Размер на Очертанието:"
+msgstr ""
 
 #: editor/plugins/mesh_library_editor_plugin.cpp
 msgid "Remove item %d?"
@@ -4822,11 +4659,11 @@ msgstr ""
 
 #: editor/plugins/mesh_library_editor_plugin.cpp
 msgid "Import from Scene"
-msgstr "Внасяне от Cцена"
+msgstr ""
 
 #: editor/plugins/mesh_library_editor_plugin.cpp
 msgid "Update from Scene"
-msgstr "Обновяване от Cцена"
+msgstr ""
 
 #: editor/plugins/multimesh_editor_plugin.cpp
 msgid "No mesh source specified (and no MultiMesh set in node)."
@@ -4998,15 +4835,15 @@ msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "No faces!"
-msgstr "Няма лица!"
+msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Node does not contain geometry."
-msgstr "Възелът не съдържа геометрия."
+msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Node does not contain geometry (faces)."
-msgstr "Възелът не съдържа геометрия (лица)."
+msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Create Emitter"
@@ -5026,7 +4863,7 @@ msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Volume"
-msgstr "Обем"
+msgstr ""
 
 #: editor/plugins/particles_editor_plugin.cpp
 msgid "Emission Source: "
@@ -5117,7 +4954,7 @@ msgstr ""
 #: editor/plugins/path_2d_editor_plugin.cpp
 #: editor/plugins/path_editor_plugin.cpp
 msgid "Delete Point"
-msgstr "Изтрий Точка"
+msgstr ""
 
 #: editor/plugins/path_2d_editor_plugin.cpp
 #: editor/plugins/path_editor_plugin.cpp
@@ -5204,37 +5041,32 @@ msgid "Create Polygon & UV"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Create Internal Vertex"
-msgstr "Създай нова хоризонтална помощна линия"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Internal Vertex"
-msgstr "Премахни вертикална помощна линия"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Invalid Polygon (need 3 different vertices)"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Add Custom Polygon"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Custom Polygon"
-msgstr "Преместване на Полигон"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Transform UV Map"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Transform Polygon"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Paint Bone Weights"
@@ -5253,48 +5085,44 @@ msgid "UV"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Points"
-msgstr "LMB: Премести Точка."
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Polygons"
-msgstr "Полигон->UV"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Bones"
 msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Move Points"
-msgstr "LMB: Премести Точка."
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Ctrl: Rotate"
-msgstr "Ctrl: Завъртане"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Shift: Move All"
-msgstr "Shift: Преместване на Всичко"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Shift+Ctrl: Scale"
-msgstr "Shift+Ctrl: Управление на Мащаб (размер)"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Move Polygon"
-msgstr "Преместване на Полигон"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Rotate Polygon"
-msgstr "Завъртане на Полигон"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Scale Polygon"
-msgstr "Мащаб на Полигон"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create a custom polygon. Enables custom polygon rendering."
@@ -5316,24 +5144,23 @@ msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Radius:"
-msgstr "Радиус:"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Polygon->UV"
-msgstr "Полигон->UV"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "UV->Polygon"
-msgstr "UV->Полигон"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Clear UV"
-msgstr "Изчисти UV"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Grid Settings"
-msgstr "Настройки"
+msgstr ""
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -5374,7 +5201,7 @@ msgstr ""
 
 #: editor/plugins/resource_preloader_editor_plugin.cpp
 msgid "ERROR: Couldn't load resource!"
-msgstr "ГРЕШКА: Ресурсът не можа да бъде зареден!"
+msgstr ""
 
 #: editor/plugins/resource_preloader_editor_plugin.cpp
 msgid "Add Resource"
@@ -5406,7 +5233,7 @@ msgstr ""
 #: editor/plugins/theme_editor_plugin.cpp editor/project_settings_editor.cpp
 #: editor/scene_tree_editor.cpp
 msgid "Type:"
-msgstr "Тип:"
+msgstr ""
 
 #: editor/plugins/resource_preloader_editor_plugin.cpp
 #: editor/scene_tree_dock.cpp editor/scene_tree_editor.cpp
@@ -5436,60 +5263,55 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Close and save changes?"
-msgstr "Затвори и запази промените?"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error writing TextFile:"
-msgstr "Грешка при записване на TextFile:"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Error: could not load file."
-msgstr "Грешка, не можа да се зареди файла."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error could not load file."
-msgstr "Грешка, не можа да се зареди файла."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error saving file!"
-msgstr "Грешка при записването на файла!"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Error while saving theme."
-msgstr "Грешка при записване."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Error Saving"
-msgstr "Грешка при запазване"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Error importing theme."
-msgstr "Грешка при внасяне на темата"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Error Importing"
-msgstr "Имаше грешка при внасянето"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "New TextFile..."
-msgstr "Нов TextFile..."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Open File"
-msgstr "Отвори Файл"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Save File As..."
-msgstr "Запази Файла Като..."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Import Theme"
-msgstr "Внасяне на тема"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error while saving theme"
@@ -5497,11 +5319,11 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Error saving"
-msgstr "Грешка при запазване"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Save Theme As..."
-msgstr "Запази Темата Като..."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid " Class Reference"
@@ -5512,42 +5334,40 @@ msgid "Toggle alphabetical sorting of the method list."
 msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Sort"
-msgstr "Подреждане:"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp editor/scene_tree_dock.cpp
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "Move Up"
-msgstr "Премести Нагоре"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp editor/scene_tree_dock.cpp
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "Move Down"
-msgstr "Премести Надоло"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Next script"
-msgstr "Следващ скрипт"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Previous script"
-msgstr "Предишен скрипт"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "File"
-msgstr "Файл"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Open..."
-msgstr "Отвори"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Save All"
-msgstr "Запази Всичко"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Soft Reload Script"
@@ -5558,39 +5378,37 @@ msgid "Copy Script Path"
 msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "History Previous"
-msgstr "История Назад"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "History Next"
-msgstr "История Напред"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Theme"
-msgstr "Тема"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Import Theme..."
-msgstr "Внасяне на тема"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Reload Theme"
-msgstr "Зареди Темата наново"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Save Theme"
-msgstr "Запази Темата"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Close Docs"
-msgstr "Затвори Документацията"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Close All"
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Close Other Tabs"
@@ -5598,17 +5416,16 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp editor/project_manager.cpp
 msgid "Run"
-msgstr "Пускане"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Toggle Scripts Panel"
-msgstr "Видимост на Панела със Скриптове"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 #: editor/plugins/script_text_editor.cpp
 msgid "Find Next"
-msgstr "Намери Напред"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Step Over"
@@ -5629,7 +5446,7 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Keep Debugger Open"
-msgstr "Отстранителя на грешки да седи отворен"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Debug with External Editor"
@@ -5637,7 +5454,7 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Open Godot online documentation"
-msgstr "Отвори документацията на Godot онлайн"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Search the reference documentation."
@@ -5645,53 +5462,49 @@ msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Go to previous edited document."
-msgstr "Отиди в предходния променен документ."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Go to next edited document."
-msgstr "Отиди в следващия променен документ."
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Discard"
-msgstr "Захвърли (промените)"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid ""
 "The following files are newer on disk.\n"
 "What action should be taken?:"
 msgstr ""
-"Следните файлове са по-нови на диска.\n"
-"Кое действие трябва да се предприеме?:"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Reload"
-msgstr "Презареди"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Resave"
-msgstr "Презапиши"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Debugger"
-msgstr "Отстранител на грешки"
+msgstr ""
 
 #: editor/plugins/script_editor_plugin.cpp
-#, fuzzy
 msgid "Search Results"
-msgstr "Търсене"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Line"
-msgstr "Ред"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "(ignore)"
 msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Go to Function"
-msgstr "Отиди на Ред"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp editor/plugins/text_editor.cpp
 msgid "Standard"
@@ -5715,15 +5528,15 @@ msgstr ""
 
 #: editor/plugins/script_text_editor.cpp editor/plugins/text_editor.cpp
 msgid "Uppercase"
-msgstr "Главни букви"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp editor/plugins/text_editor.cpp
 msgid "Lowercase"
-msgstr "Малки букви"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp editor/plugins/text_editor.cpp
 msgid "Capitalize"
-msgstr "Всяка дума с Главна буква"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp editor/plugins/text_editor.cpp
 msgid "Syntax Highlighter"
@@ -5732,16 +5545,16 @@ msgstr ""
 #: editor/plugins/script_text_editor.cpp scene/gui/line_edit.cpp
 #: scene/gui/text_edit.cpp
 msgid "Cut"
-msgstr "Изрязване"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp scene/gui/line_edit.cpp
 #: scene/gui/text_edit.cpp
 msgid "Select All"
-msgstr "Избиране на всичко"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Delete Line"
-msgstr "Изтрий Ред"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Indent Left"
@@ -5753,32 +5566,31 @@ msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Toggle Comment"
-msgstr "Вкарай Коментар"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Fold/Unfold Line"
-msgstr "Разтвори/Събери Реда"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Fold All Lines"
-msgstr "Събери всички Редове"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Unfold All Lines"
-msgstr "Разтвори Всички Редове"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Clone Down"
-msgstr "Копирай на Долен ред"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Complete Symbol"
-msgstr "Завърши Символа (предложения за довършване)"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Trim Trailing Whitespace"
-msgstr "Премахни Празните символи в края на реда"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Convert Indent to Spaces"
@@ -5795,39 +5607,35 @@ msgstr ""
 #: editor/plugins/script_text_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Toggle Breakpoint"
-msgstr "Добави Breakpoint"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Remove All Breakpoints"
-msgstr "Премахни Всички Breakpoint-ове"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Go to Next Breakpoint"
-msgstr "Отиди на следващия Breakpoint"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Go to Previous Breakpoint"
-msgstr "Отиди на Предишния Breakpoint"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Find Previous"
 msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Find in Files..."
-msgstr "Намери във файлове"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Go to Function..."
 msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
-#, fuzzy
 msgid "Go to Line..."
-msgstr "Отиди на Ред"
+msgstr ""
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Contextual Help"
@@ -5902,9 +5710,8 @@ msgid "Scaling: "
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-#, fuzzy
 msgid "Translating: "
-msgstr "Добавяне на превод"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rotating %s degrees."
@@ -5956,11 +5763,11 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Top View."
-msgstr "Изглед Отгоре."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Bottom View."
-msgstr "Изглед Отдолу."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Bottom"
@@ -5968,7 +5775,7 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Left View."
-msgstr "Изглед Отляво."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Left"
@@ -5976,7 +5783,7 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Right View."
-msgstr "Изглед Отдясно."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Right"
@@ -5984,7 +5791,7 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Front View."
-msgstr "Изглед Отпред."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Front"
@@ -5992,7 +5799,7 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rear View."
-msgstr "Изглед Отзад."
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rear"
@@ -6043,9 +5850,8 @@ msgid "View Information"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-#, fuzzy
 msgid "View FPS"
-msgstr "Преглед на файловете"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Half Resolution"
@@ -6065,27 +5871,27 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
-msgstr "Свободен Изглед Отляво"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Right"
-msgstr "Свободен Изглед Отдясно"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Forward"
-msgstr "Свободен Изглед Отпред"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Backwards"
-msgstr "Свободен Изглед Отзад"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Up"
-msgstr "Свободен Изглед Отгоре"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Down"
-msgstr "Свободен Изглед Отдолу"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Speed Modifier"
@@ -6101,7 +5907,7 @@ msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Select Mode (Q)"
-msgstr "Режим на Селектиране (Q)"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid ""
@@ -6131,9 +5937,8 @@ msgid "Local Space Mode (%s)"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
-#, fuzzy
 msgid "Snap Mode (%s)"
-msgstr "Избиране на всичко"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Bottom View"
@@ -6250,7 +6055,7 @@ msgstr ""
 #: editor/plugins/spatial_editor_plugin.cpp
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Settings"
-msgstr "Настройки"
+msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Snap Settings"
@@ -6337,9 +6142,8 @@ msgid "Convert to 2D Mesh"
 msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
-#, fuzzy
 msgid "Create 2D Mesh"
-msgstr "Създайте нов/а  %s"
+msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
 msgid "Simplification: "
@@ -6350,14 +6154,12 @@ msgid "Grow (Pixels): "
 msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
-#, fuzzy
 msgid "Update Preview"
-msgstr "Обновяване от сцена"
+msgstr ""
 
 #: editor/plugins/sprite_editor_plugin.cpp
-#, fuzzy
 msgid "Settings:"
-msgstr "Настройки"
+msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "ERROR: Couldn't load frame resource!"
@@ -6397,7 +6199,7 @@ msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Speed (FPS):"
-msgstr "Скорост (кадри в секунда):"
+msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Loop"
@@ -6416,9 +6218,8 @@ msgid "Insert Empty (After)"
 msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
-#, fuzzy
 msgid "Move (Before)"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/plugins/sprite_frames_editor_plugin.cpp
 msgid "Move (After)"
@@ -6470,9 +6271,8 @@ msgid "Sep.:"
 msgstr ""
 
 #: editor/plugins/texture_region_editor_plugin.cpp
-#, fuzzy
 msgid "TextureRegion"
-msgstr "Двуизмерна текстура"
+msgstr ""
 
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Can't save theme to file:"
@@ -6491,9 +6291,8 @@ msgid "Remove All Items"
 msgstr ""
 
 #: editor/plugins/theme_editor_plugin.cpp
-#, fuzzy
 msgid "Remove All"
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Edit theme..."
@@ -6597,7 +6396,7 @@ msgstr ""
 
 #: editor/plugins/theme_editor_plugin.cpp
 msgid "Constant"
-msgstr "Постоянно"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Erase Selection"
@@ -6608,18 +6407,16 @@ msgid "Fix Invalid Tiles"
 msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Cut Selection"
-msgstr "Центрирай върху Селекцията"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Paint TileMap"
 msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Line Draw"
-msgstr "Линейно"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Rectangle Paint"
@@ -6658,19 +6455,16 @@ msgid "Pick Tile"
 msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Copy Selection"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Rotate left"
-msgstr "Режим на Завъртане"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Rotate right"
-msgstr "Завъртане на Полигон"
+msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Flip horizontally"
@@ -6681,18 +6475,16 @@ msgid "Flip vertically"
 msgstr ""
 
 #: editor/plugins/tile_map_editor_plugin.cpp
-#, fuzzy
 msgid "Clear transform"
-msgstr "Изнасяне към платформа"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Add Texture(s) to TileSet."
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove selected Texture from TileSet."
-msgstr "Преместване на пътечката нагоре."
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Create from Scene"
@@ -6707,19 +6499,16 @@ msgid "Copy bitmask."
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Paste bitmask."
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Erase bitmask."
-msgstr "Изтрий точки."
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Create a new polygon."
-msgstr "Създай нов полигон от нулата."
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Keep polygon inside region Rect."
@@ -6734,9 +6523,8 @@ msgid "Display Tile Names (Hold Alt Key)"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove selected texture? This will remove all tiles which use it."
-msgstr "Преместване на пътечката нагоре."
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "You haven't selected a texture to remove."
@@ -6751,9 +6539,8 @@ msgid "Merge from scene?"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Texture"
-msgstr "Внасяне на текстури"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "%s file(s) were not added because was already on the list."
@@ -6766,29 +6553,25 @@ msgid ""
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Delete selected Rect."
-msgstr "Изтрий избраните файлове?"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid ""
 "Select current edited sub-tile.\n"
 "Click on another Tile to edit it."
-msgstr "Избиране на текущата папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Delete polygon."
-msgstr "Изтриване на анимацията?"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid ""
 "LMB: Set bit on.\n"
 "RMB: Set bit off.\n"
 "Click on another Tile to edit it."
-msgstr "Избиране на текущата папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid ""
@@ -6804,102 +6587,86 @@ msgid ""
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid ""
 "Select sub-tile to change its z index.\n"
 "Click on another Tile to edit it."
-msgstr "Избиране на текущата папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Set Tile Region"
-msgstr "Двуизмерна текстура"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Create Tile"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Set Tile Icon"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Tile Bitmask"
-msgstr "Промени Филтрите"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Collision Polygon"
-msgstr "Промени съществуващ полигон:"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Occlusion Polygon"
-msgstr "Приставки"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Navigation Polygon"
-msgstr "Промени съществуващ полигон:"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Paste Tile Bitmask"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Clear Tile Bitmask"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Tile"
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Collision Polygon"
-msgstr "Преместване на Полигон"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Occlusion Polygon"
-msgstr "Преместване на Полигон"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Navigation Polygon"
-msgstr "Завъртане на Полигон"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Edit Tile Priority"
-msgstr "Промени Филтрите"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Edit Tile Z Index"
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Create Collision Polygon"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "Create Occlusion Polygon"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "This property can't be changed."
 msgstr ""
 
 #: editor/plugins/tile_set_editor_plugin.cpp
-#, fuzzy
 msgid "TileSet"
-msgstr "Файл:"
+msgstr ""
 
 #: editor/plugins/visual_shader_editor_plugin.cpp
 msgid "Vertex"
@@ -6938,9 +6705,8 @@ msgid "Release"
 msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Exporting All"
-msgstr "Изнасяне за %s"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Presets"
@@ -6951,9 +6717,8 @@ msgid "Add..."
 msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Export Path"
-msgstr "Изнасяне на проекта"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Resources"
@@ -6961,23 +6726,23 @@ msgstr ""
 
 #: editor/project_export.cpp
 msgid "Export all resources in the project"
-msgstr "Изнасяне на всички ресурси в проекта"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Export selected scenes (and dependencies)"
-msgstr "Изнасяне на избраните сцени (включително зависимостите)"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Export selected resources (and dependencies)"
-msgstr "Изнасяне на избраните ресурси (включително зависимостите)"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Export Mode:"
-msgstr "Режим на изнасяне:"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Resources to export:"
-msgstr "Ресурси за изнасяне:"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid ""
@@ -7010,14 +6775,12 @@ msgid "Feature List:"
 msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Script"
-msgstr "Нов скрипт"
+msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Script Export Mode:"
-msgstr "Режим на изнасяне:"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Text"
@@ -7040,19 +6803,16 @@ msgid "Script Encryption Key (256-bits as hex):"
 msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Export PCK/Zip"
-msgstr "Изнасяне"
+msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Export mode?"
-msgstr "Режим на изнасяне:"
+msgstr ""
 
 #: editor/project_export.cpp
-#, fuzzy
 msgid "Export All"
-msgstr "Изнасяне"
+msgstr ""
 
 #: editor/project_export.cpp
 msgid "Export templates for this platform are missing:"
@@ -7071,14 +6831,12 @@ msgid "Invalid '.zip' project file, does not contain a 'project.godot' file."
 msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Please choose an empty folder."
-msgstr "Моля, изнесете извън папката на проекта!"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Please choose a 'project.godot' or '.zip' file."
-msgstr "Моля, изнесете извън папката на проекта!"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Directory already contains a Godot project."
@@ -7086,17 +6844,15 @@ msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Imported Project"
-msgstr "Внесен проект"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Invalid Project Name."
-msgstr "Име:"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Couldn't create folder."
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "There is already a folder in this path with the specified name."
@@ -7129,9 +6885,8 @@ msgid "The following files failed extraction from package:"
 msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Rename Project"
-msgstr "Нов проект"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "New Game Project"
@@ -7139,52 +6894,47 @@ msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Import Existing Project"
-msgstr "Внасяне на съществуващ проект"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Import & Edit"
-msgstr "Внасяне и отваряне"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Create New Project"
-msgstr "Създаване на нов проект"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Create & Edit"
-msgstr "Създаване"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Install Project:"
 msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Install & Edit"
-msgstr "Инсталиране"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Project Name:"
-msgstr "Име:"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Create folder"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Project Path:"
-msgstr "Път:"
+msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Project Installation Path:"
-msgstr "Път:"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Browse"
-msgstr "Разглеждане"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Renderer:"
@@ -7223,9 +6973,8 @@ msgid "Unnamed Project"
 msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Can't open project at '%s'."
-msgstr "Създаване на нов проект"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Are you sure to open more than one project?"
@@ -7284,40 +7033,39 @@ msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Project Manager"
-msgstr "Диспечер на проектите"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Project List"
-msgstr "Списък с проекти"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Scan"
-msgstr "Сканиране"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Select a Folder to Scan"
-msgstr "Изберете папка за сканиране"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "New Project"
-msgstr "Нов проект"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Templates"
-msgstr "Шаблони"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Exit"
-msgstr "Изход"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Restart Now"
 msgstr ""
 
 #: editor/project_manager.cpp
-#, fuzzy
 msgid "Can't run project"
-msgstr "Създаване на нов проект"
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid ""
@@ -7364,13 +7112,12 @@ msgid "Add Input Action Event"
 msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "All Devices"
-msgstr "Устройство"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Device"
-msgstr "Устройство"
+msgstr ""
 
 #: editor/project_settings_editor.cpp editor/settings_config_dialog.cpp
 msgid "Shift+"
@@ -7394,43 +7141,39 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Left Button"
-msgstr "Ляво копче"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Right Button"
-msgstr "Дясно копче"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Middle Button"
-msgstr "Средно копче"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Wheel Up Button"
-msgstr "Колелце нагоре"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Wheel Down Button"
-msgstr "Колелце надолу"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "Wheel Left Button"
-msgstr "Колелце нагоре"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "Wheel Right Button"
-msgstr "Дясно копче"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "X Button 1"
-msgstr "Копче 6"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "X Button 2"
-msgstr "Копче 6"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Joypad Axis Index:"
@@ -7438,7 +7181,7 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Axis"
-msgstr "Ос"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Joypad Button Index:"
@@ -7458,27 +7201,27 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Button"
-msgstr "Копче"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Left Button."
-msgstr "Ляво копче."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Right Button."
-msgstr "Дясно копче."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Middle Button."
-msgstr "Средно копче."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Wheel Up."
-msgstr "Колелцето нагоре."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Wheel Down."
-msgstr "Колелцето надолу."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Add Global Property"
@@ -7520,7 +7263,7 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Settings saved OK."
-msgstr "Настройките са запазени."
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Override for Feature"
@@ -7528,11 +7271,11 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Add Translation"
-msgstr "Добавяне на превод"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Remove Translation"
-msgstr "Премахване на превода"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Add Remapped Path"
@@ -7564,11 +7307,11 @@ msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Project Settings (project.godot)"
-msgstr "Настройки на проекта"
+msgstr ""
 
 #: editor/project_settings_editor.cpp editor/settings_config_dialog.cpp
 msgid "General"
-msgstr "Общи"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Override For..."
@@ -7587,9 +7330,8 @@ msgid "Action:"
 msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "Action"
-msgstr "Описание:"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Deadzone"
@@ -7644,9 +7386,8 @@ msgid "Show only selected locales"
 msgstr ""
 
 #: editor/project_settings_editor.cpp
-#, fuzzy
 msgid "Filter mode:"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: editor/project_settings_editor.cpp
 msgid "Locales:"
@@ -7689,18 +7430,16 @@ msgid "Assign"
 msgstr ""
 
 #: editor/property_editor.cpp
-#, fuzzy
 msgid "Select Node"
-msgstr "Избиране на всичко"
+msgstr ""
 
 #: editor/property_editor.cpp
 msgid "Error loading file: Not a resource!"
 msgstr ""
 
 #: editor/property_editor.cpp
-#, fuzzy
 msgid "Pick a Node"
-msgstr "Поставяне"
+msgstr ""
 
 #: editor/property_editor.cpp
 msgid "Bit %d, val %d."
@@ -7708,16 +7447,15 @@ msgstr ""
 
 #: editor/property_selector.cpp
 msgid "Select Property"
-msgstr "Изберете свойство"
+msgstr ""
 
 #: editor/property_selector.cpp
-#, fuzzy
 msgid "Select Virtual Method"
-msgstr "Изберете метод"
+msgstr ""
 
 #: editor/property_selector.cpp
 msgid "Select Method"
-msgstr "Изберете метод"
+msgstr ""
 
 #: editor/pvrtc_compress.cpp
 msgid "Could not execute PVRTC tool:"
@@ -7748,18 +7486,16 @@ msgid "Substitute"
 msgstr ""
 
 #: editor/rename_dialog.cpp
-#, fuzzy
 msgid "Node name"
-msgstr "Възел"
+msgstr ""
 
 #: editor/rename_dialog.cpp
 msgid "Node's parent name, if available"
 msgstr ""
 
 #: editor/rename_dialog.cpp
-#, fuzzy
 msgid "Node type"
-msgstr "Възел"
+msgstr ""
 
 #: editor/rename_dialog.cpp
 msgid "Current scene name"
@@ -7788,9 +7524,8 @@ msgid "Initial value for the counter"
 msgstr ""
 
 #: editor/rename_dialog.cpp
-#, fuzzy
 msgid "Step"
-msgstr "Стъпка (сек.):"
+msgstr ""
 
 #: editor/rename_dialog.cpp
 msgid "Amount by which counter is incremented for each node"
@@ -7880,7 +7615,7 @@ msgstr ""
 
 #: editor/run_settings_dialog.cpp
 msgid "Scene Run Settings"
-msgstr "Настройки за пускане на сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "No parent to instance the scenes at."
@@ -7905,9 +7640,8 @@ msgid "Instance Child Scene"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Clear Script"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "This operation can't be done on the tree root."
@@ -7972,28 +7706,24 @@ msgid "Make Local"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Create Root Node:"
-msgstr "Създаване на папка"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "2D Scene"
-msgstr "Сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "3D Scene"
-msgstr "Сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "User Interface"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Custom Node"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Can't operate on nodes from a foreign scene!"
@@ -8004,9 +7734,8 @@ msgid "Can't operate on nodes the current scene inherits from!"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Attach Script"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Remove Node(s)"
@@ -8035,9 +7764,8 @@ msgid "Clear Inheritance"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Open documentation"
-msgstr "Отвори документацията на Godot онлайн"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)"
@@ -8052,14 +7780,12 @@ msgid "Change Type"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Extend Script"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Make Scene Root"
-msgstr "Запазване на сцената"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Merge From Scene"
@@ -8074,9 +7800,8 @@ msgid "Copy Node Path"
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Delete (No Confirm)"
-msgstr "Моля, потвърдете..."
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Add/Create a New Node"
@@ -8097,9 +7822,8 @@ msgid "Clear a script for the selected node."
 msgstr ""
 
 #: editor/scene_tree_dock.cpp
-#, fuzzy
 msgid "Remote"
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Local"
@@ -8136,9 +7860,8 @@ msgid ""
 msgstr ""
 
 #: editor/scene_tree_editor.cpp editor/script_create_dialog.cpp
-#, fuzzy
 msgid "Open Script"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/scene_tree_editor.cpp
 msgid ""
@@ -8183,19 +7906,16 @@ msgid "Select a Node"
 msgstr ""
 
 #: editor/script_create_dialog.cpp
-#, fuzzy
 msgid "Error loading template '%s'"
-msgstr "Грешка при зареждането на шрифта."
+msgstr ""
 
 #: editor/script_create_dialog.cpp
-#, fuzzy
 msgid "Error - Could not create script in filesystem."
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: editor/script_create_dialog.cpp
-#, fuzzy
 msgid "Error loading script from %s"
-msgstr "Грешка при зареждането на шрифта."
+msgstr ""
 
 #: editor/script_create_dialog.cpp
 msgid "N/A"
@@ -8226,9 +7946,8 @@ msgid "Directory of the same name exists"
 msgstr ""
 
 #: editor/script_create_dialog.cpp
-#, fuzzy
 msgid "File exists, will be reused"
-msgstr "Файлът съществува. Искате ли да го презапишете?"
+msgstr ""
 
 #: editor/script_create_dialog.cpp
 msgid "Invalid extension"
@@ -8264,7 +7983,7 @@ msgstr ""
 
 #: editor/script_create_dialog.cpp
 msgid "Create new script file"
-msgstr "Създаване на нов скрипт"
+msgstr ""
 
 #: editor/script_create_dialog.cpp
 msgid "Load existing script file"
@@ -8291,14 +8010,12 @@ msgid "Built-in Script"
 msgstr ""
 
 #: editor/script_create_dialog.cpp
-#, fuzzy
 msgid "Attach Node Script"
-msgstr "Нова сцена"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
-#, fuzzy
 msgid "Remote "
-msgstr "Затваряне на всичко"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Bytes:"
@@ -8314,16 +8031,15 @@ msgstr ""
 
 #: editor/script_editor_debugger.cpp modules/mono/editor/mono_bottom_panel.cpp
 msgid "Errors"
-msgstr "Грешки"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Child Process Connected"
 msgstr ""
 
 #: editor/script_editor_debugger.cpp
-#, fuzzy
 msgid "Copy Error"
-msgstr "Грешки"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Inspect Previous Instance"
@@ -8347,7 +8063,7 @@ msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Value"
-msgstr "Стойност"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Monitors"
@@ -8383,7 +8099,7 @@ msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Misc"
-msgstr "Разни"
+msgstr ""
 
 #: editor/script_editor_debugger.cpp
 msgid "Clicked Control:"
@@ -8490,9 +8206,8 @@ msgid "Select dependencies of the library for this entry"
 msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
-#, fuzzy
 msgid "Remove current entry"
-msgstr "Преместване на пътечката нагоре."
+msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "Double click to create a new entry"
@@ -8503,28 +8218,24 @@ msgid "Platform:"
 msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
-#, fuzzy
 msgid "Platform"
-msgstr "Изнасяне към платформа"
+msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
-#, fuzzy
 msgid "Dynamic Library"
-msgstr "Изнасяне на библиотеката"
+msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
 msgid "Add an architecture entry"
 msgstr ""
 
 #: modules/gdnative/gdnative_library_editor_plugin.cpp
-#, fuzzy
 msgid "GDNativeLibrary"
-msgstr "Изнасяне на библиотеката"
+msgstr ""
 
 #: modules/gdnative/gdnative_library_singleton_editor.cpp
-#, fuzzy
 msgid "Library"
-msgstr "Изнасяне на библиотеката"
+msgstr ""
 
 #: modules/gdnative/gdnative_library_singleton_editor.cpp
 msgid "Status"
@@ -8539,59 +8250,48 @@ msgid "GDNative"
 msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Step argument is zero!"
-msgstr "Стъпката на range() е нула!"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Not a script with an instance"
-msgstr "Скриптът няма инстанция"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Not based on a script"
-msgstr "Обектът не е базиран на скрипт"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Not based on a resource file"
-msgstr "Обектът не е базиран на ресурсен файл"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Invalid instance dictionary format (missing @path)"
-msgstr "Невалиден формат на инстанцията в речника (липсва @path)"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
 msgid "Invalid instance dictionary format (can't load script at @path)"
 msgstr ""
-"Невалиден формат на инстанцията в речника (скриптът в @path не може да бъде "
-"зареден)"
 
 #: modules/gdscript/gdscript_functions.cpp
 msgid "Invalid instance dictionary format (invalid script at @path)"
 msgstr ""
-"Невалиден формат на инстанцията в речника (скриптът в @path е невалиден)"
 
 #: modules/gdscript/gdscript_functions.cpp
-#, fuzzy
 msgid "Invalid instance dictionary (invalid subclasses)"
-msgstr "Невалиден формат на инстанцията в речника (невалиден подклас)"
+msgstr ""
 
 #: modules/gdscript/gdscript_functions.cpp
 msgid "Object can't provide a length."
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Next Plane"
-msgstr "Следващ подпрозорец"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Previous Plane"
-msgstr "Предишен подпрозорец"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Plane:"
@@ -8602,9 +8302,8 @@ msgid "Next Floor"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Previous Floor"
-msgstr "Предишен подпрозорец"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Floor:"
@@ -8615,9 +8314,8 @@ msgid "GridMap Delete Selection"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "GridMap Fill Selection"
-msgstr "Настройки"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "GridMap Duplicate Selection"
@@ -8632,9 +8330,8 @@ msgid "Snap View"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Clip Disabled"
-msgstr "Изключено"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Clip Above"
@@ -8685,33 +8382,28 @@ msgid "Cursor Clear Rotation"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Create Area"
-msgstr "Създаване"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Create Exterior Connector"
-msgstr "Създаване на нов проект"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Erase Area"
 msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Clear Selection"
-msgstr "Нова сцена"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "Fill Selection"
-msgstr "Нова сцена"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
-#, fuzzy
 msgid "GridMap Settings"
-msgstr "Настройки"
+msgstr ""
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Pick Distance:"
@@ -8730,9 +8422,8 @@ msgid "Generating C# project..."
 msgstr ""
 
 #: modules/mono/editor/godotsharp_editor.cpp
-#, fuzzy
 msgid "Failed to create solution."
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: modules/mono/editor/godotsharp_editor.cpp
 msgid "Failed to save solution."
@@ -8763,18 +8454,16 @@ msgid "Builds"
 msgstr ""
 
 #: modules/mono/editor/mono_bottom_panel.cpp
-#, fuzzy
 msgid "Build Project"
-msgstr "Проект"
+msgstr ""
 
 #: modules/mono/editor/mono_bottom_panel.cpp
 msgid "Warnings"
 msgstr ""
 
 #: modules/mono/editor/mono_bottom_panel.cpp
-#, fuzzy
 msgid "View log"
-msgstr "Преглед на файловете"
+msgstr ""
 
 #: modules/mono/mono_gd/gd_mono_utils.cpp
 msgid "End of inner exception stack trace"
@@ -8838,7 +8527,7 @@ msgstr ""
 
 #: modules/recast/navigation_mesh_generator.cpp
 msgid "Done!"
-msgstr "Готово!"
+msgstr ""
 
 #: modules/visual_script/visual_script.cpp
 msgid ""
@@ -8987,28 +8676,24 @@ msgid "Change Base Type"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Move Node(s)"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove VisualScript Node"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Connect Nodes"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Connect Node Data"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Connect Node Sequence"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Script already has function '%s'"
@@ -9027,9 +8712,8 @@ msgid "Clipboard is empty!"
 msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Paste VisualScript Nodes"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Remove Function"
@@ -9089,16 +8773,15 @@ msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Cut Nodes"
-msgstr "Изрязване на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Paste Nodes"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_editor.cpp
-#, fuzzy
 msgid "Edit Member"
-msgstr "Файл:"
+msgstr ""
 
 #: modules/visual_script/visual_script_flow_control.cpp
 msgid "Input type not iterable: "
@@ -9155,9 +8838,8 @@ msgid ""
 msgstr ""
 
 #: modules/visual_script/visual_script_property_selector.cpp
-#, fuzzy
 msgid "Search VisualScript"
-msgstr "Поставяне на възелите"
+msgstr ""
 
 #: modules/visual_script/visual_script_property_selector.cpp
 msgid "Get %s"
@@ -9208,9 +8890,8 @@ msgid "Invalid public key for APK expansion."
 msgstr ""
 
 #: platform/android/export/export.cpp
-#, fuzzy
 msgid "Invalid package name:"
-msgstr "невалидно име на Група."
+msgstr ""
 
 #: platform/iphone/export/export.cpp
 msgid "Identifier is missing."
@@ -9258,52 +8939,44 @@ msgid "Run exported HTML in the system's default browser."
 msgstr ""
 
 #: platform/javascript/export/export.cpp
-#, fuzzy
 msgid "Could not write file:"
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: platform/javascript/export/export.cpp
-#, fuzzy
 msgid "Could not open template for export:"
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: platform/javascript/export/export.cpp
 msgid "Invalid export template:"
 msgstr ""
 
 #: platform/javascript/export/export.cpp
-#, fuzzy
 msgid "Could not read custom HTML shell:"
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: platform/javascript/export/export.cpp
-#, fuzzy
 msgid "Could not read boot splash image file:"
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: platform/javascript/export/export.cpp
-#, fuzzy
 msgid "Using default boot splash image."
-msgstr "Неуспешно създаване на папка."
+msgstr ""
 
 #: platform/uwp/export/export.cpp
-#, fuzzy
 msgid "Invalid package unique name."
-msgstr "невалидно име на Група."
+msgstr ""
 
 #: platform/uwp/export/export.cpp
-#, fuzzy
 msgid "Invalid product GUID."
-msgstr "Име:"
+msgstr ""
 
 #: platform/uwp/export/export.cpp
 msgid "Invalid publisher GUID."
 msgstr ""
 
 #: platform/uwp/export/export.cpp
-#, fuzzy
 msgid "Invalid background color."
-msgstr "невалидно име на Група."
+msgstr ""
 
 #: platform/uwp/export/export.cpp
 msgid "Invalid Store Logo image dimensions (should be 50x50)."
@@ -9338,17 +9011,12 @@ msgid ""
 "A SpriteFrames resource must be created or set in the 'Frames' property in "
 "order for AnimatedSprite to display frames."
 msgstr ""
-"За да може AnimatedSprite да показва кадри, първо трябва да му се даде "
-"SpriteFrames ресурс в парамертъра 'Frames'."
 
 #: scene/2d/canvas_modulate.cpp
-#, fuzzy
 msgid ""
 "Only one visible CanvasModulate is allowed per scene (or set of instanced "
 "scenes). The first created one will work, while the rest will be ignored."
 msgstr ""
-"Може да има само един видим CanvasModulate на сцене (или няколко "
-"инстанцирани сцени). Само първият ще работи, а всички останали - игнорирани."
 
 #: scene/2d/collision_object_2d.cpp
 msgid ""
@@ -9363,13 +9031,10 @@ msgid ""
 "CollisionObject2D derived node. Please only use it as a child of Area2D, "
 "StaticBody2D, RigidBody2D, KinematicBody2D, etc. to give them a shape."
 msgstr ""
-"CollisionPolygon2D служи само за да даде форма за колизии на "
-"CollisionObject2D. Моля, използвайте го само като наследник на Area2D, "
-"StaticBody2D, RigidBody2D, KinematicBody2D, и т.н. за да им дадете форма."
 
 #: scene/2d/collision_polygon_2d.cpp
 msgid "An empty CollisionPolygon2D has no effect on collision."
-msgstr "Празен CollisionPolygon2D няма никакъв ефект на колизията."
+msgstr ""
 
 #: scene/2d/collision_shape_2d.cpp
 msgid ""
@@ -9377,18 +9042,12 @@ msgid ""
 "CollisionObject2D derived node. Please only use it as a child of Area2D, "
 "StaticBody2D, RigidBody2D, KinematicBody2D, etc. to give them a shape."
 msgstr ""
-"CollisionShape2D служи само за да даде форма за колизии на "
-"CollisionObject2D. Моля, използвайте го само като наследник на Area2D, "
-"StaticBody2D, RigidBody2D, KinematicBody2D, и т.н. за да им дадете форма."
 
 #: scene/2d/collision_shape_2d.cpp
-#, fuzzy
 msgid ""
 "A shape must be provided for CollisionShape2D to function. Please create a "
 "shape resource for it!"
 msgstr ""
-"За да работи CollisionShape2D, е нужно да му се даде форма. Моля, създайте "
-"му Shape2D ресурс."
 
 #: scene/2d/cpu_particles_2d.cpp
 msgid ""
@@ -9401,40 +9060,32 @@ msgid ""
 "A texture with the shape of the light must be supplied to the 'texture' "
 "property."
 msgstr ""
-"Тесктура с нужната форма на светлината трябва да бъде дадена в параметъра "
-"'texture'."
 
 #: scene/2d/light_occluder_2d.cpp
 msgid ""
 "An occluder polygon must be set (or drawn) for this occluder to take effect."
 msgstr ""
-"Затъмняващият многоъгълник трябва да бъде зададен (или нарисуван) за да може "
-"да работи тази сянка."
 
 #: scene/2d/light_occluder_2d.cpp
 msgid "The occluder polygon for this occluder is empty. Please draw a polygon!"
-msgstr "Затъмняващият многоъгълник е празен. Моля, нарисувайте един."
+msgstr ""
 
 #: scene/2d/navigation_polygon.cpp
 msgid ""
 "A NavigationPolygon resource must be set or created for this node to work. "
 "Please set a property or draw a polygon."
 msgstr ""
-"За този възел трябва да бъде зададен или създаден един ресурс "
-"NavigationPolygon. Моля, задайте или нарисувайте един многоъгълник."
 
 #: scene/2d/navigation_polygon.cpp
 msgid ""
 "NavigationPolygonInstance must be a child or grandchild to a Navigation2D "
 "node. It only provides navigation data."
 msgstr ""
-"NavigationPolygonInstance трябва да бъде наследник или наследник на "
-"наследник на Navigation2D. Той само дава навигационна информация."
 
 #: scene/2d/parallax_layer.cpp
 msgid ""
 "ParallaxLayer node only works when set as child of a ParallaxBackground node."
-msgstr "ParallaxLayer работи само когато е наследник на ParallaxBackground."
+msgstr ""
 
 #: scene/2d/particles_2d.cpp scene/3d/particles.cpp
 msgid ""
@@ -9450,7 +9101,7 @@ msgstr ""
 
 #: scene/2d/path_2d.cpp
 msgid "PathFollow2D only works when set as a child of a Path2D node."
-msgstr "PathFollow2D работи само когато е наследник на Path2D."
+msgstr ""
 
 #: scene/2d/physics_body_2d.cpp
 msgid ""
@@ -9462,8 +9113,6 @@ msgstr ""
 #: scene/2d/remote_transform_2d.cpp
 msgid "Path property must point to a valid Node2D node to work."
 msgstr ""
-"Параметърът 'Path' трябва да сочи към действителен възел Node2D, за да "
-"работи."
 
 #: scene/2d/skeleton_2d.cpp
 msgid "This Bone2D chain should end at a Skeleton2D node."
@@ -9603,9 +9252,8 @@ msgid ""
 msgstr ""
 
 #: scene/3d/path.cpp
-#, fuzzy
 msgid "PathFollow only works when set as a child of a Path node."
-msgstr "PathFollow2D работи само когато е наследник на Path2D."
+msgstr ""
 
 #: scene/3d/path.cpp
 msgid ""
@@ -9621,11 +9269,8 @@ msgid ""
 msgstr ""
 
 #: scene/3d/remote_transform.cpp
-#, fuzzy
 msgid "Path property must point to a valid Spatial node to work."
 msgstr ""
-"Параметърът 'Path' трябва да сочи към действителен възел Particles2D, за да "
-"работи."
 
 #: scene/3d/scenario_fx.cpp
 msgid "WorldEnvironment needs an Environment resource."
@@ -9715,11 +9360,11 @@ msgstr ""
 
 #: scene/gui/dialogs.cpp
 msgid "Alert!"
-msgstr "Тревога!"
+msgstr ""
 
 #: scene/gui/dialogs.cpp
 msgid "Please Confirm..."
-msgstr "Моля, потвърдете..."
+msgstr ""
 
 #: scene/gui/popup.cpp
 msgid ""
@@ -9763,11 +9408,11 @@ msgstr ""
 
 #: scene/resources/dynamic_font.cpp
 msgid "Unknown font format."
-msgstr "Непознат формат за шрифтове."
+msgstr ""
 
 #: scene/resources/dynamic_font.cpp
 msgid "Error loading font."
-msgstr "Грешка при зареждането на шрифта."
+msgstr ""
 
 #: scene/resources/dynamic_font.cpp
 msgid "Invalid font size."
@@ -9792,214 +9437,3 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Varyings can only be assigned in vertex function."
 msgstr ""
-
-#, fuzzy
-#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
-#~ msgstr "PathFollow2D работи само когато е наследник на Path2D."
-
-#, fuzzy
-#~ msgid "Remove Split"
-#~ msgstr "Затваряне на всичко"
-
-#, fuzzy
-#~ msgid "Connect two points to make a split."
-#~ msgstr "Свържи две точки, за да направиш разделение"
-
-#, fuzzy
-#~ msgid "Select a split to erase it."
-#~ msgstr "Избери разделение и го изтрий"
-
-#~ msgid "Add Node.."
-#~ msgstr "Добави Възел..."
-
-#~ msgid "Zoom out"
-#~ msgstr "Отдалечи"
-
-#~ msgid "Zoom in"
-#~ msgstr "Приближи"
-
-#~ msgid "Ctrl+LMB: Split Segment."
-#~ msgstr "Ctrl+LMB: Раздели Сегмент."
-
-#~ msgid "RMB: Erase Point."
-#~ msgstr "RMB: Изтрий Точка."
-
-#, fuzzy
-#~ msgid "New TextFile"
-#~ msgstr "Нов TextFile"
-
-#~ msgid "Save Theme As"
-#~ msgstr "Запази Темата Като"
-
-#~ msgid "Zoom:"
-#~ msgstr "Приближение:"
-
-#~ msgid "Class List:"
-#~ msgstr "Списък на Класове:"
-
-#~ msgid "Search Classes"
-#~ msgstr "Търси Класове"
-
-#~ msgid "Public Methods"
-#~ msgstr "Публични методи"
-
-#~ msgid "Public Methods:"
-#~ msgstr "Публични Методи:"
-
-#, fuzzy
-#~ msgid "Show current scene file."
-#~ msgstr "Избиране на текущата папка"
-
-#~ msgid "Whole words"
-#~ msgstr "Цели думи"
-
-#~ msgid "Search the class hierarchy."
-#~ msgstr "Търси в йерархията на класовете."
-
-#~ msgid "Search in files"
-#~ msgstr "Търси във файлове"
-
-#~ msgid "Errors:"
-#~ msgstr "Грешки:"
-
-#~ msgid "Disabled"
-#~ msgstr "Изключено"
-
-#~ msgid "Length (s):"
-#~ msgstr "Дължина (сек.):"
-
-#~ msgid "Move current track up."
-#~ msgstr "Преместване на пътечката нагоре."
-
-#~ msgid "Move current track down."
-#~ msgstr "Преместване на пътечката надолу."
-
-#~ msgid "Fetching:"
-#~ msgstr "Изтегляне:"
-
-#~ msgid "Button 7"
-#~ msgstr "Копче 7"
-
-#~ msgid "Button 8"
-#~ msgstr "Копче 8"
-
-#~ msgid "Button 9"
-#~ msgstr "Копче 9"
-
-#~ msgid "Condition"
-#~ msgstr "Условие"
-
-#, fuzzy
-#~ msgid "Edit Signal"
-#~ msgstr "Настройки на редактора"
-
-#, fuzzy
-#~ msgid "Can't write file."
-#~ msgstr "Неуспешно създаване на папка."
-
-#, fuzzy
-#~ msgid "Setting '"
-#~ msgstr "Настройки"
-
-#~ msgid ""
-#~ "Path property must point to a valid Viewport node to work. Such Viewport "
-#~ "must be set to 'render target' mode."
-#~ msgstr ""
-#~ "Параметъра 'Path' трябва да сочи към валиден Viewport нод за да работи. "
-#~ "Този Viewport трябва да бъде настройен в режим 'рендъринг цел'(render "
-#~ "target)."
-
-#~ msgid "Re-Import"
-#~ msgstr "Повторно внасяне"
-
-#~ msgid "Current scene must be saved to re-import."
-#~ msgstr ""
-#~ "За да се извърши повторното внасяне, текущата сцена трябва да бъде "
-#~ "запазена."
-
-#~ msgid "Re-Importing"
-#~ msgstr "Извършва се повторно внасяне"
-
-#, fuzzy
-#~ msgid ""
-#~ "\n"
-#~ "Status: Needs Re-Import"
-#~ msgstr "Запазване и повторно внасяне"
-
-#~ msgid "Re-Import..."
-#~ msgstr "Повторно внасяне..."
-
-#~ msgid "Font Import"
-#~ msgstr "Внасяне на шрифт"
-
-#~ msgid "Import 3D Scene"
-#~ msgstr "Внасяне на триизмерна сцена"
-
-#~ msgid "Import Anyway"
-#~ msgstr "Внасяне въпреки това"
-
-#~ msgid "Import Image:"
-#~ msgstr "Внасяне на изображение:"
-
-#~ msgid "Import Textures for Atlas (2D)"
-#~ msgstr "Внасяне на текстури за Атлас (двуизмерно)"
-
-#~ msgid "Import Large Textures (2D)"
-#~ msgstr "Внасяне на големи текстури (двуизмерно)"
-
-#~ msgid "3D Texture"
-#~ msgstr "Триизмерна текстура"
-
-#~ msgid "Import Large Texture"
-#~ msgstr "Внасяне на голяма текстура"
-
-#~ msgid "Import Translations"
-#~ msgstr "Внасяне на преводи"
-
-#~ msgid "Couldn't import!"
-#~ msgstr "Неуспешно внасяне!"
-
-#~ msgid "Import Translation"
-#~ msgstr "Внасяне на превода"
-
-#~ msgid "Invalid project path, the path must exist!"
-#~ msgstr "Недействителен път. Пътят трябва да съществува!"
-
-#, fuzzy
-#~ msgid "Error creating the signature object."
-#~ msgstr "Имаше грешка при изнасяне на проекта!"
-
-#~ msgid "Import assets to the project."
-#~ msgstr "Внасяне на обекти в проекта."
-
-#~ msgid "Export the project to many platforms."
-#~ msgstr "Изнасяне на проекта на много платформи."
-
-#~ msgid "Path property must point to a valid Particles2D node to work."
-#~ msgstr ""
-#~ "Параметърът 'Path' трябва да сочи към действителен възел Particles2D, за "
-#~ "да работи."
-
-#~ msgid ""
-#~ "A SampleLibrary resource must be created or set in the 'samples' property "
-#~ "in order for SamplePlayer to play sound."
-#~ msgstr ""
-#~ "За да изпълнява звук, SamplePlayer трябва да има един SampleLibrary "
-#~ "ресурс в параметъра 'samples'."
-
-#~ msgid "Error exporting project!"
-#~ msgstr "Имаше грешка при изнасяне на проекта!"
-
-#, fuzzy
-#~ msgid "Create Android keystore"
-#~ msgstr "Създаване на папка"
-
-#, fuzzy
-#~ msgid "Organization"
-#~ msgstr "Преходи"
-
-#~ msgid "Project Export Settings"
-#~ msgstr "Настройки за изнасяне на проекта"
-
-#~ msgid "Export all files in the project directory."
-#~ msgstr "Изнасяне на всички файлове в папката на проекта."

@@ -40,8 +40,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-01-13 15:07+0000\n"
-"Last-Translator: Rémi Verschelde <akien@godotengine.org>\n"
+"PO-Revision-Date: 2019-01-26 21:22+0000\n"
+"Last-Translator: So Wieso <sowieso@dukun.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/godot-engine/"
 "godot/de/>\n"
 "Language: de\n"
@@ -49,7 +49,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.4-dev\n"
+"X-Generator: Weblate 3.5-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -1324,8 +1324,24 @@ msgid "Storing File:"
 msgstr "Speichere Datei:"
 
 #: editor/editor_export.cpp
+msgid "No export template found at the expected path:"
+msgstr "Keine Exportvorlagen am erwarteten Pfad gefunden:"
+
+#: editor/editor_export.cpp
 msgid "Packing"
 msgstr "Packe"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom debug template not found."
+msgstr "Selbst konfigurierte Debug-Exportvorlage nicht gefunden."
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom release template not found."
+msgstr "Selbst konfigurierte Release-Exportvorlage nicht gefunden."
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
 msgid "Template file not found:"
@@ -2635,9 +2651,8 @@ msgid "Assign..."
 msgstr "Zuweisen.."
 
 #: editor/editor_properties.cpp
-#, fuzzy
 msgid "Invalid RID"
-msgstr "Ungültiger Pfad"
+msgstr "Ungültige RID"
 
 #: editor/editor_properties.cpp
 msgid ""
@@ -3350,6 +3365,20 @@ msgstr "Voreinstellungen..."
 #: editor/import_dock.cpp
 msgid "Reimport"
 msgstr "Neuimport"
+
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr ""
+
+#: editor/import_dock.cpp
+#, fuzzy
+msgid "Changing the type of an imported file requires editor restart."
+msgstr "Das Ändern des Video-Treibers erfordert einen Neustart des Editors."
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
 
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
@@ -5229,28 +5258,24 @@ msgid "Create Polygon & UV"
 msgstr "Polygon und UV erstellen"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Create Internal Vertex"
-msgstr "Neue horizontale Hilfslinie erstellen"
+msgstr "Internen Vertex erstellen"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Internal Vertex"
-msgstr "Eingangskontrollpunkt löschen"
+msgstr "Internen Vertex entfernen"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Invalid Polygon (need 3 different vertices)"
-msgstr ""
+msgstr "Ungültiges Polygon (3 verschiedene Vertices werden benötigt)"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Add Custom Polygon"
-msgstr "Polygon bearbeiten"
+msgstr "Selbst-erstelltes Polygon hinzufügen"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Remove Custom Polygon"
-msgstr "Kollisionspolygon entfernen"
+msgstr "Selbst-erstelltes Polygon entfernen"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Transform UV Map"
@@ -5277,14 +5302,12 @@ msgid "UV"
 msgstr "UV"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Points"
-msgstr "Punkt"
+msgstr "Punkte"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Polygons"
-msgstr "Polygon→UV"
+msgstr "Polygone"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Bones"
@@ -5320,13 +5343,15 @@ msgstr "Polygon skalieren"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create a custom polygon. Enables custom polygon rendering."
-msgstr ""
+msgstr "Eigenes Polygon erstellen. Aktiviert Eigen-Polygon-Rendern."
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid ""
 "Remove a custom polygon. If none remain, custom polygon rendering is "
 "disabled."
 msgstr ""
+"Eigenes Polygon entfernen. Sollten kein eigenes Polygon übrig bleiben, wird "
+"Eigen-Polygon-Rendern deaktiviert."
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Paint weights with specified intensity."
@@ -7166,6 +7191,38 @@ msgid "Browse"
 msgstr "Durchstöbern"
 
 #: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
+
+#: editor/project_manager.cpp
 msgid "Unnamed Project"
 msgstr "Unbenanntes Projekt"
 
@@ -7892,6 +7949,18 @@ msgstr "Bewege Nodes innerhalb des Eltern-Nodes"
 #: editor/scene_tree_dock.cpp
 msgid "Duplicate Node(s)"
 msgstr "Dupliziere Node(s)"
+
+#: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr "Node muss zur bearbeiteten Szene gehören um ihre Wurzel zu werden."
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr "Instantiierte Szenen können keine Wurzel werden"
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
@@ -9109,6 +9178,94 @@ msgstr "%s abrufen"
 msgid "Set %s"
 msgstr "%s setzen"
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr "Paketname fehlt."
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr "Paketsegmente dürfen keine Länge gleich Null haben."
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr "Das Zeichen ‚%s‘ ist in Android-Anwendungs-Paketnamen nicht gestattet."
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr "Eine Ziffer kann nicht das erste Zeichen eines Paketsegments sein."
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr ""
+"Das Zeichen ‚%s‘ kann nicht das erste Zeichen in einem Paketsegment sein."
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr "Das Paket muss mindestens einen Punkt-Unterteiler ‚.‘ haben."
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr "Das ADB-Programm wurde nicht in den Editoreinstellungen konfiguriert."
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr "OpenJDK-Jarsigner wurde nicht in den Editoreinstellungen konfiguriert."
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+"Debug-Keystore wurde weder in den Editoreinstellungen noch in der Vorlage "
+"konfiguriert."
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr "Ungültiger öffentlicher Schlüssel für APK-Erweiterung."
+
+#: platform/android/export/export.cpp
+msgid "Invalid package name:"
+msgstr "Ungültiger Paketname:"
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr "Bezeichner fehlt."
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr "Bezeichnersegmente dürfen keine Länge gleich Null haben."
+
+#: platform/iphone/export/export.cpp
+msgid "The character '%s' is not allowed in Identifier."
+msgstr "Das Zeichen ‚%s‘ ist in Bezeichnern nicht gestattet."
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+"Eine Ziffer kann nicht das erste Zeichen eines Bezeichnersegments sein."
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+"Das Zeichen ‚%s‘ kann nicht das erste Zeichen in einem Bezeichnersegment "
+"sein."
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr "Der Bezeichner muss mindestens einen Punkt-Unterteiler ‚.‘ haben."
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+"App-Store-Team-ID nicht festgelegt – Projekt kann nicht konfiguriert werden."
+
+#: platform/iphone/export/export.cpp
+msgid "Invalid Identifier:"
+msgstr "Ungültiger Bezeichner:"
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr "Benötigtes Icon wurde nicht in der Vorlage festgelegt."
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr "Im Browser ausführen"
@@ -9140,6 +9297,50 @@ msgstr "Konnte Bilddatei des Startbildschirms nicht lesen:"
 #: platform/javascript/export/export.cpp
 msgid "Using default boot splash image."
 msgstr "Verwende Standard-Startbildschirm-Bilddatei."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid package unique name."
+msgstr "Ungültiger paket-einzigartiger Name."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid product GUID."
+msgstr "Ungültige Produkt-GUID."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr "Ungültige Verleger-GUID."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid background color."
+msgstr "Ungültige Hintergrundfarbe."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr "Ungültige Abmessungen des Store-Logos (sollte 50x50 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr "Ungültige Abmessungen für 44x44-Quadratlogo (sollte 44x44 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr "Ungültige Abmessungen für 71x71-Quadratlogo (sollte 71x71 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr "Ungültige Abmessungen für 150x150-Quadratlogo (sollte 150x150 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr "Ungültige Abmessungen für 310x310-Quadratlogo (sollte 310x310 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr "Ungültige Abmessungen für 310x150-Breitlogo (sollte 310x150 sein)."
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
+msgstr "Ungültige Abmessungen für Startbildschirm (sollte 620x300 sein)."
 
 #: scene/2d/animated_sprite.cpp
 msgid ""
@@ -9470,18 +9671,12 @@ msgstr ""
 "gesetzt wird."
 
 #: scene/3d/path.cpp
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr ""
-"OrientedPathFollow funktioniert nur, wenn es als Unterobjekt eines Path-"
-"Nodes gesetzt wird."
-
-#: scene/3d/path.cpp
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr ""
-"OrientedPathFollow erfordert die Aktivierung von \"Up Vector\" in der Curve-"
-"Ressource des übergeordneten Pfades."
+"PathFollow ROTATION_ORIENTED erfordert die Aktivierung von „Up Vector“ in "
+"der Curve-Ressource des übergeordneten Pfades."
 
 #: scene/3d/physics_body.cpp
 msgid ""
@@ -9699,6 +9894,11 @@ msgstr "Zuweisung an Uniform."
 #: servers/visual/shader_language.cpp
 msgid "Varyings can only be assigned in vertex function."
 msgstr "Varyings können nur in Vertex-Funktion zugewiesen werden."
+
+#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
+#~ msgstr ""
+#~ "OrientedPathFollow funktioniert nur, wenn es als Unterobjekt eines Path-"
+#~ "Nodes gesetzt wird."
 
 #~ msgid "Split point with itself."
 #~ msgstr "Teile Punkt mit sich selbst."
@@ -10939,55 +11139,6 @@ msgstr "Varyings können nur in Vertex-Funktion zugewiesen werden."
 
 #~ msgid "Error creating the package signature."
 #~ msgstr "Fehler beim erstellen der Paketsignatur."
-
-#~ msgid ""
-#~ "No export templates found.\n"
-#~ "Download and install export templates."
-#~ msgstr ""
-#~ "Keine Exportvorlagen gefunden.\n"
-#~ "Laden Sie Exportvorlagen ggf. von der offiziellen Webseite herunter und "
-#~ "installieren Sie diese."
-
-#~ msgid "Custom debug package not found."
-#~ msgstr "Selbst konfiguriertes Debug-Paket nicht gefunden."
-
-#~ msgid "Custom release package not found."
-#~ msgstr "Selbst konfiguriertes Release-Paket nicht gefunden."
-
-#~ msgid "Invalid unique name."
-#~ msgstr "Ungültiger einzigartiger Name."
-
-#~ msgid "Invalid product GUID."
-#~ msgstr "Ungültige Produkt-GUID."
-
-#~ msgid "Invalid publisher GUID."
-#~ msgstr "Ungültige Verleger-GUID."
-
-#~ msgid "Invalid background color."
-#~ msgstr "Ungültige Hintergrundfarbe."
-
-#~ msgid "Invalid Store Logo image dimensions (should be 50x50)."
-#~ msgstr "Ungültige Abmessungen des Store-Logos (sollte 50x50 sein)."
-
-#~ msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
-#~ msgstr "Ungültige Abmessungen für 44x44-Quadratlogo (sollte 44x44 sein)."
-
-#~ msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
-#~ msgstr "Ungültige Abmessungen für 71x71-Quadratlogo (sollte 71x71 sein)."
-
-#~ msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
-#~ msgstr ""
-#~ "Ungültige Abmessungen für 150x150-Quadratlogo (sollte 150x150 sein)."
-
-#~ msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
-#~ msgstr ""
-#~ "Ungültige Abmessungen für 310x310-Quadratlogo (sollte 310x310 sein)."
-
-#~ msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
-#~ msgstr "Ungültige Abmessungen für 310x150-Breitlogo (sollte 310x150 sein)."
-
-#~ msgid "Invalid splash screen image dimensions (should be 620x300)."
-#~ msgstr "Ungültige Abmessungen für Startbildschirm (sollte 620x300 sein)."
 
 #, fuzzy
 #~ msgid "RAW Mode"

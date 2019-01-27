@@ -37,12 +37,15 @@
 # yzt <834950797@qq.com>, 2018.
 # DKLost <514dklost@gmail.com>, 2018.
 # thanksshu <hezihanshangyuan@gmail.com>, 2018.
+# Jsheng <yangea@outlook.com>, 2019.
+# Zhang Zhibo <zzhibo98@gmail.com>, 2019.
+# ws00010203 <ws00010203@hotmail.com>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Chinese (Simplified) (Godot Engine)\n"
 "POT-Creation-Date: 2018-01-20 12:15+0200\n"
-"PO-Revision-Date: 2018-12-18 01:28+0000\n"
-"Last-Translator: thanksshu <hezihanshangyuan@gmail.com>\n"
+"PO-Revision-Date: 2019-01-26 21:22+0000\n"
+"Last-Translator: ws00010203 <ws00010203@hotmail.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "godot-engine/godot/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -50,7 +53,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.4-dev\n"
+"X-Generator: Weblate 3.5-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -985,7 +988,6 @@ msgid "Uncompressing Assets"
 msgstr "无压缩资源"
 
 #: editor/editor_asset_installer.cpp editor/project_manager.cpp
-#, fuzzy
 msgid "Package installed successfully!"
 msgstr "软件包安装成功！"
 
@@ -1298,8 +1300,24 @@ msgid "Storing File:"
 msgstr "文件排序:"
 
 #: editor/editor_export.cpp
+msgid "No export template found at the expected path:"
+msgstr "目标路径找不到导出模版："
+
+#: editor/editor_export.cpp
 msgid "Packing"
 msgstr "打包中"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom debug template not found."
+msgstr "找不到自定义调试包。"
+
+#: editor/editor_export.cpp platform/android/export/export.cpp
+#: platform/iphone/export/export.cpp platform/javascript/export/export.cpp
+#: platform/osx/export/export.cpp platform/uwp/export/export.cpp
+msgid "Custom release template not found."
+msgstr "找不到自定义发布包。"
 
 #: editor/editor_export.cpp platform/javascript/export/export.cpp
 msgid "Template file not found:"
@@ -2559,17 +2577,14 @@ msgid "[Empty]"
 msgstr "[空]"
 
 #: editor/editor_properties.cpp editor/plugins/root_motion_editor_plugin.cpp
-#, fuzzy
 msgid "Assign..."
-msgstr "分配…。"
+msgstr "分配…"
 
 #: editor/editor_properties.cpp
-#, fuzzy
 msgid "Invalid RID"
 msgstr "路径非法"
 
 #: editor/editor_properties.cpp
-#, fuzzy
 msgid ""
 "The selected resource (%s) does not match any type expected for this "
 "property (%s)."
@@ -3265,6 +3280,20 @@ msgstr "预设..."
 msgid "Reimport"
 msgstr "重新导入"
 
+#: editor/import_dock.cpp
+msgid "Save scenes, re-import and restart"
+msgstr ""
+
+#: editor/import_dock.cpp
+#, fuzzy
+msgid "Changing the type of an imported file requires editor restart."
+msgstr "改变视频驱动需要重启编辑器。"
+
+#: editor/import_dock.cpp
+msgid ""
+"WARNING: Assets exist that use this resource, they may stop loading properly."
+msgstr ""
+
 #: editor/inspector_dock.cpp
 msgid "Failed to load resource."
 msgstr "加载资源失败。"
@@ -3436,7 +3465,6 @@ msgstr "添加动画"
 #: editor/plugins/animation_blend_space_2d_editor.cpp
 #: editor/plugins/animation_blend_tree_editor_plugin.cpp
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Load..."
 msgstr "加载..."
 
@@ -3814,9 +3842,8 @@ msgid "Connect nodes."
 msgstr "连接节点。"
 
 #: editor/plugins/animation_state_machine_editor.cpp
-#, fuzzy
 msgid "Remove selected node or transition."
-msgstr "移除选中的节点或过渡动画"
+msgstr "移除选中的节点或过渡动画。"
 
 #: editor/plugins/animation_state_machine_editor.cpp
 msgid "Toggle autoplay this animation on start, restart or seek to zero."
@@ -4230,11 +4257,10 @@ msgid "Paste Pose"
 msgstr "粘贴姿势"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
-#, fuzzy
 msgid ""
 "Warning: Children of a container get their position and size determined only "
 "by their parent."
-msgstr "警告：容器中的子级只能由它的父级确定位置与大小。"
+msgstr "警告：容器子级的位置与大小只能由它的父级确定。"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/texture_region_editor_plugin.cpp
@@ -5116,9 +5142,8 @@ msgid "Create Polygon & UV"
 msgstr "创建多边形和 UV"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Create Internal Vertex"
-msgstr "创建水平标尺"
+msgstr "创建内部顶点"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #, fuzzy
@@ -5126,13 +5151,13 @@ msgid "Remove Internal Vertex"
 msgstr "移除曲线内控制点"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
+#, fuzzy
 msgid "Invalid Polygon (need 3 different vertices)"
-msgstr ""
+msgstr "无效的多边形（需要三个控制点）"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
-#, fuzzy
 msgid "Add Custom Polygon"
-msgstr "编辑多边形"
+msgstr "添加自定义多边形"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 #, fuzzy
@@ -5207,13 +5232,13 @@ msgstr "缩放多边形"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Create a custom polygon. Enables custom polygon rendering."
-msgstr ""
+msgstr "建立自定义多边形。启用自定义多边形渲染。"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid ""
 "Remove a custom polygon. If none remain, custom polygon rendering is "
 "disabled."
-msgstr ""
+msgstr "移除自定义多边形。如果不存在，禁用自定义多边形渲染。"
 
 #: editor/plugins/polygon_2d_editor_plugin.cpp
 msgid "Paint weights with specified intensity."
@@ -6624,8 +6649,9 @@ msgid "You haven't selected a texture to remove."
 msgstr "请先选择要移除的纹理。"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
+#, fuzzy
 msgid "Create from scene? This will overwrite all current tiles."
-msgstr ""
+msgstr "从场景创建？这将覆盖所有当前标题。"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Merge from scene?"
@@ -7059,6 +7085,38 @@ msgstr "项目安装路径："
 #: editor/project_manager.cpp
 msgid "Browse"
 msgstr "浏览"
+
+#: editor/project_manager.cpp
+msgid "Renderer:"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 3.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Higher visual quality\n"
+"All features available\n"
+"Incompatible with older hardware\n"
+"Not recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "OpenGL ES 2.0"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid ""
+"Lower visual quality\n"
+"Some features not available\n"
+"Works on most hardware\n"
+"Recommended for web games"
+msgstr ""
+
+#: editor/project_manager.cpp
+msgid "Renderer can be changed later, but scenes may need to be adjusted."
+msgstr ""
 
 #: editor/project_manager.cpp
 msgid "Unnamed Project"
@@ -7764,6 +7822,18 @@ msgstr "在父节点中移动多个节点"
 #: editor/scene_tree_dock.cpp
 msgid "Duplicate Node(s)"
 msgstr "复制节点"
+
+#: editor/scene_tree_dock.cpp
+msgid "Can't reparent nodes in inherited scenes, order of nodes can't change."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Node must belong to the edited scene to become root."
+msgstr ""
+
+#: editor/scene_tree_dock.cpp
+msgid "Instantiated scenes can't become root"
+msgstr ""
 
 #: editor/scene_tree_dock.cpp
 msgid "Delete Node(s)?"
@@ -8956,6 +9026,90 @@ msgstr "得到 %s"
 msgid "Set %s"
 msgstr "设值 %s"
 
+#: platform/android/export/export.cpp
+msgid "Package name is missing."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Package segments must be of non-zero length."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' is not allowed in Android application package names."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "A digit cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The character '%s' cannot be the first character in a package segment."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "The package must have at least one '.' separator."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "ADB executable not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "OpenJDK jarsigner not configured in the Editor Settings."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Debug keystore not configured in the Editor Settings nor in the preset."
+msgstr ""
+
+#: platform/android/export/export.cpp
+msgid "Invalid public key for APK expansion."
+msgstr ""
+
+#: platform/android/export/export.cpp
+#, fuzzy
+msgid "Invalid package name:"
+msgstr "类名非法"
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier is missing."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "Identifier segments must be of non-zero length."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "The character '%s' is not allowed in Identifier."
+msgstr "名称不是有效的标识符："
+
+#: platform/iphone/export/export.cpp
+msgid "A digit cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid ""
+"The character '%s' cannot be the first character in a Identifier segment."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "The Identifier must have at least one '.' separator."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+msgid "App Store Team ID not specified - cannot configure the project."
+msgstr ""
+
+#: platform/iphone/export/export.cpp
+#, fuzzy
+msgid "Invalid Identifier:"
+msgstr "名称不是有效的标识符："
+
+#: platform/iphone/export/export.cpp
+msgid "Required icon is not specified in the preset."
+msgstr ""
+
 #: platform/javascript/export/export.cpp
 msgid "Run in Browser"
 msgstr "在浏览器中运行"
@@ -8987,6 +9141,51 @@ msgstr "无法读取启动图片:"
 #: platform/javascript/export/export.cpp
 msgid "Using default boot splash image."
 msgstr "使用默认启动图片。"
+
+#: platform/uwp/export/export.cpp
+#, fuzzy
+msgid "Invalid package unique name."
+msgstr "名称非法。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid product GUID."
+msgstr "产品GUID非法。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid publisher GUID."
+msgstr "发布GUID非法。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid background color."
+msgstr "无效的背景颜色。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid Store Logo image dimensions (should be 50x50)."
+msgstr "Logo图片尺寸无效（图像尺寸必须是50x50）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
+msgstr "正方形的 44x44 Logo图片尺寸无效（应为44x44）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
+msgstr "正方形的 71x71 Logo标志图片尺寸无效（应为71x71）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
+msgstr "正方的 150x150 Logo图片尺寸无效（应为150x150）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
+msgstr "正方形的 310x310 Logo图片尺寸无效（应为310x310）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
+msgstr "宽幅310x150 Logo图片尺寸无效（应为310x150）。"
+
+#: platform/uwp/export/export.cpp
+msgid "Invalid splash screen image dimensions (should be 620x300)."
+msgstr "启动画面图片尺寸无效（应为620x300）。"
 
 #: scene/2d/animated_sprite.cpp
 msgid ""
@@ -9266,14 +9465,10 @@ msgid "PathFollow only works when set as a child of a Path node."
 msgstr "PathFollow类型的节点只有作为Path类型节点的子节点才能正常工作。"
 
 #: scene/3d/path.cpp
-msgid "OrientedPathFollow only works when set as a child of a Path node."
-msgstr ""
-"OrientedPathFollow 类型的节点只有作为Path类型节点的子节点才能正常工作。"
-
-#: scene/3d/path.cpp
+#, fuzzy
 msgid ""
-"OrientedPathFollow requires \"Up Vector\" enabled in its parent Path's Curve "
-"resource."
+"PathFollow ROTATION_ORIENTED requires \"Up Vector\" enabled in its parent "
+"Path's Curve resource."
 msgstr "OrientedPathFollow 需要在其父路径中启用“Up Vectors”。"
 
 #: scene/3d/physics_body.cpp
@@ -9470,6 +9665,10 @@ msgstr "对uniform的赋值。"
 #: servers/visual/shader_language.cpp
 msgid "Varyings can only be assigned in vertex function."
 msgstr "变量只能在顶点函数中指定。"
+
+#~ msgid "OrientedPathFollow only works when set as a child of a Path node."
+#~ msgstr ""
+#~ "OrientedPathFollow 类型的节点只有作为Path类型节点的子节点才能正常工作。"
 
 #~ msgid "Split point with itself."
 #~ msgstr "拆分点本身。"
@@ -10708,52 +10907,6 @@ msgstr "变量只能在顶点函数中指定。"
 
 #~ msgid "Error creating the package signature."
 #~ msgstr "创建包(PCK)签名时出错。"
-
-#~ msgid ""
-#~ "No export templates found.\n"
-#~ "Download and install export templates."
-#~ msgstr ""
-#~ "找不到导出模版。\n"
-#~ "下载并安装导出模版。"
-
-#~ msgid "Custom debug package not found."
-#~ msgstr "找不到自定义调试包。"
-
-#~ msgid "Custom release package not found."
-#~ msgstr "找不到自定义发布包。"
-
-#~ msgid "Invalid unique name."
-#~ msgstr "名称非法。"
-
-#~ msgid "Invalid product GUID."
-#~ msgstr "产品GUID非法。"
-
-#~ msgid "Invalid publisher GUID."
-#~ msgstr "发布GUID非法。"
-
-#~ msgid "Invalid background color."
-#~ msgstr "无效的背景颜色。"
-
-#~ msgid "Invalid Store Logo image dimensions (should be 50x50)."
-#~ msgstr "Logo图片尺寸无效（图像尺寸必须是50x50）。"
-
-#~ msgid "Invalid square 44x44 logo image dimensions (should be 44x44)."
-#~ msgstr "正方形的 44x44 Logo图片尺寸无效（应为44x44）。"
-
-#~ msgid "Invalid square 71x71 logo image dimensions (should be 71x71)."
-#~ msgstr "正方形的 71x71 Logo标志图片尺寸无效（应为71x71）。"
-
-#~ msgid "Invalid square 150x150 logo image dimensions (should be 150x150)."
-#~ msgstr "正方的 150x150 Logo图片尺寸无效（应为150x150）。"
-
-#~ msgid "Invalid square 310x310 logo image dimensions (should be 310x310)."
-#~ msgstr "正方形的 310x310 Logo图片尺寸无效（应为310x310）。"
-
-#~ msgid "Invalid wide 310x150 logo image dimensions (should be 310x150)."
-#~ msgstr "宽幅310x150 Logo图片尺寸无效（应为310x150）。"
-
-#~ msgid "Invalid splash screen image dimensions (should be 620x300)."
-#~ msgstr "启动画面图片尺寸无效（应为620x300）。"
 
 #~ msgid "RAW Mode"
 #~ msgstr "RAW模式"
