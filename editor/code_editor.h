@@ -63,7 +63,6 @@ class FindReplaceBar : public HBoxContainer {
 
 	GDCLASS(FindReplaceBar, HBoxContainer);
 
-	MarginContainer *container;
 	LineEdit *search_text;
 	ToolButton *find_prev;
 	ToolButton *find_next;
@@ -76,7 +75,6 @@ class FindReplaceBar : public HBoxContainer {
 	Button *replace_all;
 	CheckBox *selection_only;
 
-	HBoxContainer *hbc;
 	VBoxContainer *vbc_lineedit;
 	HBoxContainer *hbc_button_replace;
 	HBoxContainer *hbc_option_replace;
@@ -142,12 +140,12 @@ class CodeTextEditor : public VBoxContainer {
 	TextEdit *text_editor;
 	FindReplaceBar *find_replace_bar;
 	HBoxContainer *status_bar;
-	Label *warning_label;
+
+	ToolButton *warning_button;
 	Label *warning_count_label;
 
-	Label *line_nb;
-	Label *col_nb;
-	Label *font_size_nb;
+	Label *line_and_col_txt;
+
 	Label *info;
 	Timer *idle;
 	Timer *code_complete_timer;
@@ -175,6 +173,10 @@ class CodeTextEditor : public VBoxContainer {
 
 	CodeTextEditorCodeCompleteFunc code_complete_func;
 	void *code_complete_ud;
+
+	void _warning_label_gui_input(const Ref<InputEvent> &p_event);
+	void _warning_button_pressed();
+	void _error_pressed(const Ref<InputEvent> &p_event);
 
 protected:
 	virtual void _load_theme_settings() {}
@@ -212,15 +214,14 @@ public:
 	Variant get_edit_state();
 	void set_edit_state(const Variant &p_state);
 
+	void set_warning_nb(int p_warning_nb);
+
 	void update_editor_settings();
 	void set_error(const String &p_error);
 	void set_error_pos(int p_line, int p_column);
 	void update_line_and_column() { _line_col_changed(); }
 	TextEdit *get_text_edit() { return text_editor; }
 	FindReplaceBar *get_find_replace_bar() { return find_replace_bar; }
-	Label *get_error_label() const { return error; }
-	Label *get_warning_label() const { return warning_label; }
-	Label *get_warning_count_label() const { return warning_count_label; }
 	virtual void apply_code() {}
 	void goto_error();
 
