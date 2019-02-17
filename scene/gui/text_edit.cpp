@@ -2286,10 +2286,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 		bool had_selection = selection.active;
 
 		// stuff to do when selection is active..
-		if (selection.active) {
-
-			if (readonly)
-				return;
+		if (!readonly && selection.active) {
 
 			bool clear = false;
 			bool unselect = false;
