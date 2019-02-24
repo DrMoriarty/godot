@@ -1028,6 +1028,11 @@ void RasterizerStorageGLES2::sky_set_texture(RID p_sky, RID p_panorama, int p_ra
 		for (int i = 0; i < 6; i++) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _cube_side_enum[i], sky->radiance, lod);
 
+			GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			if (status != GL_FRAMEBUFFER_COMPLETE) {
+				break; //may be too small
+			}
+
 			glViewport(0, 0, size, size);
 
 			bind_quad_array();
@@ -1230,6 +1235,10 @@ void RasterizerStorageGLES2::_update_shader(Shader *p_shader) const {
 
 			actions = &shaders.actions_scene;
 			actions->uniforms = &p_shader->uniforms;
+
+			if (p_shader->spatial.uses_screen_texture && p_shader->spatial.uses_depth_texture) {
+				WARN_PRINT("Using both SCREEN_TEXTURE and DEPTH_TEXTURE is not supported in GLES2");
+			}
 		} break;
 
 		default: {
@@ -2205,6 +2214,8 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, surface->index_id);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_array_size, ir.ptr(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		} else {
+			surface->index_id = 0;
 		}
 
 		// TODO generate wireframes
@@ -2231,7 +2242,7 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 	}
 
 	mesh->surfaces.push_back(surface);
-	mesh->instance_change_notify(true, false);
+	mesh->instance_change_notify(true, true);
 
 	info.vertex_mem += surface->total_data_size;
 }
@@ -4200,7 +4211,12 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 	glGenTextures(1, &rt->color);
 	glBindTexture(GL_TEXTURE_2D, rt->color);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rt->width, rt->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+	if (rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rt->width, rt->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	} else {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->width, rt->height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	}
 
 	if (texture->flags & VS::TEXTURE_FLAG_FILTER) {
 
@@ -4218,20 +4234,26 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 
 	// depth
 
-	glGenRenderbuffers(1, &rt->depth);
-	glBindRenderbuffer(GL_RENDERBUFFER, rt->depth);
+	glGenTextures(1, &rt->depth);
+	glBindTexture(GL_TEXTURE_2D, rt->depth);
+
 #ifdef JAVASCRIPT_ENABLED
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, rt->width, rt->height);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, rt->width, rt->height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 #else
-	glRenderbufferStorage(GL_RENDERBUFFER, _DEPTH_COMPONENT24_OES, rt->width, rt->height);
+	glTexImage2D(GL_TEXTURE_2D, 0, _DEPTH_COMPONENT24_OES, rt->width, rt->height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 #endif
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rt->depth);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rt->depth, 0);
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (status != GL_FRAMEBUFFER_COMPLETE) {
 
-		glDeleteRenderbuffers(1, &rt->fbo);
+		glDeleteFramebuffers(1, &rt->fbo);
 		glDeleteTextures(1, &rt->depth);
 		glDeleteTextures(1, &rt->color);
 		rt->fbo = 0;
@@ -4264,13 +4286,15 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 	// copy texscreen buffers
 	if (!(rt->flags[RasterizerStorage::RENDER_TARGET_NO_SAMPLING])) {
 
-		int w = rt->width;
-		int h = rt->height;
-
 		glGenTextures(1, &rt->copy_screen_effect.color);
 		glBindTexture(GL_TEXTURE_2D, rt->copy_screen_effect.color);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		if (rt->flags[RasterizerStorage::RENDER_TARGET_TRANSPARENT]) {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rt->width, rt->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		} else {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rt->width, rt->height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		}
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -4302,7 +4326,7 @@ void RasterizerStorageGLES2::_render_target_clear(RenderTarget *rt) {
 	}
 
 	if (rt->depth) {
-		glDeleteRenderbuffers(1, &rt->depth);
+		glDeleteTextures(1, &rt->depth);
 		rt->depth = 0;
 	}
 
@@ -4313,7 +4337,6 @@ void RasterizerStorageGLES2::_render_target_clear(RenderTarget *rt) {
 	tex->height = 0;
 	tex->active = false;
 
-	// TODO hardcoded texscreen copy effect
 	if (rt->copy_screen_effect.color) {
 		glDeleteFramebuffers(1, &rt->copy_screen_effect.fbo);
 		rt->copy_screen_effect.fbo = 0;
