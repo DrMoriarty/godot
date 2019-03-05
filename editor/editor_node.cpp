@@ -291,6 +291,8 @@ void EditorNode::_notification(int p_what) {
 		get_tree()->get_root()->set_as_audio_listener_2d(false);
 		get_tree()->set_auto_accept_quit(false);
 		get_tree()->connect("files_dropped", this, "_dropped_files");
+
+		/* DO NOT LOAD SCENES HERE, WAIT FOR FILE SCANNING AND REIMPORT TO COMPLETE */
 	}
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
@@ -305,7 +307,8 @@ void EditorNode::_notification(int p_what) {
 
 		_editor_select(EDITOR_3D);
 		_update_debug_options();
-		_load_docks();
+
+		/* DO NOT LOAD SCENES HERE, WAIT FOR FILE SCANNING AND REIMPORT TO COMPLETE */
 	}
 
 	if (p_what == MainLoop::NOTIFICATION_WM_FOCUS_IN) {
@@ -527,14 +530,17 @@ void EditorNode::_resources_reimported(const Vector<String> &p_resources) {
 void EditorNode::_sources_changed(bool p_exist) {
 
 	if (waiting_for_first_scan) {
+		waiting_for_first_scan = false;
+
+		EditorResourcePreview::get_singleton()->start(); //start previes now that it's safe
+
+		_load_docks();
 
 		if (defer_load_scene != "") {
 
 			load_scene(defer_load_scene);
 			defer_load_scene = "";
 		}
-
-		waiting_for_first_scan = false;
 	}
 }
 
@@ -613,7 +619,11 @@ void EditorNode::save_resource_in_path(const Ref<Resource> &p_resource, const St
 	Error err = ResourceSaver::save(path, p_resource, flg | ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS);
 
 	if (err != OK) {
-		show_accept(TTR("Error saving resource!"), TTR("OK"));
+		if (ResourceLoader::is_imported(p_resource->get_path())) {
+			show_accept(TTR("Imported resources can't be saved."), TTR("OK"));
+		} else {
+			show_accept(TTR("Error saving resource!"), TTR("OK"));
+		}
 		return;
 	}
 
@@ -632,6 +642,18 @@ void EditorNode::save_resource(const Ref<Resource> &p_resource) {
 }
 
 void EditorNode::save_resource_as(const Ref<Resource> &p_resource, const String &p_at_path) {
+
+	{
+		String path = p_resource->get_path();
+		int srpos = path.find("::");
+		if (srpos != -1) {
+			String base = path.substr(0, srpos);
+			if (!get_edited_scene() || get_edited_scene()->get_filename() != base) {
+				show_warning(TTR("This resource can't be saved because it does not belong to the edited scene. Make it unique first."));
+				return;
+			}
+		}
+	}
 
 	file->set_mode(EditorFileDialog::MODE_SAVE_FILE);
 	saving_resource = p_resource;
@@ -1017,6 +1039,70 @@ bool EditorNode::_validate_scene_recursive(const String &p_filename, Node *p_nod
 	return false;
 }
 
+static bool _find_edited_resources(const Ref<Resource> &p_resource, Set<Ref<Resource> > &edited_resources) {
+
+	if (p_resource->is_edited()) {
+		edited_resources.insert(p_resource);
+		return true;
+	}
+
+	List<PropertyInfo> plist;
+
+	p_resource->get_property_list(&plist);
+
+	for (List<PropertyInfo>::Element *E = plist.front(); E; E = E->next()) {
+		if (E->get().type == Variant::OBJECT && E->get().usage & PROPERTY_USAGE_STORAGE && !(E->get().usage & PROPERTY_USAGE_RESOURCE_NOT_PERSISTENT)) {
+			RES res = p_resource->get(E->get().name);
+			if (res.is_null()) {
+				continue;
+			}
+			if (res->get_path().is_resource_file()) { //not a subresource, continue
+				continue;
+			}
+			if (_find_edited_resources(res, edited_resources)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+int EditorNode::_save_external_resources() {
+	//save external resources and its subresources if any was modified
+
+	int flg = 0;
+	if (EditorSettings::get_singleton()->get("filesystem/on_save/compress_binary_resources"))
+		flg |= ResourceSaver::FLAG_COMPRESS;
+	flg |= ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS;
+
+	Set<Ref<Resource> > edited_subresources;
+	int saved = 0;
+	List<Ref<Resource> > cached;
+	ResourceCache::get_cached_resources(&cached);
+	for (List<Ref<Resource> >::Element *E = cached.front(); E; E = E->next()) {
+
+		Ref<Resource> res = E->get();
+		if (!res->get_path().is_resource_file())
+			continue;
+		//not only check if this resourec is edited, check contained subresources too
+		if (_find_edited_resources(res, edited_subresources)) {
+			ResourceSaver::save(res->get_path(), res, flg);
+			saved++;
+		}
+	}
+
+	// clear later, because user may have put the same subresource in two different resources,
+	// which will be shared until the next reload
+
+	for (Set<Ref<Resource> >::Element *E = edited_subresources.front(); E; E = E->next()) {
+		Ref<Resource> res = E->get();
+		res->set_edited(false);
+	}
+
+	return saved;
+}
+
 void EditorNode::_save_scene(String p_file, int idx) {
 
 	Node *scene = editor_data.get_edited_scene_root(idx);
@@ -1075,22 +1161,8 @@ void EditorNode::_save_scene(String p_file, int idx) {
 	flg |= ResourceSaver::FLAG_REPLACE_SUBRESOURCE_PATHS;
 
 	err = ResourceSaver::save(p_file, sdata, flg);
-	//Map<RES, bool> processed;
-	//this method is slow and not always works, deprecating
-	//_save_edited_subresources(scene, processed, flg);
-	{ //instead, just find globally unsaved subresources and save them
 
-		List<Ref<Resource> > cached;
-		ResourceCache::get_cached_resources(&cached);
-		for (List<Ref<Resource> >::Element *E = cached.front(); E; E = E->next()) {
-
-			Ref<Resource> res = E->get();
-			if (res->is_edited() && res->get_path().is_resource_file()) {
-				ResourceSaver::save(res->get_path(), res, flg);
-				res->set_edited(false);
-			}
-		}
-	}
+	_save_external_resources();
 
 	editor_data.save_editor_external_data();
 	if (err == OK) {
@@ -1388,7 +1460,7 @@ void EditorNode::edit_item(Object *p_object) {
 		_set_editing_top_editors(p_object);
 		_display_top_editors(true);
 	} else {
-		_hide_top_editors();
+		hide_top_editors();
 	}
 }
 
@@ -1426,7 +1498,7 @@ void EditorNode::_save_default_environment() {
 	}
 }
 
-void EditorNode::_hide_top_editors() {
+void EditorNode::hide_top_editors() {
 
 	_display_top_editors(false);
 
@@ -1603,7 +1675,7 @@ void EditorNode::_edit_current() {
 
 		} else if (!editor_plugins_over->get_plugins_list().empty()) {
 
-			_hide_top_editors();
+			hide_top_editors();
 		}
 	}
 
@@ -1843,7 +1915,15 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 
 			if (!scene) {
 
-				show_accept(TTR("This operation can't be done without a tree root."), TTR("OK"));
+				int saved = _save_external_resources();
+				String err_text;
+				if (saved > 0) {
+					err_text = vformat(TTR("Saved %s modified resource(s)."), itos(saved));
+				} else {
+					err_text = TTR("A root node is required to save the scene.");
+				}
+
+				show_accept(err_text, TTR("OK"));
 				break;
 			}
 
@@ -2542,6 +2622,7 @@ void EditorNode::remove_editor_plugin(EditorPlugin *p_editor, bool p_config_chan
 	singleton->editor_plugins_over->get_plugins_list().erase(p_editor);
 	singleton->remove_child(p_editor);
 	singleton->editor_data.remove_editor_plugin(p_editor);
+	singleton->get_editor_plugins_force_input_forwarding()->remove_plugin(p_editor);
 }
 
 void EditorNode::_update_addon_config() {
@@ -2787,7 +2868,7 @@ bool EditorNode::is_changing_scene() const {
 
 void EditorNode::_clear_undo_history() {
 
-	get_undo_redo()->clear_history();
+	get_undo_redo()->clear_history(false);
 }
 
 void EditorNode::set_current_scene(int p_idx) {
@@ -3604,6 +3685,9 @@ void EditorNode::_dock_select_draw() {
 
 void EditorNode::_save_docks() {
 
+	if (waiting_for_first_scan) {
+		return; //scanning, do not touch docks
+	}
 	Ref<ConfigFile> config;
 	config.instance();
 
@@ -3631,6 +3715,8 @@ void EditorNode::_save_docks_to_config(Ref<ConfigFile> p_layout, const String &p
 	}
 
 	p_layout->set_value(p_section, "dock_filesystem_split", filesystem_dock->get_split_offset());
+	p_layout->set_value(p_section, "dock_filesystem_display_mode", filesystem_dock->get_display_mode());
+	p_layout->set_value(p_section, "dock_filesystem_file_list_display_mode", filesystem_dock->get_file_list_display_mode());
 
 	for (int i = 0; i < vsplits.size(); i++) {
 
@@ -3815,11 +3901,20 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 		}
 	}
 
-	int fs_split_ofs = 0;
 	if (p_layout->has_section_key(p_section, "dock_filesystem_split")) {
-		fs_split_ofs = p_layout->get_value(p_section, "dock_filesystem_split");
+		int fs_split_ofs = p_layout->get_value(p_section, "dock_filesystem_split");
+		filesystem_dock->set_split_offset(fs_split_ofs);
 	}
-	filesystem_dock->set_split_offset(fs_split_ofs);
+
+	if (p_layout->has_section_key(p_section, "dock_filesystem_display_mode")) {
+		FileSystemDock::DisplayMode dock_filesystem_display_mode = FileSystemDock::DisplayMode(int(p_layout->get_value(p_section, "dock_filesystem_display_mode")));
+		filesystem_dock->set_display_mode(dock_filesystem_display_mode);
+	}
+
+	if (p_layout->has_section_key(p_section, "dock_filesystem_file_list_display_mode")) {
+		FileSystemDock::FileListDisplayMode dock_filesystem_file_list_display_mode = FileSystemDock::FileListDisplayMode(int(p_layout->get_value(p_section, "dock_filesystem_file_list_display_mode")));
+		filesystem_dock->set_file_list_display_mode(dock_filesystem_file_list_display_mode);
+	}
 
 	for (int i = 0; i < vsplits.size(); i++) {
 
@@ -4771,6 +4866,7 @@ void EditorNode::_print_handler(void *p_this, const String &p_string, bool p_err
 
 EditorNode::EditorNode() {
 
+	Input::get_singleton()->set_use_accumulated_input(true);
 	Resource::_get_local_scene_func = _resource_get_edited_scene;
 
 	VisualServer::get_singleton()->textures_keep_original(true);
@@ -5579,9 +5675,9 @@ EditorNode::EditorNode() {
 	node_dock = memnew(NodeDock);
 
 	filesystem_dock = memnew(FileSystemDock(this));
-	filesystem_dock->set_file_list_display_mode(int(EditorSettings::get_singleton()->get("docks/filesystem/files_display_mode")));
 	filesystem_dock->connect("open", this, "open_request");
 	filesystem_dock->connect("instance", this, "_instance_request");
+	filesystem_dock->connect("display_mode_changed", this, "_save_docks");
 
 	// Scene: Top left
 	dock_slot[DOCK_SLOT_LEFT_UR]->add_child(scene_tree_dock);
@@ -5808,6 +5904,8 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(SkeletonEditorPlugin(this)));
 	add_editor_plugin(memnew(SkeletonIKEditorPlugin(this)));
 	add_editor_plugin(memnew(PhysicalBonePlugin(this)));
+	add_editor_plugin(memnew(MeshEditorPlugin(this)));
+	add_editor_plugin(memnew(MaterialEditorPlugin(this)));
 
 	for (int i = 0; i < EditorPlugins::get_plugin_count(); i++)
 		add_editor_plugin(EditorPlugins::create(i, this));
@@ -6057,6 +6155,10 @@ void EditorPluginList::forward_spatial_force_draw_over_viewport(Control *p_overl
 
 void EditorPluginList::add_plugin(EditorPlugin *p_plugin) {
 	plugins_list.push_back(p_plugin);
+}
+
+void EditorPluginList::remove_plugin(EditorPlugin *p_plugin) {
+	plugins_list.erase(p_plugin);
 }
 
 bool EditorPluginList::empty() {

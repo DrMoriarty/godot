@@ -92,6 +92,8 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 
 		if (i > 0) {
 
+			ERR_EXPLAIN(vformat("Invalid scene: node %s does not specify its parent node.", snames[n.name]))
+			ERR_FAIL_COND_V(n.parent == -1, NULL)
 			NODE_FROM_ID(nparent, n.parent);
 #ifdef DEBUG_ENABLED
 			if (!nparent && (n.parent & FLAG_ID_IS_PATH)) {
@@ -175,8 +177,8 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 			node = Object::cast_to<Node>(obj);
 
 		} else {
-			print_line("Class is disabled for: " + itos(n.type));
-			print_line("name: " + String(snames[n.type]));
+			//print_line("Class is disabled for: " + itos(n.type));
+			//print_line("name: " + String(snames[n.type]));
 		}
 
 		if (node) {

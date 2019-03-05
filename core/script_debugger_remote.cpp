@@ -311,6 +311,7 @@ void ScriptDebuggerRemote::debug(ScriptLanguage *p_script, bool p_can_continue) 
 
 		} else {
 			OS::get_singleton()->delay_usec(10000);
+			OS::get_singleton()->process_and_drop_events();
 		}
 	}
 
@@ -1053,7 +1054,6 @@ void ScriptDebuggerRemote::profiling_set_frame_times(float p_frame_time, float p
 	physics_time = p_physics_time;
 	physics_frame_time = p_physics_frame_time;
 }
-
 
 ScriptDebuggerRemote::ResourceUsageFunc ScriptDebuggerRemote::resource_usage_func = NULL;
 
