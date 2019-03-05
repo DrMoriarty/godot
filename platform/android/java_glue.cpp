@@ -598,7 +598,7 @@ static jobject godot_io;
 typedef void (*GFXInitFunc)(void *ud, bool gl2);
 
 static jmethodID _on_video_init = 0;
-static jobject _godot_instance;
+jobject _godot_instance;
 
 static jmethodID _openURI = 0;
 static jmethodID _getDataDir = 0;
