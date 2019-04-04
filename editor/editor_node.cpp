@@ -81,6 +81,7 @@
 #include "editor/plugins/collision_polygon_2d_editor_plugin.h"
 #include "editor/plugins/collision_polygon_editor_plugin.h"
 #include "editor/plugins/collision_shape_2d_editor_plugin.h"
+#include "editor/plugins/cpu_particles_2d_editor_plugin.h"
 #include "editor/plugins/cpu_particles_editor_plugin.h"
 #include "editor/plugins/curve_editor_plugin.h"
 #include "editor/plugins/editor_preview_plugins.h"
@@ -136,10 +137,10 @@ void EditorNode::_update_scene_tabs() {
 	Ref<Texture> script_icon = gui_base->get_icon("Script", "EditorIcons");
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 
-		String type = editor_data.get_scene_type(i);
+		Node *type_node = editor_data.get_edited_scene_root(i);
 		Ref<Texture> icon;
-		if (type != String()) {
-			icon = get_class_icon(type, "Node");
+		if (type_node) {
+			icon = EditorNode::get_singleton()->get_object_icon(type_node, "Node");
 		}
 
 		int current = editor_data.get_edited_scene();
@@ -3350,12 +3351,30 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 	if (ScriptServer::is_global_class(p_class)) {
 		String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(p_class);
 		RES icon;
+
 		if (FileAccess::exists(icon_path)) {
 			icon = ResourceLoader::load(icon_path);
+			if (icon.is_valid())
+				return icon;
 		}
-		if (!icon.is_valid()) {
-			icon = gui_base->get_icon(ScriptServer::get_global_class_native_base(p_class), "EditorIcons");
+
+		Ref<Script> script = ResourceLoader::load(ScriptServer::get_global_class_path(p_class), "Script");
+
+		while (script.is_valid()) {
+			String current_icon_path;
+			script->get_language()->get_global_class_name(script->get_path(), NULL, &current_icon_path);
+			if (FileAccess::exists(current_icon_path)) {
+				RES texture = ResourceLoader::load(current_icon_path);
+				if (texture.is_valid())
+					return texture;
+			}
+			script = script->get_base_script();
 		}
+
+		if (icon.is_null()) {
+			icon = gui_base->get_icon(ScriptServer::get_global_class_base(p_class), "EditorIcons");
+		}
+
 		return icon;
 	}
 
@@ -4232,7 +4251,13 @@ bool EditorNode::are_bottom_panels_hidden() const {
 
 void EditorNode::hide_bottom_panel() {
 
-	_bottom_panel_switch(false, 0);
+	for (int i = 0; i < bottom_panel_items.size(); i++) {
+
+		if (bottom_panel_items[i].control->is_visible()) {
+			_bottom_panel_switch(false, i);
+			break;
+		}
+	}
 }
 
 void EditorNode::make_bottom_panel_item_visible(Control *p_item) {
@@ -4269,7 +4294,7 @@ void EditorNode::remove_bottom_panel_item(Control *p_item) {
 
 		if (bottom_panel_items[i].control == p_item) {
 			if (p_item->is_visible_in_tree()) {
-				_bottom_panel_switch(false, 0);
+				_bottom_panel_switch(false, i);
 			}
 			bottom_panel_vb->remove_child(bottom_panel_items[i].control);
 			bottom_panel_hb_editors->remove_child(bottom_panel_items[i].button);
@@ -4288,6 +4313,10 @@ void EditorNode::remove_bottom_panel_item(Control *p_item) {
 void EditorNode::_bottom_panel_switch(bool p_enable, int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, bottom_panel_items.size());
+
+	if (bottom_panel_items[p_idx].control->is_visible() == p_enable) {
+		return;
+	}
 
 	if (p_enable) {
 		for (int i = 0; i < bottom_panel_items.size(); i++) {
@@ -4309,11 +4338,8 @@ void EditorNode::_bottom_panel_switch(bool p_enable, int p_idx) {
 
 	} else {
 		bottom_panel->add_style_override("panel", gui_base->get_stylebox("panel", "TabContainer"));
-		for (int i = 0; i < bottom_panel_items.size(); i++) {
-
-			bottom_panel_items[i].button->set_pressed(false);
-			bottom_panel_items[i].control->set_visible(false);
-		}
+		bottom_panel_items[p_idx].button->set_pressed(false);
+		bottom_panel_items[p_idx].control->set_visible(false);
 		center_split->set_dragger_visibility(SplitContainer::DRAGGER_HIDDEN);
 		center_split->set_collapsed(true);
 		bottom_panel_raise->hide();
@@ -5888,6 +5914,7 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(SpriteEditorPlugin(this)));
 	add_editor_plugin(memnew(Skeleton2DEditorPlugin(this)));
 	add_editor_plugin(memnew(ParticlesEditorPlugin(this)));
+	add_editor_plugin(memnew(CPUParticles2DEditorPlugin(this)));
 	add_editor_plugin(memnew(CPUParticlesEditorPlugin(this)));
 	add_editor_plugin(memnew(ResourcePreloaderEditorPlugin(this)));
 	add_editor_plugin(memnew(ItemListEditorPlugin(this)));

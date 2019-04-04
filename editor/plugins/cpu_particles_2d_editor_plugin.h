@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  packet_buffer.h                                                      */
+/*  cpu_particles_2d_editor_plugin.h                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,95 +28,65 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef PACKET_BUFFER_H
-#define PACKET_BUFFER_H
+#ifndef CPU_PARTICLES_2D_EDITOR_PLUGIN_H
+#define CPU_PARTICLES_2D_EDITOR_PLUGIN_H
 
-#include "core/os/copymem.h"
-#include "core/ring_buffer.h"
+#include "editor/editor_node.h"
+#include "editor/editor_plugin.h"
+#include "scene/2d/collision_polygon_2d.h"
+#include "scene/2d/cpu_particles_2d.h"
+#include "scene/gui/box_container.h"
+#include "scene/gui/file_dialog.h"
 
-template <class T>
-class PacketBuffer {
+class CPUParticles2DEditorPlugin : public EditorPlugin {
 
-private:
-	typedef struct {
-		uint32_t size;
-		T info;
-	} _Packet;
+	GDCLASS(CPUParticles2DEditorPlugin, EditorPlugin);
 
-	RingBuffer<_Packet> _packets;
-	RingBuffer<uint8_t> _payload;
+	enum {
+		MENU_LOAD_EMISSION_MASK,
+		MENU_CLEAR_EMISSION_MASK
+	};
+
+	enum EmissionMode {
+		EMISSION_MODE_SOLID,
+		EMISSION_MODE_BORDER,
+		EMISSION_MODE_BORDER_DIRECTED
+	};
+
+	CPUParticles2D *particles;
+
+	EditorFileDialog *file;
+	EditorNode *editor;
+
+	HBoxContainer *toolbar;
+	MenuButton *menu;
+
+	SpinBox *epoints;
+
+	ConfirmationDialog *emission_mask;
+	OptionButton *emission_mask_mode;
+	CheckBox *emission_colors;
+
+	String source_emission_file;
+
+	UndoRedo *undo_redo;
+	void _file_selected(const String &p_file);
+	void _menu_callback(int p_idx);
+	void _generate_emission_mask();
+
+protected:
+	void _notification(int p_what);
+	static void _bind_methods();
 
 public:
-	Error write_packet(const uint8_t *p_payload, uint32_t p_size, const T *p_info) {
-#ifdef TOOLS_ENABLED
-		// Verbose buffer warnings
-		if (p_payload && _payload.space_left() < (int32_t)p_size) {
-			ERR_PRINT("Buffer payload full! Dropping data.");
-			ERR_FAIL_V(ERR_OUT_OF_MEMORY);
-		}
-		if (p_info && _packets.space_left() < 1) {
-			ERR_PRINT("Too many packets in queue! Dropping data.");
-			ERR_FAIL_V(ERR_OUT_OF_MEMORY);
-		}
-#else
-		ERR_FAIL_COND_V(p_payload && (uint32_t)_payload.space_left() < p_size, ERR_OUT_OF_MEMORY);
-		ERR_FAIL_COND_V(p_info && _packets.space_left() < 1, ERR_OUT_OF_MEMORY);
-#endif
+	virtual String get_name() const { return "CPUParticles2D"; }
+	bool has_main_screen() const { return false; }
+	virtual void edit(Object *p_object);
+	virtual bool handles(Object *p_object) const;
+	virtual void make_visible(bool p_visible);
 
-		// If p_info is NULL, only the payload is written
-		if (p_info) {
-			_Packet p;
-			p.size = p_size;
-			copymem(&p.info, p_info, sizeof(T));
-			_packets.write(p);
-		}
-
-		// If p_payload is NULL, only the packet information is written.
-		if (p_payload) {
-			_payload.write((const uint8_t *)p_payload, p_size);
-		}
-
-		return OK;
-	}
-
-	Error read_packet(uint8_t *r_payload, int p_bytes, T *r_info, int &r_read) {
-		ERR_FAIL_COND_V(_packets.data_left() < 1, ERR_UNAVAILABLE);
-		_Packet p;
-		_packets.read(&p, 1);
-		ERR_FAIL_COND_V(_payload.data_left() < (int)p.size, ERR_BUG);
-		ERR_FAIL_COND_V(p_bytes < (int)p.size, ERR_OUT_OF_MEMORY);
-
-		r_read = p.size;
-		copymem(r_info, &p.info, sizeof(T));
-		_payload.read(r_payload, p.size);
-		return OK;
-	}
-
-	void discard_payload(int p_size) {
-		_packets.decrease_write(p_size);
-	}
-
-	void resize(int p_pkt_shift, int p_buf_shift) {
-		_packets.resize(p_pkt_shift);
-		_payload.resize(p_buf_shift);
-	}
-
-	int packets_left() const {
-		return _packets.data_left();
-	}
-
-	void clear() {
-		_payload.resize(0);
-		_packets.resize(0);
-	}
-
-	PacketBuffer() {
-		clear();
-	}
-
-	~PacketBuffer() {
-		clear();
-	}
+	CPUParticles2DEditorPlugin(EditorNode *p_node);
+	~CPUParticles2DEditorPlugin();
 };
 
-#endif // PACKET_BUFFER_H
+#endif // CPU_PARTICLES_2D_EDITOR_PLUGIN_H
