@@ -18,8 +18,6 @@
 	</description>
 	<tutorials>
 	</tutorials>
-	<demos>
-	</demos>
 	<methods>
 		<method name="follow_method">
 			<return type="bool">
@@ -350,6 +348,11 @@
 		</member>
 	</members>
 	<signals>
+		<signal name="tween_all_completed">
+			<description>
+				Emitted when all processes in a tween end.
+			</description>
+		</signal>
 		<signal name="tween_completed">
 			<argument index="0" name="object" type="Object">
 			</argument>

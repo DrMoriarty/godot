@@ -988,6 +988,7 @@ void FileSystemDock::_try_move_item(const FileOrFolder &p_item, const String &p_
 				for (int j = 0; j < ed->get_edited_scene_count(); j++) {
 					if (ed->get_scene_path(j) == file_changed_paths[i]) {
 						ed->get_edited_scene_root(j)->set_filename(new_item_path);
+						editor->save_layout();
 						break;
 					}
 				}
@@ -1429,6 +1430,10 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> p_selected)
 		case FILE_SHOW_IN_EXPLORER: {
 			// Show the file / folder in the OS explorer
 			String fpath = path;
+			if (path == "Favorites") {
+				fpath = p_selected[0];
+			}
+
 			if (!fpath.ends_with("/")) {
 				fpath = fpath.get_base_dir();
 			}
@@ -2088,6 +2093,10 @@ void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos) {
 	}
 }
 
+void FileSystemDock::_tree_empty_selected() {
+	tree->deselect_all();
+}
+
 void FileSystemDock::_file_list_rmb_select(int p_item, const Vector2 &p_pos) {
 	// Right click is pressed in the file list
 	Vector<String> paths;
@@ -2266,9 +2275,10 @@ void FileSystemDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_toggle_split_mode"), &FileSystemDock::_toggle_split_mode);
 
 	ClassDB::bind_method(D_METHOD("_tree_rmb_option", "option"), &FileSystemDock::_tree_rmb_option);
-	ClassDB::bind_method(D_METHOD("_file_list_rmb_option", "option"), &FileSystemDock::_file_list_rmb_option);
-
 	ClassDB::bind_method(D_METHOD("_tree_rmb_select"), &FileSystemDock::_tree_rmb_select);
+	ClassDB::bind_method(D_METHOD("_tree_empty_selected"), &FileSystemDock::_tree_empty_selected);
+
+	ClassDB::bind_method(D_METHOD("_file_list_rmb_option", "option"), &FileSystemDock::_file_list_rmb_option);
 	ClassDB::bind_method(D_METHOD("_file_list_rmb_select"), &FileSystemDock::_file_list_rmb_select);
 	ClassDB::bind_method(D_METHOD("_file_list_rmb_pressed"), &FileSystemDock::_file_list_rmb_pressed);
 
@@ -2401,6 +2411,7 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	tree->connect("item_activated", this, "_tree_activate_file");
 	tree->connect("multi_selected", this, "_tree_multi_selected");
 	tree->connect("item_rmb_selected", this, "_tree_rmb_select");
+	tree->connect("nothing_selected", this, "_tree_empty_selected");
 	tree->connect("gui_input", this, "_tree_gui_input");
 
 	file_list_vb = memnew(VBoxContainer);

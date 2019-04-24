@@ -5,7 +5,6 @@ EnsureSConsVersion(0, 98, 1)
 # System
 import glob
 import os
-import string
 import sys
 
 # Local
@@ -181,7 +180,6 @@ opts.Add(BoolVariable('builtin_opus', "Use the built-in Opus library", True))
 opts.Add(BoolVariable('builtin_pcre2', "Use the built-in PCRE2 library)", True))
 opts.Add(BoolVariable('builtin_recast', "Use the built-in Recast library", True))
 opts.Add(BoolVariable('builtin_squish', "Use the built-in squish library", True))
-opts.Add(BoolVariable('builtin_thekla_atlas', "Use the built-in thekla_altas library", True))
 opts.Add(BoolVariable('builtin_xatlas', "Use the built-in xatlas library", True))
 opts.Add(BoolVariable('builtin_zlib', "Use the built-in zlib library", True))
 opts.Add(BoolVariable('builtin_zstd', "Use the built-in Zstd library", True))
@@ -342,7 +340,7 @@ if selected_platform in platform_list:
         shadow_local_warning = []
         all_plus_warnings = ['-Wwrite-strings']
 
-        if methods.use_gcc(env):
+        if methods.using_gcc(env):
             version = methods.get_compiler_version(env)
             if version != None and version[0] >= '7':
                 shadow_local_warning = ['-Wshadow-local']
@@ -350,7 +348,7 @@ if selected_platform in platform_list:
             # FIXME: enable -Wimplicit-fallthrough once #26135 is fixed
             # FIXME: enable -Wclobbered once #26351 is fixed
             env.Append(CCFLAGS=['-Wall', '-Wextra', '-Wno-implicit-fallthrough', '-Wno-unused-parameter'] + all_plus_warnings + shadow_local_warning)
-            if methods.use_gcc(env):
+            if methods.using_gcc(env):
                 env['CCFLAGS'] += ['-Wno-clobbered']
 
         elif (env["warnings"] == 'all'):
