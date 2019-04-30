@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -174,8 +174,11 @@ void EditorAssetLibraryItemDescription::set_image(int p_type, int p_index, const
 					if (preview_images[i].is_video) {
 						Ref<Image> overlay = get_icon("PlayOverlay", "EditorIcons")->get_data();
 						Ref<Image> thumbnail = p_image->get_data();
-						Point2 overlay_pos = Point2((thumbnail->get_width() - overlay->get_width()) / 2, (thumbnail->get_height() - overlay->get_height()) / 2);
+						thumbnail = thumbnail->duplicate();
+						Point2 overlay_pos = Point2((thumbnail->get_width() - overlay->get_width() / 2) / 2, (thumbnail->get_height() - overlay->get_height() / 2) / 2);
 
+						// Overlay and thumbnail need the same format for `blend_rect` to work.
+						thumbnail->convert(Image::FORMAT_RGBA8);
 						thumbnail->lock();
 						thumbnail->blend_rect(overlay, overlay->get_used_rect(), overlay_pos);
 						thumbnail->unlock();
@@ -197,7 +200,7 @@ void EditorAssetLibraryItemDescription::set_image(int p_type, int p_index, const
 
 			for (int i = 0; i < preview_images.size(); i++) {
 				if (preview_images[i].id == p_index) {
-					preview_images[i].image = p_image;
+					preview_images.write[i].image = p_image;
 					if (preview_images[i].button->is_pressed()) {
 						_preview_click(p_index);
 					}
@@ -234,6 +237,7 @@ void EditorAssetLibraryItemDescription::_preview_click(int p_id) {
 			if (!preview_images[i].is_video) {
 				if (preview_images[i].image.is_valid()) {
 					preview->set_texture(preview_images[i].image);
+					minimum_size_changed();
 				}
 			} else {
 				_link_click(preview_images[i].video_link);
@@ -306,15 +310,20 @@ EditorAssetLibraryItemDescription::EditorAssetLibraryItemDescription() {
 
 	description = memnew(RichTextLabel);
 	description->connect("meta_clicked", this, "_link_click");
+	description->set_custom_minimum_size(Size2(440 * EDSCALE, 300 * EDSCALE));
 	desc_bg->add_child(description);
+
+	VBoxContainer *previews_vbox = memnew(VBoxContainer);
+	hbox->add_child(previews_vbox);
+	previews_vbox->add_constant_override("separation", 15 * EDSCALE);
 
 	preview = memnew(TextureRect);
 	preview->set_custom_minimum_size(Size2(640 * EDSCALE, 345 * EDSCALE));
-	hbox->add_child(preview);
+	previews_vbox->add_child(preview);
 
 	previews_bg = memnew(PanelContainer);
-	vbox->add_child(previews_bg);
-	previews_bg->set_custom_minimum_size(Size2(0, 101 * EDSCALE));
+	previews_vbox->add_child(previews_bg);
+	previews_bg->set_custom_minimum_size(Size2(640 * EDSCALE, 101 * EDSCALE));
 
 	previews = memnew(ScrollContainer);
 	previews_bg->add_child(previews);
@@ -383,14 +392,11 @@ void EditorAssetLibraryItemDownload::_http_download_completed(int p_status, int 
 		return;
 	}
 
-	progress->set_max(download->get_body_size());
-	progress->set_value(download->get_downloaded_bytes());
-
 	install->set_disabled(false);
+	status->set_text(TTR("Success!"));
+	// Make the progress bar invisible but don't reflow other Controls around it
+	progress->set_modulate(Color(0, 0, 0, 0));
 
-	progress->set_value(download->get_downloaded_bytes());
-
-	status->set_text(TTR("Success!") + " (" + String::humanize_size(download->get_downloaded_bytes()) + ")");
 	set_process(false);
 }
 
@@ -412,27 +418,49 @@ void EditorAssetLibraryItemDownload::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_PROCESS) {
 
-		progress->set_max(download->get_body_size());
-		progress->set_value(download->get_downloaded_bytes());
+		// Make the progress bar visible again when retrying the download
+		progress->set_modulate(Color(1, 1, 1, 1));
+
+		if (download->get_downloaded_bytes() > 0) {
+			progress->set_max(download->get_body_size());
+			progress->set_value(download->get_downloaded_bytes());
+		}
 
 		int cstatus = download->get_http_client_status();
 
-		if (cstatus == HTTPClient::STATUS_BODY)
-			status->set_text(TTR("Fetching:") + " " + String::humanize_size(download->get_downloaded_bytes()));
+		if (cstatus == HTTPClient::STATUS_BODY) {
+			if (download->get_body_size() > 0) {
+				status->set_text(
+						vformat(
+								TTR("Downloading (%s / %s)..."),
+								String::humanize_size(download->get_downloaded_bytes()),
+								String::humanize_size(download->get_body_size())));
+			} else {
+				// Total file size is unknown, so it cannot be displayed
+				status->set_text(TTR("Downloading..."));
+			}
+		}
 
 		if (cstatus != prev_status) {
 			switch (cstatus) {
 
 				case HTTPClient::STATUS_RESOLVING: {
 					status->set_text(TTR("Resolving..."));
+					progress->set_max(1);
+					progress->set_value(0);
 				} break;
 				case HTTPClient::STATUS_CONNECTING: {
 					status->set_text(TTR("Connecting..."));
+					progress->set_max(1);
+					progress->set_value(0);
 				} break;
 				case HTTPClient::STATUS_REQUESTING: {
 					status->set_text(TTR("Requesting..."));
+					progress->set_max(1);
+					progress->set_value(0);
 				} break;
-				default: {}
+				default: {
+				}
 			}
 			prev_status = cstatus;
 		}
@@ -526,7 +554,7 @@ EditorAssetLibraryItemDownload::EditorAssetLibraryItemDownload() {
 
 	hb2->add_child(retry);
 	hb2->add_child(install);
-	set_custom_minimum_size(Size2(250, 0));
+	set_custom_minimum_size(Size2(310, 0));
 
 	download = memnew(HTTPRequest);
 	add_child(download);
@@ -553,6 +581,8 @@ void EditorAssetLibrary::_notification(int p_what) {
 
 			error_tr->set_texture(get_icon("Error", "EditorIcons"));
 			reverse->set_icon(get_icon("Sort", "EditorIcons"));
+			filter->set_right_icon(get_icon("Search", "EditorIcons"));
+			filter->set_clear_button_enabled(true);
 
 			error_label->raise();
 		} break;
@@ -588,7 +618,8 @@ void EditorAssetLibrary::_notification(int p_what) {
 					case HTTPClient::STATUS_BODY: {
 						load_status->set_value(0.4);
 					} break;
-					default: {}
+					default: {
+					}
 				}
 			}
 
@@ -603,6 +634,8 @@ void EditorAssetLibrary::_notification(int p_what) {
 			library_scroll_bg->add_style_override("panel", get_stylebox("bg", "Tree"));
 			error_tr->set_texture(get_icon("Error", "EditorIcons"));
 			reverse->set_icon(get_icon("Sort", "EditorIcons"));
+			filter->set_right_icon(get_icon("Search", "EditorIcons"));
+			filter->set_clear_button_enabled(true);
 		} break;
 	}
 }
@@ -705,7 +738,18 @@ void EditorAssetLibrary::_image_update(bool use_cache, bool final, const PoolByt
 
 		int len = image_data.size();
 		PoolByteArray::Read r = image_data.read();
-		Ref<Image> image = Ref<Image>(memnew(Image(r.ptr(), len)));
+		Ref<Image> image = Ref<Image>(memnew(Image));
+
+		uint8_t png_signature[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+		uint8_t jpg_signature[3] = { 255, 216, 255 };
+
+		if (r.ptr()) {
+			if (memcmp(&r[0], &png_signature[0], 8) == 0) {
+				image->copy_internals_from(Image::_png_mem_loader_func(r.ptr(), len));
+			} else if (memcmp(&r[0], &jpg_signature[0], 3) == 0) {
+				image->copy_internals_from(Image::_jpg_mem_loader_func(r.ptr(), len));
+			}
+		}
 
 		if (!image->empty()) {
 			switch (image_queue[p_queue_id].image_type) {
@@ -750,7 +794,7 @@ void EditorAssetLibrary::_image_request_completed(int p_status, int p_code, cons
 
 	ERR_FAIL_COND(!image_queue.has(p_queue_id));
 
-	if (p_status == HTTPRequest::RESULT_SUCCESS) {
+	if (p_status == HTTPRequest::RESULT_SUCCESS && p_code < HTTPClient::RESPONSE_BAD_REQUEST) {
 
 		if (p_code != HTTPClient::RESPONSE_NOT_MODIFIED) {
 			for (int i = 0; i < headers.size(); i++) {
@@ -781,7 +825,7 @@ void EditorAssetLibrary::_image_request_completed(int p_status, int p_code, cons
 		_image_update(p_code == HTTPClient::RESPONSE_NOT_MODIFIED, true, p_data, p_queue_id);
 
 	} else {
-		WARN_PRINTS("Error getting PNG file from URL: " + image_queue[p_queue_id].image_url);
+		WARN_PRINTS("Error getting image file from URL: " + image_queue[p_queue_id].image_url);
 		Object *obj = ObjectDB::get_instance(image_queue[p_queue_id].target);
 		if (obj) {
 			obj->call("set_image", image_queue[p_queue_id].image_type, image_queue[p_queue_id].image_index, get_icon("DefaultProjectIcon", "EditorIcons"));
@@ -927,6 +971,9 @@ void EditorAssetLibrary::_search_text_entered(const String &p_text) {
 HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int p_page_len, int p_total_items, int p_current_items) {
 
 	HBoxContainer *hbc = memnew(HBoxContainer);
+
+	if (p_page_count < 2)
+		return hbc;
 
 	//do the mario
 	int from = p_page - 5;
@@ -1300,6 +1347,7 @@ void EditorAssetLibrary::_bind_methods() {
 
 EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 
+	requesting = REQUESTING_NONE;
 	templates_only = p_templates_only;
 
 	VBoxContainer *library_main = memnew(VBoxContainer);

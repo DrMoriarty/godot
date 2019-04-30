@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -79,6 +79,8 @@ class GridMapEditor : public VBoxContainer {
 	double accumulated_floor_delta;
 	ToolButton *mode_thumbnail;
 	ToolButton *mode_list;
+	LineEdit *search_box;
+	HSlider *size_slider;
 	HBoxContainer *spatial_editor_hb;
 	ConfirmationDialog *settings_dialog;
 	VBoxContainer *settings_vbc;
@@ -97,7 +99,7 @@ class GridMapEditor : public VBoxContainer {
 	List<SetItem> set_items;
 
 	GridMap *node;
-	MeshLibrary *last_theme;
+	MeshLibrary *last_mesh_library;
 	ClipMode clip_mode;
 
 	bool lock_view;
@@ -141,7 +143,7 @@ class GridMapEditor : public VBoxContainer {
 	Vector3 last_mouseover;
 
 	int display_mode;
-	int selected_pallete;
+	int selected_palette;
 	int cursor_rot;
 
 	enum Menu {
@@ -168,6 +170,7 @@ class GridMapEditor : public VBoxContainer {
 		MENU_OPTION_SELECTION_MAKE_EXTERIOR_CONNECTOR,
 		MENU_OPTION_SELECTION_DUPLICATE,
 		MENU_OPTION_SELECTION_CLEAR,
+		MENU_OPTION_SELECTION_FILL,
 		MENU_OPTION_REMOVE_AREA,
 		MENU_OPTION_GRIDMAP_SETTINGS
 
@@ -184,13 +187,18 @@ class GridMapEditor : public VBoxContainer {
 	void update_grid();
 	void _configure();
 	void _menu_option(int);
-	void update_pallete();
+	void update_palette();
 	void _set_display_mode(int p_mode);
-	ItemList *theme_pallete;
+	ItemList *mesh_library_palette;
 	void _item_selected_cbk(int idx);
 	void _update_cursor_transform();
 	void _update_cursor_instance();
 	void _update_clip();
+
+	void _text_changed(const String &p_text);
+	void _sbox_input(const Ref<InputEvent> &p_ie);
+
+	void _icon_size_changed(float p_value);
 
 	void _update_duplicate_indicator();
 	void _duplicate_paste();
@@ -200,12 +208,12 @@ class GridMapEditor : public VBoxContainer {
 	void _floor_changed(float p_value);
 
 	void _delete_selection();
+	void _fill_selection();
 
 	EditorNode *editor;
 	bool do_input_action(Camera *p_camera, const Point2 &p_point, bool p_click);
 
 	friend class GridMapEditorPlugin;
-	Panel *theme_panel;
 
 protected:
 	void _notification(int p_what);
@@ -225,11 +233,14 @@ class GridMapEditorPlugin : public EditorPlugin {
 
 	GDCLASS(GridMapEditorPlugin, EditorPlugin);
 
-	GridMapEditor *gridmap_editor;
+	GridMapEditor *grid_map_editor;
 	EditorNode *editor;
 
+protected:
+	void _notification(int p_what);
+
 public:
-	virtual bool forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event) { return gridmap_editor->forward_spatial_input_event(p_camera, p_event); }
+	virtual bool forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event) { return grid_map_editor->forward_spatial_input_event(p_camera, p_event); }
 	virtual String get_name() const { return "GridMap"; }
 	bool has_main_screen() const { return false; }
 	virtual void edit(Object *p_object);

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,8 +35,6 @@
 
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
-#define RAY_STABILITY_MARGIN 0.1
-
 /**
 	@author AndreaCatania
 */
@@ -49,9 +47,9 @@ GodotRayWorldAlgorithm::SwappedCreateFunc::SwappedCreateFunc(const btDiscreteDyn
 
 GodotRayWorldAlgorithm::GodotRayWorldAlgorithm(const btDiscreteDynamicsWorld *world, btPersistentManifold *mf, const btCollisionAlgorithmConstructionInfo &ci, const btCollisionObjectWrapper *body0Wrap, const btCollisionObjectWrapper *body1Wrap, bool isSwapped) :
 		btActivatingCollisionAlgorithm(ci, body0Wrap, body1Wrap),
+		m_world(world),
 		m_manifoldPtr(mf),
 		m_ownManifold(false),
-		m_world(world),
 		m_isSwapped(isSwapped) {}
 
 GodotRayWorldAlgorithm::~GodotRayWorldAlgorithm() {
@@ -102,7 +100,7 @@ void GodotRayWorldAlgorithm::processCollision(const btCollisionObjectWrapper *bo
 
 		btScalar depth(ray_shape->getScaledLength() * (btResult.m_closestHitFraction - 1));
 
-		if (depth >= -RAY_STABILITY_MARGIN)
+		if (depth >= -ray_shape->getMargin() * 0.5)
 			depth = 0;
 
 		if (ray_shape->getSlipsOnSlope())

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,15 +31,15 @@
 #ifndef GDNATIVE_H
 #define GDNATIVE_H
 
-#include "io/resource_loader.h"
-#include "io/resource_saver.h"
-#include "os/thread_safe.h"
-#include "resource.h"
+#include "core/io/resource_loader.h"
+#include "core/io/resource_saver.h"
+#include "core/os/thread_safe.h"
+#include "core/resource.h"
 
 #include "gdnative/gdnative.h"
 #include "gdnative_api_struct.gen.h"
 
-#include "io/config_file.h"
+#include "core/io/config_file.h"
 
 class GDNativeLibraryResourceLoader;
 class GDNative;
@@ -148,19 +148,20 @@ public:
 	static void _bind_methods();
 
 	void set_library(Ref<GDNativeLibrary> p_library);
-	Ref<GDNativeLibrary> get_library();
+	Ref<GDNativeLibrary> get_library() const;
 
-	bool is_initialized();
+	bool is_initialized() const;
 
 	bool initialize();
 	bool terminate();
 
 	Variant call_native(StringName p_native_call_type, StringName p_procedure_name, Array p_arguments = Array());
 
-	Error get_symbol(StringName p_procedure_name, void *&r_handle, bool p_optional = true);
+	Error get_symbol(StringName p_procedure_name, void *&r_handle, bool p_optional = true) const;
 };
 
 class GDNativeLibraryResourceLoader : public ResourceFormatLoader {
+	GDCLASS(GDNativeLibraryResourceLoader, ResourceFormatLoader)
 public:
 	virtual RES load(const String &p_path, const String &p_original_path, Error *r_error);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;
@@ -169,6 +170,7 @@ public:
 };
 
 class GDNativeLibraryResourceSaver : public ResourceFormatSaver {
+	GDCLASS(GDNativeLibraryResourceSaver, ResourceFormatSaver)
 public:
 	virtual Error save(const String &p_path, const RES &p_resource, uint32_t p_flags);
 	virtual bool recognize(const RES &p_resource) const;

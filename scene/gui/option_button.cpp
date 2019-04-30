@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,14 +29,14 @@
 /*************************************************************************/
 
 #include "option_button.h"
-#include "print_string.h"
+#include "core/print_string.h"
 
 Size2 OptionButton::get_minimum_size() const {
 
 	Size2 minsize = Button::get_minimum_size();
 
 	if (has_icon("arrow"))
-		minsize.width += Control::get_icon("arrow")->get_width();
+		minsize.width += Control::get_icon("arrow")->get_width() + get_constant("hseparation");
 
 	return minsize;
 }
@@ -72,6 +72,11 @@ void OptionButton::_notification(int p_what) {
 
 		Point2 ofs(size.width - arrow->get_width() - get_constant("arrow_margin"), int(Math::abs((size.height - arrow->get_height()) / 2)));
 		arrow->draw(ci, ofs, clr);
+	} else if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
+
+		if (!is_visible_in_tree()) {
+			popup->hide();
+		}
 	}
 }
 
@@ -104,9 +109,9 @@ void OptionButton::_selected(int p_which) {
 void OptionButton::pressed() {
 
 	Size2 size = get_size();
-	popup->set_global_position(get_global_position() + Size2(0, size.height));
+	popup->set_global_position(get_global_position() + Size2(0, size.height * get_global_transform().get_scale().y));
 	popup->set_size(Size2(size.width, 0));
-
+	popup->set_scale(get_global_transform().get_scale());
 	popup->popup();
 }
 
@@ -160,6 +165,12 @@ int OptionButton::get_item_id(int p_idx) const {
 
 	return popup->get_item_id(p_idx);
 }
+
+int OptionButton::get_item_index(int p_id) const {
+
+	return popup->get_item_index(p_id);
+}
+
 Variant OptionButton::get_item_metadata(int p_idx) const {
 
 	return popup->get_item_metadata(p_idx);
@@ -306,6 +317,7 @@ void OptionButton::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_item_text", "idx"), &OptionButton::get_item_text);
 	ClassDB::bind_method(D_METHOD("get_item_icon", "idx"), &OptionButton::get_item_icon);
 	ClassDB::bind_method(D_METHOD("get_item_id", "idx"), &OptionButton::get_item_id);
+	ClassDB::bind_method(D_METHOD("get_item_index", "id"), &OptionButton::get_item_index);
 	ClassDB::bind_method(D_METHOD("get_item_metadata", "idx"), &OptionButton::get_item_metadata);
 	ClassDB::bind_method(D_METHOD("is_item_disabled", "idx"), &OptionButton::is_item_disabled);
 	ClassDB::bind_method(D_METHOD("get_item_count"), &OptionButton::get_item_count);
@@ -333,16 +345,18 @@ void OptionButton::_bind_methods() {
 OptionButton::OptionButton() {
 
 	current = -1;
+	set_toggle_mode(true);
 	set_text_align(ALIGN_LEFT);
 	set_action_mode(ACTION_MODE_BUTTON_PRESS);
 
 	popup = memnew(PopupMenu);
 	popup->hide();
 	add_child(popup);
-	popup->set_as_toplevel(true);
 	popup->set_pass_on_modal_close_click(false);
+	popup->set_notify_transform(true);
 	popup->connect("id_pressed", this, "_selected");
 	popup->connect("id_focused", this, "_focused");
+	popup->connect("popup_hide", this, "set_pressed", varray(false));
 }
 
 OptionButton::~OptionButton() {

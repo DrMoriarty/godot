@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -55,9 +55,9 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 		for (int j = 0; j < rlen; j += 3) {
 			Vector<int> vi;
 			vi.resize(3);
-			vi[0] = r[j + 0] + from;
-			vi[1] = r[j + 1] + from;
-			vi[2] = r[j + 2] + from;
+			vi.write[0] = r[j + 0] + from;
+			vi.write[1] = r[j + 1] + from;
+			vi.write[2] = r[j + 2] + from;
 
 			add_polygon(vi);
 		}
@@ -215,7 +215,7 @@ void NavigationMesh::_set_polygons(const Array &p_array) {
 
 	polygons.resize(p_array.size());
 	for (int i = 0; i < p_array.size(); i++) {
-		polygons[i].indices = p_array[i];
+		polygons.write[i].indices = p_array[i];
 	}
 }
 
@@ -292,11 +292,11 @@ Ref<Mesh> NavigationMesh::get_debug_mesh() {
 				if (ek.from < ek.to)
 					SWAP(ek.from, ek.to);
 
-				Map<_EdgeKey, bool>::Element *E = edge_map.find(ek);
+				Map<_EdgeKey, bool>::Element *F = edge_map.find(ek);
 
-				if (E) {
+				if (F) {
 
-					E->get() = false;
+					F->get() = false;
 
 				} else {
 

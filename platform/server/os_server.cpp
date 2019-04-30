@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,17 +27,19 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "os_server.h"
+
+#include "core/print_string.h"
 #include "drivers/dummy/audio_driver_dummy.h"
 #include "drivers/dummy/rasterizer_dummy.h"
 #include "drivers/dummy/texture_loader_dummy.h"
-#include "print_string.h"
 #include "servers/visual/visual_server_raster.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "main/main.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 int OS_Server::get_video_driver_count() const {
@@ -58,11 +60,19 @@ const char *OS_Server::get_audio_driver_name(int p_driver) const {
 	return "Dummy";
 }
 
+int OS_Server::get_current_video_driver() const {
+	return video_driver_index;
+}
+
 void OS_Server::initialize_core() {
 
 	crash_handler.initialize();
 
 	OS_Unix::initialize_core();
+
+#ifdef __APPLE__
+	SemaphoreOSX::make_default();
+#endif
 }
 
 Error OS_Server::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
@@ -73,6 +83,8 @@ Error OS_Server::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	RasterizerDummy::make_current();
 
+	video_driver_index = p_video_driver; // unused in server platform, but should still be initialized
+
 	visual_server = memnew(VisualServerRaster);
 	visual_server->init();
 
@@ -80,11 +92,15 @@ Error OS_Server::initialize(const VideoMode &p_desired, int p_video_driver, int 
 
 	input = memnew(InputDefault);
 
+#ifdef __APPLE__
+	power_manager = memnew(PowerOSX);
+#else
 	power_manager = memnew(PowerX11);
+#endif
 
 	_ensure_user_data_dir();
 
-	resource_loader_dummy = memnew(ResourceFormatDummyTexture);
+	resource_loader_dummy.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_dummy);
 
 	return OK;
@@ -103,7 +119,8 @@ void OS_Server::finalize() {
 
 	memdelete(power_manager);
 
-	memdelete(resource_loader_dummy);
+	ResourceLoader::remove_resource_format_loader(resource_loader_dummy);
+	resource_loader_dummy.unref();
 
 	args.clear();
 }
@@ -181,12 +198,6 @@ String OS_Server::get_name() {
 void OS_Server::move_window_to_foreground() {
 }
 
-void OS_Server::set_cursor_shape(CursorShape p_shape) {
-}
-
-void OS_Server::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
-}
-
 OS::PowerState OS_Server::get_power_state() {
 	return power_manager->get_power_state();
 }
@@ -214,7 +225,7 @@ void OS_Server::run() {
 
 	while (!force_quit) {
 
-		if (Main::iteration() == true)
+		if (Main::iteration())
 			break;
 	};
 

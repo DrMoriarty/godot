@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,8 +31,8 @@
 #include "font.h"
 
 #include "core/io/resource_loader.h"
+#include "core/method_bind_ext.gen.inc"
 #include "core/os/file_access.h"
-#include "method_bind_ext.gen.inc"
 
 void Font::draw_halign(RID p_canvas_item, const Point2 &p_pos, HAlign p_align, float p_width, const String &p_text, const Color &p_modulate, const Color &p_outline_modulate) const {
 	float length = get_string_size(p_text).width;
@@ -178,6 +178,7 @@ PoolVector<int> BitmapFont::_get_kernings() const {
 
 void BitmapFont::_set_textures(const Vector<Variant> &p_textures) {
 
+	textures.clear();
 	for (int i = 0; i < p_textures.size(); i++) {
 		Ref<Texture> tex = p_textures[i];
 		ERR_CONTINUE(!tex.is_valid());
@@ -386,7 +387,7 @@ Vector<CharType> BitmapFont::get_char_keys() const {
 	int count = 0;
 	while ((ct = char_map.next(ct))) {
 
-		chars[count++] = *ct;
+		chars.write[count++] = *ct;
 	};
 
 	return chars;
@@ -438,7 +439,7 @@ Vector<BitmapFont::KerningPairKey> BitmapFont::get_kerning_pair_keys() const {
 	int i = 0;
 
 	for (Map<KerningPairKey, int>::Element *E = kerning_map.front(); E; E = E->next()) {
-		ret[i++] = E->key();
+		ret.write[i++] = E->key();
 	}
 
 	return ret;
@@ -496,6 +497,7 @@ Size2 Font::get_string_size(const String &p_string) const {
 }
 void BitmapFont::set_fallback(const Ref<BitmapFont> &p_fallback) {
 
+	ERR_FAIL_COND(p_fallback == this);
 	fallback = p_fallback;
 }
 

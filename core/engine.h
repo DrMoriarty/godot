@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,10 +31,10 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "list.h"
-#include "os/main_loop.h"
-#include "ustring.h"
-#include "vector.h"
+#include "core/list.h"
+#include "core/os/main_loop.h"
+#include "core/ustring.h"
+#include "core/vector.h"
 
 class Engine {
 
@@ -118,8 +118,14 @@ public:
 #endif
 
 	Dictionary get_version_info() const;
+	Dictionary get_author_info() const;
+	Array get_copyright_info() const;
+	Dictionary get_donor_info() const;
+	Dictionary get_license_info() const;
+	String get_license_text() const;
 
 	Engine();
+	virtual ~Engine() {}
 };
 
 #endif // ENGINE_H

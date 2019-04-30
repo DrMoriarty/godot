@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -63,6 +63,7 @@ private:
 	int last_send_cache_id;
 	Vector<uint8_t> packet_cache;
 	Node *root_node;
+	bool allow_object_decoding;
 
 protected:
 	static void _bind_methods();
@@ -87,12 +88,25 @@ public:
 		NETWORK_COMMAND_RAW,
 	};
 
+	enum RPCMode {
+
+		RPC_MODE_DISABLED, // No rpc for this method, calls to this will be blocked (default)
+		RPC_MODE_REMOTE, // Using rpc() on it will call method / set property in all remote peers
+		RPC_MODE_MASTER, // Using rpc() on it will call method on wherever the master is, be it local or remote
+		RPC_MODE_PUPPET, // Using rpc() on it will call method for all puppets
+		RPC_MODE_SLAVE = RPC_MODE_PUPPET, // Deprecated, same as puppet
+		RPC_MODE_REMOTESYNC, // Using rpc() on it will call method / set property in all remote peers and locally
+		RPC_MODE_SYNC = RPC_MODE_REMOTESYNC, // Deprecated. Same as RPC_MODE_REMOTESYNC
+		RPC_MODE_MASTERSYNC, // Using rpc() on it will call method / set property in the master peer and locally
+		RPC_MODE_PUPPETSYNC, // Using rpc() on it will call method / set property in all puppets peers and locally
+	};
+
 	void poll();
 	void clear();
 	void set_root_node(Node *p_node);
 	void set_network_peer(const Ref<NetworkedMultiplayerPeer> &p_peer);
 	Ref<NetworkedMultiplayerPeer> get_network_peer() const;
-	Error send_bytes(PoolVector<uint8_t> p_data, int p_to = NetworkedMultiplayerPeer::TARGET_PEER_BROADCAST);
+	Error send_bytes(PoolVector<uint8_t> p_data, int p_to = NetworkedMultiplayerPeer::TARGET_PEER_BROADCAST, NetworkedMultiplayerPeer::TransferMode p_mode = NetworkedMultiplayerPeer::TRANSFER_MODE_RELIABLE);
 
 	// Called by Node.rpc
 	void rpcp(Node *p_node, int p_peer_id, bool p_unreliable, const StringName &p_method, const Variant **p_arg, int p_argcount);
@@ -113,8 +127,13 @@ public:
 	void set_refuse_new_network_connections(bool p_refuse);
 	bool is_refusing_new_network_connections() const;
 
+	void set_allow_object_decoding(bool p_enable);
+	bool is_object_decoding_allowed() const;
+
 	MultiplayerAPI();
 	~MultiplayerAPI();
 };
+
+VARIANT_ENUM_CAST(MultiplayerAPI::RPCMode);
 
 #endif // MULTIPLAYER_PROTOCOL_H

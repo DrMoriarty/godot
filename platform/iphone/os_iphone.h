@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,9 +33,9 @@
 #ifndef OS_IPHONE_H
 #define OS_IPHONE_H
 
+#include "core/os/input.h"
 #include "drivers/coreaudio/audio_driver_coreaudio.h"
 #include "drivers/unix/os_unix.h"
-#include "os/input.h"
 
 #include "game_center.h"
 #include "icloud.h"
@@ -47,14 +47,6 @@
 
 class OSIPhone : public OS_Unix {
 
-public:
-	enum Orientations {
-		PortraitDown,
-		PortraitUp,
-		LandscapeLeft,
-		LandscapeRight,
-	};
-
 private:
 	enum {
 		MAX_MOUSE_COUNT = 8,
@@ -63,8 +55,6 @@ private:
 
 	static HashMap<String, void *> dynamic_symbol_lookup_table;
 	friend void register_dynamic_symbol(char *name, void *address);
-
-	uint8_t supported_orientations;
 
 	VisualServer *visual_server;
 
@@ -86,6 +76,8 @@ private:
 
 	virtual int get_video_driver_count() const;
 	virtual const char *get_video_driver_name(int p_driver) const;
+
+	virtual int get_current_video_driver() const;
 
 	virtual void initialize_core();
 	virtual Error initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
@@ -121,6 +113,8 @@ private:
 	InputDefault *input;
 
 	int virtual_keyboard_height;
+
+	int video_driver_index;
 
 public:
 	bool iterate();
@@ -172,9 +166,6 @@ public:
 	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2());
 	virtual void hide_virtual_keyboard();
 	virtual int get_virtual_keyboard_height() const;
-
-	virtual void set_cursor_shape(CursorShape p_shape);
-	virtual void set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot);
 
 	virtual Size2 get_window_size() const;
 	virtual Rect2 get_window_safe_area() const;

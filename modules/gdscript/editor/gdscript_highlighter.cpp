@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -43,10 +43,6 @@ static bool _is_text_char(CharType c) {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_';
 }
 
-static bool _is_whitespace(CharType c) {
-	return c == '\t' || c == ' ';
-}
-
 static bool _is_char(CharType c) {
 
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
@@ -75,9 +71,12 @@ Map<int, TextEdit::HighlighterInfo> GDScriptSyntaxHighlighter::_get_line_syntax_
 	bool in_keyword = false;
 	bool in_word = false;
 	bool in_function_name = false;
+	bool in_variable_declaration = false;
+	bool in_function_args = false;
 	bool in_member_variable = false;
 	bool in_node_path = false;
 	bool is_hex_notation = false;
+	bool expect_type = false;
 	Color keyword_color;
 	Color color;
 
@@ -119,8 +118,8 @@ Map<int, TextEdit::HighlighterInfo> GDScriptSyntaxHighlighter::_get_line_syntax_
 			is_hex_notation = false;
 		}
 
-		// check for dot or underscore or 'x' for hex notation in floating point number
-		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_') && !in_word && prev_is_number && !is_number) {
+		// check for dot or underscore or 'x' for hex notation in floating point number or 'e' for scientific notation
+		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_' || str[j] == 'e') && !in_word && prev_is_number && !is_number) {
 			is_number = true;
 			is_symbol = false;
 			is_char = false;
@@ -205,6 +204,8 @@ Map<int, TextEdit::HighlighterInfo> GDScriptSyntaxHighlighter::_get_line_syntax_
 
 			if (str[k] == '(') {
 				in_function_name = true;
+			} else if (previous_text == GDScriptTokenizer::get_token_name(GDScriptTokenizer::TK_PR_VAR)) {
+				in_variable_declaration = true;
 			}
 		}
 
@@ -220,6 +221,37 @@ Map<int, TextEdit::HighlighterInfo> GDScriptSyntaxHighlighter::_get_line_syntax_
 		}
 
 		if (is_symbol) {
+
+			if (in_function_name) {
+				in_function_args = true;
+			}
+
+			if (in_function_args && str[j] == ')') {
+				in_function_args = false;
+			}
+
+			if (expect_type && prev_is_char) {
+				expect_type = false;
+			}
+
+			if (j > 0 && str[j] == '>' && str[j - 1] == '-') {
+				expect_type = true;
+			}
+
+			if (in_variable_declaration || in_function_args) {
+				int k = j;
+				// Skip space
+				while (k < str.length() && (str[k] == '\t' || str[k] == ' ')) {
+					k++;
+				}
+
+				if (str[k] == ':') {
+					// has type hint
+					expect_type = true;
+				}
+			}
+
+			in_variable_declaration = false;
 			in_function_name = false;
 			in_member_variable = false;
 		}
@@ -256,6 +288,9 @@ Map<int, TextEdit::HighlighterInfo> GDScriptSyntaxHighlighter::_get_line_syntax_
 		} else if (is_number) {
 			next_type = NUMBER;
 			color = number_color;
+		} else if (expect_type) {
+			next_type = TYPE;
+			color = type_color;
 		} else {
 			next_type = IDENTIFIER;
 		}
@@ -312,8 +347,25 @@ void GDScriptSyntaxHighlighter::_update_cache() {
 	number_color = text_editor->get_color("number_color");
 	member_color = text_editor->get_color("member_variable_color");
 
-	function_definition_color = EDITOR_DEF("text_editor/highlighting/gdscript/function_definition_color", Color::html("#01e1ff"));
-	node_path_color = EDITOR_DEF("text_editor/highlighting/gdscript/node_path_color", Color::html("#64c15a"));
+	EditorSettings *settings = EditorSettings::get_singleton();
+	String text_editor_color_theme = settings->get("text_editor/theme/color_theme");
+
+	bool default_theme = text_editor_color_theme == "Default";
+	bool dark_theme = settings->is_dark_theme();
+
+	function_definition_color = Color::html(default_theme ? "#01e1ff" : dark_theme ? "#01e1ff" : "#00a5ba");
+	node_path_color = Color::html(default_theme ? "#64c15a" : dark_theme ? "64c15a" : "#518b4b");
+
+	EDITOR_DEF("text_editor/highlighting/gdscript/function_definition_color", function_definition_color);
+	EDITOR_DEF("text_editor/highlighting/gdscript/node_path_color", node_path_color);
+	if (text_editor_color_theme == "Adaptive" || default_theme) {
+		settings->set_initial_value("text_editor/highlighting/gdscript/function_definition_color", function_definition_color, true);
+		settings->set_initial_value("text_editor/highlighting/gdscript/node_path_color", node_path_color, true);
+	}
+
+	function_definition_color = EDITOR_GET("text_editor/highlighting/gdscript/function_definition_color");
+	node_path_color = EDITOR_GET("text_editor/highlighting/gdscript/node_path_color");
+	type_color = EDITOR_GET("text_editor/highlighting/base_type_color");
 }
 
 SyntaxHighlighter *GDScriptSyntaxHighlighter::create() {

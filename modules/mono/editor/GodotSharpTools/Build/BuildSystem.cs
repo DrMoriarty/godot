@@ -18,11 +18,11 @@ namespace GodotSharpTools.Build
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string godot_icall_BuildInstance_get_MSBuildPath();
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern static string godot_icall_BuildInstance_get_FrameworkPath();
-        [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static string godot_icall_BuildInstance_get_MonoWindowsBinDir();
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static bool godot_icall_BuildInstance_get_UsingMonoMSBuildOnWindows();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private extern static bool godot_icall_BuildInstance_get_PrintBuildOutput();
 
         private static string GetMSBuildPath()
         {
@@ -32,11 +32,6 @@ namespace GodotSharpTools.Build
                 throw new FileNotFoundException("Cannot find the MSBuild executable.");
 
             return msbuildPath;
-        }
-
-        private static string GetFrameworkPath()
-        {
-            return godot_icall_BuildInstance_get_FrameworkPath();
         }
 
         private static string MonoWindowsBinDir
@@ -57,6 +52,14 @@ namespace GodotSharpTools.Build
             get
             {
                 return godot_icall_BuildInstance_get_UsingMonoMSBuildOnWindows();
+            }
+        }
+
+        private static bool PrintBuildOutput
+        {
+            get
+            {
+                return godot_icall_BuildInstance_get_PrintBuildOutput();
             }
         }
 
@@ -83,18 +86,17 @@ namespace GodotSharpTools.Build
             if (customProperties != null)
                 customPropertiesList.AddRange(customProperties);
 
-            string frameworkPath = GetFrameworkPath();
-
-            if (!string.IsNullOrEmpty(frameworkPath))
-                customPropertiesList.Add("FrameworkPathOverride=" + frameworkPath);
-
             string compilerArgs = BuildArguments(loggerAssemblyPath, loggerOutputDir, customPropertiesList);
 
             ProcessStartInfo startInfo = new ProcessStartInfo(GetMSBuildPath(), compilerArgs);
 
-            // No console output, thanks
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
+            bool redirectOutput = !IsDebugMSBuildRequested() && !PrintBuildOutput;
+
+            if (!redirectOutput) // TODO: or if stdout verbose
+                Console.WriteLine($"Running: \"{startInfo.FileName}\" {startInfo.Arguments}");
+
+            startInfo.RedirectStandardOutput = redirectOutput;
+            startInfo.RedirectStandardError = redirectOutput;
             startInfo.UseShellExecute = false;
 
             if (UsingMonoMSBuildOnWindows)
@@ -116,8 +118,11 @@ namespace GodotSharpTools.Build
 
                 process.Start();
 
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+                if (redirectOutput)
+                {
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                }
 
                 process.WaitForExit();
 
@@ -137,18 +142,17 @@ namespace GodotSharpTools.Build
             if (customProperties != null)
                 customPropertiesList.AddRange(customProperties);
 
-            string frameworkPath = GetFrameworkPath();
-
-            if (!string.IsNullOrEmpty(frameworkPath))
-                customPropertiesList.Add("FrameworkPathOverride=" + frameworkPath);
-
             string compilerArgs = BuildArguments(loggerAssemblyPath, loggerOutputDir, customPropertiesList);
 
             ProcessStartInfo startInfo = new ProcessStartInfo(GetMSBuildPath(), compilerArgs);
 
-            // No console output, thanks
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
+            bool redirectOutput = !IsDebugMSBuildRequested() && !PrintBuildOutput;
+
+            if (!redirectOutput) // TODO: or if stdout verbose
+                Console.WriteLine($"Running: \"{startInfo.FileName}\" {startInfo.Arguments}");
+
+            startInfo.RedirectStandardOutput = redirectOutput;
+            startInfo.RedirectStandardError = redirectOutput;
             startInfo.UseShellExecute = false;
 
             if (UsingMonoMSBuildOnWindows)
@@ -171,8 +175,11 @@ namespace GodotSharpTools.Build
 
             process.Start();
 
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            if (redirectOutput)
+            {
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
 
             return true;
         }
@@ -220,6 +227,11 @@ namespace GodotSharpTools.Build
             Dispose();
         }
 
+        private static bool IsDebugMSBuildRequested()
+        {
+            return Environment.GetEnvironmentVariable("GODOT_DEBUG_MSBUILD")?.Trim() == "1";
+        }
+
         public void Dispose()
         {
             if (process != null)
@@ -240,7 +252,7 @@ namespace GodotSharpTools.Build
             if (null == Parameters)
                 throw new LoggerException("Log directory was not set.");
 
-            string[] parameters = Parameters.Split(';');
+            string[] parameters = Parameters.Split(new[] { ';' });
 
             string logDir = parameters[0];
 

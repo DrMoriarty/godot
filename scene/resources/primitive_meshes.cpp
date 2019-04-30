@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -89,7 +89,7 @@ void PrimitiveMesh::_update() const {
 
 	pending_request = false;
 
-	_clear_triangle_mesh();
+	clear_cache();
 
 	const_cast<PrimitiveMesh *>(this)->emit_changed();
 }
@@ -102,6 +102,9 @@ void PrimitiveMesh::_request_update() {
 }
 
 int PrimitiveMesh::get_surface_count() const {
+	if (pending_request) {
+		_update();
+	}
 	return 1;
 }
 
@@ -303,7 +306,7 @@ void CapsuleMesh::_create_mesh_array(Array &p_arr) const {
 			Vector3 p = Vector3(x * radius * w, y * radius * w, z);
 			points.push_back(p + Vector3(0.0, 0.0, 0.5 * mid_height));
 			normals.push_back(p.normalized());
-			ADD_TANGENT(y, -x, 0.0, -1.0)
+			ADD_TANGENT(-y, x, 0.0, 1.0)
 			uvs.push_back(Vector2(u, v * onethird));
 			point++;
 
@@ -342,7 +345,7 @@ void CapsuleMesh::_create_mesh_array(Array &p_arr) const {
 			Vector3 p = Vector3(x * radius, y * radius, z);
 			points.push_back(p);
 			normals.push_back(Vector3(x, y, 0.0));
-			ADD_TANGENT(y, -x, 0.0, -1.0)
+			ADD_TANGENT(-y, x, 0.0, 1.0)
 			uvs.push_back(Vector2(u, onethird + (v * onethird)));
 			point++;
 
@@ -373,17 +376,17 @@ void CapsuleMesh::_create_mesh_array(Array &p_arr) const {
 		z = radius * cos(0.5 * Math_PI * v);
 
 		for (i = 0; i <= radial_segments; i++) {
-			float u = i;
-			u /= radial_segments;
+			float u2 = i;
+			u2 /= radial_segments;
 
-			x = sin(u * (Math_PI * 2.0));
-			y = -cos(u * (Math_PI * 2.0));
+			x = sin(u2 * (Math_PI * 2.0));
+			y = -cos(u2 * (Math_PI * 2.0));
 
 			Vector3 p = Vector3(x * radius * w, y * radius * w, z);
 			points.push_back(p + Vector3(0.0, 0.0, -0.5 * mid_height));
 			normals.push_back(p.normalized());
-			ADD_TANGENT(y, -x, 0.0, -1.0)
-			uvs.push_back(Vector2(u, twothirds + ((v - 1.0) * onethird)));
+			ADD_TANGENT(-y, x, 0.0, 1.0)
+			uvs.push_back(Vector2(u2, twothirds + ((v - 1.0) * onethird)));
 			point++;
 
 			if (i > 0 && j > 0) {
@@ -419,10 +422,10 @@ void CapsuleMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_rings", "rings"), &CapsuleMesh::set_rings);
 	ClassDB::bind_method(D_METHOD("get_rings"), &CapsuleMesh::get_rings);
 
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_radius", "get_radius");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "mid_height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_mid_height", "get_mid_height");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1"), "set_radial_segments", "get_radial_segments");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1"), "set_rings", "get_rings");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_radius", "get_radius");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "mid_height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_mid_height", "get_mid_height");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_radial_segments", "get_radial_segments");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_rings", "get_rings");
 }
 
 void CapsuleMesh::set_radius(const float p_radius) {
@@ -511,14 +514,14 @@ void CubeMesh::_create_mesh_array(Array &p_arr) const {
 			// front
 			points.push_back(Vector3(x, -y, -start_pos.z)); // double negative on the Z!
 			normals.push_back(Vector3(0.0, 0.0, 1.0));
-			ADD_TANGENT(-1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(u, v));
 			point++;
 
 			// back
 			points.push_back(Vector3(-x, -y, start_pos.z));
 			normals.push_back(Vector3(0.0, 0.0, -1.0));
-			ADD_TANGENT(1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(-1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(twothirds + u, v));
 			point++;
 
@@ -565,14 +568,14 @@ void CubeMesh::_create_mesh_array(Array &p_arr) const {
 			// right
 			points.push_back(Vector3(-start_pos.x, -y, -z));
 			normals.push_back(Vector3(1.0, 0.0, 0.0));
-			ADD_TANGENT(0.0, 0.0, 1.0, -1.0);
+			ADD_TANGENT(0.0, 0.0, -1.0, 1.0);
 			uvs.push_back(Vector2(onethird + u, v));
 			point++;
 
 			// left
 			points.push_back(Vector3(start_pos.x, -y, z));
 			normals.push_back(Vector3(-1.0, 0.0, 0.0));
-			ADD_TANGENT(0.0, 0.0, -1.0, -1.0);
+			ADD_TANGENT(0.0, 0.0, 1.0, 1.0);
 			uvs.push_back(Vector2(u, 0.5 + v));
 			point++;
 
@@ -619,14 +622,14 @@ void CubeMesh::_create_mesh_array(Array &p_arr) const {
 			// top
 			points.push_back(Vector3(-x, -start_pos.y, -z));
 			normals.push_back(Vector3(0.0, 1.0, 0.0));
-			ADD_TANGENT(1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(-1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(onethird + u, 0.5 + v));
 			point++;
 
 			// bottom
 			points.push_back(Vector3(x, start_pos.y, -z));
 			normals.push_back(Vector3(0.0, -1.0, 0.0));
-			ADD_TANGENT(-1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(twothirds + u, 0.5 + v));
 			point++;
 
@@ -677,9 +680,9 @@ void CubeMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_subdivide_depth"), &CubeMesh::get_subdivide_depth);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "size"), "set_size", "get_size");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_width", "get_subdivide_width");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_height", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_height", "get_subdivide_height");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_depth", "get_subdivide_depth");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_width", "get_subdivide_width");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_height", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_height", "get_subdivide_height");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_depth", "get_subdivide_depth");
 }
 
 void CubeMesh::set_size(const Vector3 &p_size) {
@@ -770,7 +773,7 @@ void CylinderMesh::_create_mesh_array(Array &p_arr) const {
 			Vector3 p = Vector3(x * radius, y, z * radius);
 			points.push_back(p);
 			normals.push_back(Vector3(x, 0.0, z));
-			ADD_TANGENT(-z, 0.0, x, -1.0)
+			ADD_TANGENT(z, 0.0, -x, 1.0)
 			uvs.push_back(Vector2(u, v * 0.5));
 			point++;
 
@@ -832,7 +835,7 @@ void CylinderMesh::_create_mesh_array(Array &p_arr) const {
 		thisrow = point;
 		points.push_back(Vector3(0.0, y, 0.0));
 		normals.push_back(Vector3(0.0, -1.0, 0.0));
-		ADD_TANGENT(-1.0, 0.0, 0.0, -1.0)
+		ADD_TANGENT(1.0, 0.0, 0.0, 1.0)
 		uvs.push_back(Vector2(0.75, 0.75));
 		point++;
 
@@ -849,7 +852,7 @@ void CylinderMesh::_create_mesh_array(Array &p_arr) const {
 			Vector3 p = Vector3(x * bottom_radius, y, z * bottom_radius);
 			points.push_back(p);
 			normals.push_back(Vector3(0.0, -1.0, 0.0));
-			ADD_TANGENT(-1.0, 0.0, 0.0, -1.0)
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0)
 			uvs.push_back(Vector2(u, v));
 			point++;
 
@@ -881,11 +884,11 @@ void CylinderMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_rings", "rings"), &CylinderMesh::set_rings);
 	ClassDB::bind_method(D_METHOD("get_rings"), &CylinderMesh::get_rings);
 
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "top_radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_top_radius", "get_top_radius");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bottom_radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_bottom_radius", "get_bottom_radius");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_height", "get_height");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1"), "set_radial_segments", "get_radial_segments");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1"), "set_rings", "get_rings");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "top_radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_top_radius", "get_top_radius");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bottom_radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_bottom_radius", "get_bottom_radius");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_height", "get_height");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_radial_segments", "get_radial_segments");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_rings", "get_rings");
 }
 
 void CylinderMesh::set_top_radius(const float p_radius) {
@@ -979,8 +982,8 @@ void PlaneMesh::_create_mesh_array(Array &p_arr) const {
 
 			points.push_back(Vector3(-x, 0.0, -z));
 			normals.push_back(Vector3(0.0, 1.0, 0.0));
-			ADD_TANGENT(1.0, 0.0, 0.0, -1.0);
-			uvs.push_back(Vector2(u, v));
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0);
+			uvs.push_back(Vector2(1.0 - u, 1.0 - v)); /* 1.0 - uv to match orientation with Quad */
 			point++;
 
 			if (i > 0 && j > 0) {
@@ -1017,8 +1020,8 @@ void PlaneMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_subdivide_depth"), &PlaneMesh::get_subdivide_depth);
 
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "size"), "set_size", "get_size");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_width", "get_subdivide_width");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_depth", "get_subdivide_depth");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_width", "get_subdivide_width");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_depth", "get_subdivide_depth");
 }
 
 void PlaneMesh::set_size(const Size2 &p_size) {
@@ -1105,14 +1108,14 @@ void PrismMesh::_create_mesh_array(Array &p_arr) const {
 			/* front */
 			points.push_back(Vector3(start_x + x, -y, -start_pos.z)); // double negative on the Z!
 			normals.push_back(Vector3(0.0, 0.0, 1.0));
-			ADD_TANGENT(-1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(offset_front + u, v));
 			point++;
 
 			/* back */
 			points.push_back(Vector3(start_x + scaled_size_x - x, -y, start_pos.z));
 			normals.push_back(Vector3(0.0, 0.0, -1.0));
-			ADD_TANGENT(1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(-1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(twothirds + offset_back + u, v));
 			point++;
 
@@ -1184,14 +1187,14 @@ void PrismMesh::_create_mesh_array(Array &p_arr) const {
 			/* right */
 			points.push_back(Vector3(right, -y, -z));
 			normals.push_back(normal_right);
-			ADD_TANGENT(0.0, 0.0, 1.0, -1.0);
+			ADD_TANGENT(0.0, 0.0, -1.0, 1.0);
 			uvs.push_back(Vector2(onethird + u, v));
 			point++;
 
 			/* left */
 			points.push_back(Vector3(left, -y, z));
 			normals.push_back(normal_left);
-			ADD_TANGENT(0.0, 0.0, -1.0, -1.0);
+			ADD_TANGENT(0.0, 0.0, 1.0, 1.0);
 			uvs.push_back(Vector2(u, 0.5 + v));
 			point++;
 
@@ -1238,7 +1241,7 @@ void PrismMesh::_create_mesh_array(Array &p_arr) const {
 			/* bottom */
 			points.push_back(Vector3(x, start_pos.y, -z));
 			normals.push_back(Vector3(0.0, -1.0, 0.0));
-			ADD_TANGENT(-1.0, 0.0, 0.0, -1.0);
+			ADD_TANGENT(1.0, 0.0, 0.0, 1.0);
 			uvs.push_back(Vector2(twothirds + u, 0.5 + v));
 			point++;
 
@@ -1282,10 +1285,10 @@ void PrismMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_subdivide_depth"), &PrismMesh::get_subdivide_depth);
 
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "left_to_right", PROPERTY_HINT_RANGE, "-2.0,2.0,0.1"), "set_left_to_right", "get_left_to_right");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "size"), "set_size", "get_size");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_width", "get_subdivide_width");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_height", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_height", "get_subdivide_height");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1"), "set_subdivide_depth", "get_subdivide_depth");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "size"), "set_size", "get_size");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_width", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_width", "get_subdivide_width");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_height", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_height", "get_subdivide_height");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "subdivide_depth", PROPERTY_HINT_RANGE, "0,100,1,or_greater"), "set_subdivide_depth", "get_subdivide_depth");
 }
 
 void PrismMesh::set_left_to_right(const float p_left_to_right) {
@@ -1352,10 +1355,10 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 	PoolVector<float> tangents;
 	PoolVector<Vector2> uvs;
 
-	faces.resize(4);
-	normals.resize(4);
-	tangents.resize(4 * 4);
-	uvs.resize(4);
+	faces.resize(6);
+	normals.resize(6);
+	tangents.resize(6 * 4);
+	uvs.resize(6);
 
 	Vector2 _size = Vector2(size.x / 2.0f, size.y / 2.0f);
 
@@ -1366,9 +1369,15 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 		Vector3(_size.x, -_size.y, 0),
 	};
 
-	for (int i = 0; i < 4; i++) {
+	static const int indices[6] = {
+		0, 1, 2,
+		0, 2, 3
+	};
 
-		faces.set(i, quad_faces[i]);
+	for (int i = 0; i < 6; i++) {
+
+		int j = indices[i];
+		faces.set(i, quad_faces[j]);
 		normals.set(i, Vector3(0, 0, 1));
 		tangents.set(i * 4 + 0, 1.0);
 		tangents.set(i * 4 + 1, 0.0);
@@ -1382,14 +1391,14 @@ void QuadMesh::_create_mesh_array(Array &p_arr) const {
 			Vector2(1, 1),
 		};
 
-		uvs.set(i, quad_uv[i]);
+		uvs.set(i, quad_uv[j]);
 	}
 
 	p_arr[VS::ARRAY_VERTEX] = faces;
 	p_arr[VS::ARRAY_NORMAL] = normals;
 	p_arr[VS::ARRAY_TANGENT] = tangents;
 	p_arr[VS::ARRAY_TEX_UV] = uvs;
-};
+}
 
 void QuadMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_size", "size"), &QuadMesh::set_size);
@@ -1398,7 +1407,7 @@ void QuadMesh::_bind_methods() {
 }
 
 QuadMesh::QuadMesh() {
-	primitive_type = PRIMITIVE_TRIANGLE_FAN;
+	primitive_type = PRIMITIVE_TRIANGLES;
 	size = Size2(1.0, 1.0);
 }
 
@@ -1459,7 +1468,7 @@ void SphereMesh::_create_mesh_array(Array &p_arr) const {
 				points.push_back(p);
 				normals.push_back(p.normalized());
 			};
-			ADD_TANGENT(-z, 0.0, x, -1.0)
+			ADD_TANGENT(z, 0.0, -x, 1.0)
 			uvs.push_back(Vector2(u, v));
 			point++;
 
@@ -1499,10 +1508,10 @@ void SphereMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_is_hemisphere", "is_hemisphere"), &SphereMesh::set_is_hemisphere);
 	ClassDB::bind_method(D_METHOD("get_is_hemisphere"), &SphereMesh::get_is_hemisphere);
 
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_radius", "get_radius");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_height", "get_height");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1"), "set_radial_segments", "get_radial_segments");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1"), "set_rings", "get_rings");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "radius", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_radius", "get_radius");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "height", PROPERTY_HINT_RANGE, "0.001,100.0,0.001,or_greater"), "set_height", "get_height");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "radial_segments", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_radial_segments", "get_radial_segments");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "rings", PROPERTY_HINT_RANGE, "1,100,1,or_greater"), "set_rings", "get_rings");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "is_hemisphere"), "set_is_hemisphere", "get_is_hemisphere");
 }
 

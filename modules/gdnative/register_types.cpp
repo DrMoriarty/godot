@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2018 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2018 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,18 +29,20 @@
 /*************************************************************************/
 
 #include "register_types.h"
+
 #include "gdnative/gdnative.h"
 
 #include "gdnative.h"
 
-#include "io/resource_loader.h"
-#include "io/resource_saver.h"
-
 #include "arvr/register_types.h"
 #include "nativescript/register_types.h"
+#include "net/register_types.h"
 #include "pluginscript/register_types.h"
+#include "videodecoder/register_types.h"
 
 #include "core/engine.h"
+#include "core/io/resource_loader.h"
+#include "core/io/resource_saver.h"
 #include "core/os/os.h"
 #include "core/project_settings.h"
 
@@ -123,8 +125,8 @@ static void actual_discoverer_handler() {
 
 	// Check for removed files
 	if (!changed) {
-		for (int i = 0; i < current_files.size(); i++) {
-			if (!file_paths.has(current_files[i])) {
+		for (int j = 0; j < current_files.size(); j++) {
+			if (!file_paths.has(current_files[j])) {
 				changed = true;
 				break;
 			}
@@ -147,7 +149,7 @@ protected:
 };
 
 struct LibrarySymbol {
-	char *name;
+	const char *name;
 	bool is_required;
 };
 
@@ -238,7 +240,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 		String additional_code = "extern void register_dynamic_symbol(char *name, void *address);\n"
 								 "extern void add_ios_init_callback(void (*cb)());\n";
 		String linker_flags = "";
-		for (int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+		for (unsigned int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
 			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
 			String code = declare_pattern.replace("$name", full_name);
 			code = code.replace("$weak", expected_symbols[i].is_required ? "" : " __attribute__((weak))");
@@ -254,7 +256,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 
 		additional_code += String("void $prefixinit() {\n").replace("$prefix", lib->get_symbol_prefix());
 		String register_pattern = "  if (&$name) register_dynamic_symbol((char *)\"$name\", (void *)$name);\n";
-		for (int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+		for (unsigned int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
 			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
 			additional_code += register_pattern.replace("$name", full_name);
 		}
@@ -298,8 +300,8 @@ GDNativeCallRegistry *GDNativeCallRegistry::singleton;
 
 Vector<Ref<GDNative> > singleton_gdnatives;
 
-GDNativeLibraryResourceLoader *resource_loader_gdnlib = NULL;
-GDNativeLibraryResourceSaver *resource_saver_gdnlib = NULL;
+Ref<GDNativeLibraryResourceLoader> resource_loader_gdnlib;
+Ref<GDNativeLibraryResourceSaver> resource_saver_gdnlib;
 
 void register_gdnative_types() {
 
@@ -311,19 +313,21 @@ void register_gdnative_types() {
 	ClassDB::register_class<GDNativeLibrary>();
 	ClassDB::register_class<GDNative>();
 
-	resource_loader_gdnlib = memnew(GDNativeLibraryResourceLoader);
-	resource_saver_gdnlib = memnew(GDNativeLibraryResourceSaver);
-
+	resource_loader_gdnlib.instance();
 	ResourceLoader::add_resource_format_loader(resource_loader_gdnlib);
+
+	resource_saver_gdnlib.instance();
 	ResourceSaver::add_resource_format_saver(resource_saver_gdnlib);
 
 	GDNativeCallRegistry::singleton = memnew(GDNativeCallRegistry);
 
 	GDNativeCallRegistry::singleton->register_native_call_type("standard_varcall", cb_standard_varcall);
 
+	register_net_types();
 	register_arvr_types();
 	register_nativescript_types();
 	register_pluginscript_types();
+	register_videodecoder_types();
 
 	// run singletons
 
@@ -339,10 +343,10 @@ void register_gdnative_types() {
 
 		Ref<GDNativeLibrary> lib = ResourceLoader::load(path);
 
-		singleton_gdnatives[i].instance();
-		singleton_gdnatives[i]->set_library(lib);
+		singleton_gdnatives.write[i].instance();
+		singleton_gdnatives.write[i]->set_library(lib);
 
-		if (!singleton_gdnatives[i]->initialize()) {
+		if (!singleton_gdnatives.write[i]->initialize()) {
 			// Can't initialize. Don't make a native_call then
 			continue;
 		}
@@ -372,13 +376,15 @@ void unregister_gdnative_types() {
 			continue;
 		}
 
-		singleton_gdnatives[i]->terminate();
+		singleton_gdnatives.write[i]->terminate();
 	}
 	singleton_gdnatives.clear();
 
+	unregister_videodecoder_types();
 	unregister_pluginscript_types();
 	unregister_nativescript_types();
 	unregister_arvr_types();
+	unregister_net_types();
 
 	memdelete(GDNativeCallRegistry::singleton);
 
@@ -388,8 +394,11 @@ void unregister_gdnative_types() {
 	}
 #endif
 
-	memdelete(resource_loader_gdnlib);
-	memdelete(resource_saver_gdnlib);
+	ResourceLoader::remove_resource_format_loader(resource_loader_gdnlib);
+	resource_loader_gdnlib.unref();
+
+	ResourceSaver::remove_resource_format_saver(resource_saver_gdnlib);
+	resource_saver_gdnlib.unref();
 
 	// This is for printing out the sizes of the core types
 
