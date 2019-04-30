@@ -50,7 +50,7 @@
 bool gles3_available = true;
 int gl_view_base_fb;
 static String keyboard_text;
-static GLView *_instance = NULL;
+GLView *_instance = NULL;
 
 static bool video_found_error = false;
 static bool video_playing = false;
