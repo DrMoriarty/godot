@@ -825,6 +825,9 @@ void TextEdit::_notification(int p_what) {
 			// get the highlighted words
 			String highlighted_text = get_selection_text();
 
+			// check if highlighted words contains only whitespaces (tabs or spaces)
+			bool only_whitespaces_highlighted = highlighted_text.strip_edges() == String();
+
 			String line_num_padding = line_numbers_zero_padded ? "0" : " ";
 
 			int cursor_wrap_index = get_cursor_wrap_index();
@@ -1123,7 +1126,7 @@ void TextEdit::_notification(int p_what) {
 								VisualServer::get_singleton()->canvas_item_add_rect(ci, Rect2(Point2i(char_ofs + char_margin + char_w + ofs_x - 1, ofs_y), Size2i(1, get_row_height())), border_color);
 						}
 
-						if (highlight_all_occurrences) {
+						if (highlight_all_occurrences && !only_whitespaces_highlighted) {
 							if (highlighted_text_col != -1) {
 
 								// if we are at the end check for new word on same line
@@ -1557,8 +1560,7 @@ void TextEdit::_consume_pair_symbol(CharType ch) {
 	}
 
 	if ((ch == '\'' || ch == '"') &&
-			cursor_get_column() > 0 &&
-			_is_text_char(text[cursor.line][cursor_get_column() - 1])) {
+			cursor_get_column() > 0 && _is_text_char(text[cursor.line][cursor_get_column() - 1]) && !_is_pair_right_symbol(text[cursor.line][cursor_get_column()])) {
 		insert_text_at_cursor(ch_single);
 		cursor_set_column(cursor_position_to_move);
 		return;
@@ -2357,6 +2359,36 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 			k->set_command(true);
 			k->set_shift(false);
 		}
+#ifdef APPLE_STYLE_KEYS
+		if (k->get_control() && !k->get_shift() && !k->get_alt() && !k->get_command()) {
+			uint32_t remap_key = KEY_UNKNOWN;
+			switch (k->get_scancode()) {
+				case KEY_F: {
+					remap_key = KEY_RIGHT;
+				} break;
+				case KEY_B: {
+					remap_key = KEY_LEFT;
+				} break;
+				case KEY_P: {
+					remap_key = KEY_UP;
+				} break;
+				case KEY_N: {
+					remap_key = KEY_DOWN;
+				} break;
+				case KEY_D: {
+					remap_key = KEY_DELETE;
+				} break;
+				case KEY_H: {
+					remap_key = KEY_BACKSPACE;
+				} break;
+			}
+
+			if (remap_key != KEY_UNKNOWN) {
+				k->set_scancode(remap_key);
+				k->set_control(false);
+			}
+		}
+#endif
 
 		_reset_caret_blink_timer();
 
@@ -2615,9 +2647,22 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 
 #ifdef APPLE_STYLE_KEYS
 				if (k->get_command()) {
-					cursor_set_column(0);
+					// Start at first column (it's slightly faster that way) and look for the first non-whitespace character.
+					int new_cursor_pos = 0;
+					for (int i = 0; i < text[cursor.line].length(); ++i) {
+						if (!_is_whitespace(text[cursor.line][i])) {
+							new_cursor_pos = i;
+							break;
+						}
+					}
+					if (new_cursor_pos == cursor.column) {
+						// We're already at the first text character, so move to the very beginning of the line.
+						cursor_set_column(0);
+					} else {
+						// We're somewhere to the right of the first text character; move to the first one.
+						cursor_set_column(new_cursor_pos);
+					}
 				} else if (k->get_alt()) {
-
 #else
 				if (k->get_alt()) {
 					scancode_handled = false;

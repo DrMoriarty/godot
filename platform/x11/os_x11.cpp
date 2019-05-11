@@ -503,35 +503,33 @@ Error OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_a
 
 	current_cursor = CURSOR_ARROW;
 
-	if (cursor_theme) {
-		for (int i = 0; i < CURSOR_MAX; i++) {
+	for (int i = 0; i < CURSOR_MAX; i++) {
 
-			static const char *cursor_file[] = {
-				"left_ptr",
-				"xterm",
-				"hand2",
-				"cross",
-				"watch",
-				"left_ptr_watch",
-				"fleur",
-				"hand1",
-				"X_cursor",
-				"sb_v_double_arrow",
-				"sb_h_double_arrow",
-				"size_bdiag",
-				"size_fdiag",
-				"hand1",
-				"sb_v_double_arrow",
-				"sb_h_double_arrow",
-				"question_arrow"
-			};
+		static const char *cursor_file[] = {
+			"left_ptr",
+			"xterm",
+			"hand2",
+			"cross",
+			"watch",
+			"left_ptr_watch",
+			"fleur",
+			"hand1",
+			"X_cursor",
+			"sb_v_double_arrow",
+			"sb_h_double_arrow",
+			"size_bdiag",
+			"size_fdiag",
+			"hand1",
+			"sb_v_double_arrow",
+			"sb_h_double_arrow",
+			"question_arrow"
+		};
 
-			img[i] = XcursorLibraryLoadImage(cursor_file[i], cursor_theme, cursor_size);
-			if (img[i]) {
-				cursors[i] = XcursorImageLoadCursor(x11_display, img[i]);
-			} else {
-				print_verbose("Failed loading custom cursor: " + String(cursor_file[i]));
-			}
+		img[i] = XcursorLibraryLoadImage(cursor_file[i], cursor_theme, cursor_size);
+		if (img[i]) {
+			cursors[i] = XcursorImageLoadCursor(x11_display, img[i]);
+		} else {
+			print_verbose("Failed loading custom cursor: " + String(cursor_file[i]));
 		}
 	}
 
@@ -1186,15 +1184,20 @@ void OS_X11::set_window_position(const Point2 &p_position) {
 		//exclude window decorations
 		XSync(x11_display, False);
 		Atom prop = XInternAtom(x11_display, "_NET_FRAME_EXTENTS", True);
-		Atom type;
-		int format;
-		unsigned long len;
-		unsigned long remaining;
-		unsigned char *data = NULL;
-		if (XGetWindowProperty(x11_display, x11_window, prop, 0, 4, False, AnyPropertyType, &type, &format, &len, &remaining, &data) == Success) {
-			long *extents = (long *)data;
-			x = extents[0];
-			y = extents[2];
+		if (prop != None) {
+			Atom type;
+			int format;
+			unsigned long len;
+			unsigned long remaining;
+			unsigned char *data = NULL;
+			if (XGetWindowProperty(x11_display, x11_window, prop, 0, 4, False, AnyPropertyType, &type, &format, &len, &remaining, &data) == Success) {
+				if (format == 32 && len == 4) {
+					long *extents = (long *)data;
+					x = extents[0];
+					y = extents[2];
+				}
+				XFree(data);
+			}
 		}
 	}
 	XMoveWindow(x11_display, x11_window, p_position.x - x, p_position.y - y);
@@ -1214,15 +1217,20 @@ Size2 OS_X11::get_real_window_size() const {
 	int w = xwa.width;
 	int h = xwa.height;
 	Atom prop = XInternAtom(x11_display, "_NET_FRAME_EXTENTS", True);
-	Atom type;
-	int format;
-	unsigned long len;
-	unsigned long remaining;
-	unsigned char *data = NULL;
-	if (XGetWindowProperty(x11_display, x11_window, prop, 0, 4, False, AnyPropertyType, &type, &format, &len, &remaining, &data) == Success) {
-		long *extents = (long *)data;
-		w += extents[0] + extents[1]; // left, right
-		h += extents[2] + extents[3]; // top, bottom
+	if (prop != None) {
+		Atom type;
+		int format;
+		unsigned long len;
+		unsigned long remaining;
+		unsigned char *data = NULL;
+		if (XGetWindowProperty(x11_display, x11_window, prop, 0, 4, False, AnyPropertyType, &type, &format, &len, &remaining, &data) == Success) {
+			if (format == 32 && len == 4) {
+				long *extents = (long *)data;
+				w += extents[0] + extents[1]; // left, right
+				h += extents[2] + extents[3]; // top, bottom
+			}
+			XFree(data);
+		}
 	}
 	return Size2(w, h);
 }
