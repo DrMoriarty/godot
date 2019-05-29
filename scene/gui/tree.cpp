@@ -1970,6 +1970,9 @@ int Tree::propagate_mouse_event(const Point2i &p_pos, int x_ofs, int y_ofs, bool
 				item_h += child_h;
 			}
 		}
+		if (p_item == root && p_button == BUTTON_RIGHT) {
+			emit_signal("empty_rmb", get_local_mouse_position());
+		}
 	}
 
 	return item_h; // nothing found
@@ -2266,7 +2269,7 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 				next = _n;
 			} else {
 
-				return;
+				break;
 			}
 		}
 		if (next == selected_item)
@@ -2304,7 +2307,7 @@ void Tree::_gui_input(Ref<InputEvent> p_event) {
 				prev = _n;
 			} else {
 
-				return;
+				break;
 			}
 		}
 		if (prev == selected_item)
@@ -3853,6 +3856,7 @@ void Tree::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("cell_selected"));
 	ADD_SIGNAL(MethodInfo("multi_selected", PropertyInfo(Variant::OBJECT, "item", PROPERTY_HINT_RESOURCE_TYPE, "TreeItem"), PropertyInfo(Variant::INT, "column"), PropertyInfo(Variant::BOOL, "selected")));
 	ADD_SIGNAL(MethodInfo("item_rmb_selected", PropertyInfo(Variant::VECTOR2, "position")));
+	ADD_SIGNAL(MethodInfo("empty_rmb", PropertyInfo(Variant::VECTOR2, "position")));
 	ADD_SIGNAL(MethodInfo("empty_tree_rmb_selected", PropertyInfo(Variant::VECTOR2, "position")));
 	ADD_SIGNAL(MethodInfo("item_edited"));
 	ADD_SIGNAL(MethodInfo("item_rmb_edited"));

@@ -90,7 +90,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			String file_type = p_dir->get_file_type(i);
 
 			if (_is_file_type_disabled_by_feature_profile(file_type)) {
-				//if type is disabled, file wont be displayed.
+				//if type is disabled, file won't be displayed.
 				continue;
 			}
 			String file_name = p_dir->get_file(i);
@@ -462,6 +462,7 @@ void FileSystemDock::_navigate_to_path(const String &p_path, bool p_select_in_fa
 	_update_tree(_compute_uncollapsed_paths(), false, p_select_in_favorites);
 	if (display_mode == DISPLAY_MODE_SPLIT) {
 		_update_file_list(false);
+		files->get_v_scroll()->set_value(0);
 	}
 
 	String file_name = p_path.get_file();
@@ -755,7 +756,7 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 		Ref<Texture> type_icon;
 		Ref<Texture> big_icon;
 
-		String tooltip = fname;
+		String tooltip = fpath;
 
 		// Select the icons
 		if (!finfo->import_broken) {
@@ -1489,9 +1490,25 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> p_selected)
 		} break;
 
 		case FILE_OPEN: {
+			// Open folders
+			TreeItem *selected = tree->get_root();
+			selected = tree->get_next_selected(selected);
+			while (selected) {
+				if (p_selected.find(selected->get_metadata(0)) >= 0) {
+					selected->set_collapsed(false);
+				}
+				selected = tree->get_next_selected(selected);
+			}
 			// Open the file
 			for (int i = 0; i < p_selected.size(); i++) {
 				_select_file(p_selected[i]);
+			}
+		} break;
+
+		case FILE_INHERIT: {
+			// Create a new scene inherited from the selected one
+			if (p_selected.size() == 1) {
+				emit_signal("inherit", p_selected[0]);
 			}
 		} break;
 
@@ -2061,13 +2078,16 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 
 	if (all_files) {
 
-		if (all_files_scenes && filenames.size() >= 1) {
-			p_popup->add_item(TTR("Open Scene(s)"), FILE_OPEN);
+		if (all_files_scenes) {
+			if (filenames.size() == 1) {
+				p_popup->add_item(TTR("Open Scene"), FILE_OPEN);
+				p_popup->add_item(TTR("New Inherited Scene"), FILE_INHERIT);
+			} else {
+				p_popup->add_item(TTR("Open Scenes"), FILE_OPEN);
+			}
 			p_popup->add_item(TTR("Instance"), FILE_INSTANCE);
 			p_popup->add_separator();
-		}
-
-		if (!all_files_scenes && filenames.size() == 1) {
+		} else if (filenames.size() == 1) {
 			p_popup->add_item(TTR("Open"), FILE_OPEN);
 			p_popup->add_separator();
 		}
@@ -2138,6 +2158,18 @@ void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos) {
 		tree_popup->set_position(tree->get_global_position() + p_pos);
 		tree_popup->popup();
 	}
+}
+
+void FileSystemDock::_tree_rmb_empty(const Vector2 &p_pos) {
+	// Right click is pressed in the empty space of the tree
+	path = "res://";
+	tree_popup->clear();
+	tree_popup->set_size(Size2(1, 1));
+	tree_popup->add_item(TTR("New Folder..."), FILE_NEW_FOLDER);
+	tree_popup->add_item(TTR("New Script..."), FILE_NEW_SCRIPT);
+	tree_popup->add_item(TTR("New Resource..."), FILE_NEW_RESOURCE);
+	tree_popup->set_position(tree->get_global_position() + p_pos);
+	tree_popup->popup();
 }
 
 void FileSystemDock::_tree_empty_selected() {
@@ -2333,6 +2365,7 @@ void FileSystemDock::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_file_list_rmb_option", "option"), &FileSystemDock::_file_list_rmb_option);
 	ClassDB::bind_method(D_METHOD("_file_list_rmb_select"), &FileSystemDock::_file_list_rmb_select);
 	ClassDB::bind_method(D_METHOD("_file_list_rmb_pressed"), &FileSystemDock::_file_list_rmb_pressed);
+	ClassDB::bind_method(D_METHOD("_tree_rmb_empty"), &FileSystemDock::_tree_rmb_empty);
 
 	ClassDB::bind_method(D_METHOD("_file_deleted"), &FileSystemDock::_file_deleted);
 	ClassDB::bind_method(D_METHOD("_folder_deleted"), &FileSystemDock::_folder_deleted);
@@ -2368,8 +2401,8 @@ void FileSystemDock::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_feature_profile_changed"), &FileSystemDock::_feature_profile_changed);
 
+	ADD_SIGNAL(MethodInfo("inherit", PropertyInfo(Variant::STRING, "file")));
 	ADD_SIGNAL(MethodInfo("instance", PropertyInfo(Variant::POOL_STRING_ARRAY, "files")));
-	ADD_SIGNAL(MethodInfo("open"));
 
 	ADD_SIGNAL(MethodInfo("file_removed", PropertyInfo(Variant::STRING, "file")));
 	ADD_SIGNAL(MethodInfo("folder_removed", PropertyInfo(Variant::STRING, "folder")));
@@ -2465,6 +2498,7 @@ FileSystemDock::FileSystemDock(EditorNode *p_editor) {
 	tree->connect("item_activated", this, "_tree_activate_file");
 	tree->connect("multi_selected", this, "_tree_multi_selected");
 	tree->connect("item_rmb_selected", this, "_tree_rmb_select");
+	tree->connect("empty_rmb", this, "_tree_rmb_empty");
 	tree->connect("nothing_selected", this, "_tree_empty_selected");
 	tree->connect("gui_input", this, "_tree_gui_input");
 

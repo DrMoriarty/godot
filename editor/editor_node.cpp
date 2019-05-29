@@ -1015,8 +1015,7 @@ void EditorNode::_save_scene_with_preview(String p_file, int p_idx) {
 			y = (img->get_height() - size) / 2;
 
 			img->crop_from_point(x, y, size, size);
-			// We could get better pictures with better filters
-			img->resize(preview_size, preview_size, Image::INTERPOLATE_CUBIC);
+			img->resize(preview_size, preview_size, Image::INTERPOLATE_LANCZOS);
 		}
 		img->convert(Image::FORMAT_RGB8);
 
@@ -1922,6 +1921,12 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			file->popup_centered_ratio();
 
 		} break;
+		case FILE_QUICK_OPEN: {
+
+			quick_open->popup_dialog("Resource", true);
+			quick_open->set_title(TTR("Quick Open..."));
+
+		} break;
 		case FILE_QUICK_OPEN_SCENE: {
 
 			quick_open->popup_dialog("PackedScene", true);
@@ -1955,6 +1960,9 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 				else
 					_scene_tab_closed(editor_data.get_edited_scene());
 			}
+
+			if (p_confirmed)
+				_menu_option_confirm(SCENE_TAB_CLOSE, true);
 
 		} break;
 		case FILE_CLOSE_ALL_AND_QUIT:
@@ -2288,10 +2296,6 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 
 			project_settings->popup_project_settings();
 		} break;
-		case RUN_PROJECT_DATA_FOLDER: {
-
-			OS::get_singleton()->shell_open(String("file://") + OS::get_singleton()->get_user_data_dir());
-		} break;
 		case FILE_INSTALL_ANDROID_SOURCE: {
 
 			if (p_confirmed) {
@@ -2456,14 +2460,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		} break;
 		case SETTINGS_MANAGE_FEATURE_PROFILES: {
 
-			Size2 popup_size = Size2(900, 800) * editor_get_scale();
-			Size2 window_size = get_viewport()->get_size();
-
-			popup_size.x = MIN(window_size.x * 0.8, popup_size.x);
-			popup_size.y = MIN(window_size.y * 0.8, popup_size.y);
-
-			feature_profile_manager->popup_centered(popup_size);
-
+			feature_profile_manager->popup_centered_clamped(Size2(900, 800) * EDSCALE, 0.8);
 		} break;
 		case SETTINGS_TOGGLE_FULLSCREEN: {
 
@@ -2527,6 +2524,9 @@ void EditorNode::_tool_menu_option(int p_idx) {
 	switch (tool_menu->get_item_id(p_idx)) {
 		case TOOLS_ORPHAN_RESOURCES: {
 			orphan_resources->show();
+		} break;
+		case RUN_PROJECT_DATA_FOLDER: {
+			OS::get_singleton()->shell_open(String("file://") + OS::get_singleton()->get_user_data_dir());
 		} break;
 		case TOOLS_CUSTOM: {
 			if (tool_menu->get_item_submenu(p_idx) == "") {
@@ -3248,6 +3248,12 @@ SceneTreeDock *EditorNode::get_scene_tree_dock() {
 InspectorDock *EditorNode::get_inspector_dock() {
 
 	return inspector_dock;
+}
+
+void EditorNode::_inherit_request(String p_file) {
+
+	current_option = FILE_NEW_INHERITED_SCENE;
+	_dialog_action(p_file);
 }
 
 void EditorNode::_instance_request(const Vector<String> &p_files) {
@@ -5023,6 +5029,7 @@ void EditorNode::_bind_methods() {
 	ClassDB::bind_method("_get_scene_metadata", &EditorNode::_get_scene_metadata);
 	ClassDB::bind_method("set_edited_scene", &EditorNode::set_edited_scene);
 	ClassDB::bind_method("open_request", &EditorNode::open_request);
+	ClassDB::bind_method("_inherit_request", &EditorNode::_inherit_request);
 	ClassDB::bind_method("_instance_request", &EditorNode::_instance_request);
 	ClassDB::bind_method("_close_messages", &EditorNode::_close_messages);
 	ClassDB::bind_method("_show_messages", &EditorNode::_show_messages);
@@ -5694,6 +5701,7 @@ EditorNode::EditorNode() {
 	p->add_separator();
 	p->add_submenu_item(TTR("Open Recent"), "RecentScenes", FILE_OPEN_RECENT);
 	p->add_separator();
+	p->add_shortcut(ED_SHORTCUT("editor/quick_open", TTR("Quick Open..."), KEY_MASK_SHIFT + KEY_MASK_ALT + KEY_O), FILE_QUICK_OPEN);
 	p->add_shortcut(ED_SHORTCUT("editor/quick_open_scene", TTR("Quick Open Scene..."), KEY_MASK_SHIFT + KEY_MASK_CMD + KEY_O), FILE_QUICK_OPEN_SCENE);
 	p->add_shortcut(ED_SHORTCUT("editor/quick_open_script", TTR("Quick Open Script..."), KEY_MASK_ALT + KEY_MASK_CMD + KEY_O), FILE_QUICK_OPEN_SCRIPT);
 	p->add_separator();
@@ -5990,7 +5998,7 @@ EditorNode::EditorNode() {
 	node_dock = memnew(NodeDock);
 
 	filesystem_dock = memnew(FileSystemDock(this));
-	filesystem_dock->connect("open", this, "open_request");
+	filesystem_dock->connect("inherit", this, "_inherit_request");
 	filesystem_dock->connect("instance", this, "_instance_request");
 	filesystem_dock->connect("display_mode_changed", this, "_save_docks");
 
@@ -6395,7 +6403,7 @@ EditorNode::EditorNode() {
 	ED_SHORTCUT("editor/editor_2d", TTR("Open 2D Editor"), KEY_F1);
 	ED_SHORTCUT("editor/editor_3d", TTR("Open 3D Editor"), KEY_F2);
 	ED_SHORTCUT("editor/editor_script", TTR("Open Script Editor"), KEY_F3); //hack needed for script editor F3 search to work :) Assign like this or don't use F3
-	ED_SHORTCUT("editor/editor_help", TTR("Search Help"), KEY_F4);
+	ED_SHORTCUT("editor/editor_help", TTR("Search Help"), KEY_MASK_SHIFT | KEY_F1);
 #endif
 	ED_SHORTCUT("editor/editor_assetlib", TTR("Open Asset Library"));
 	ED_SHORTCUT("editor/editor_next", TTR("Open the next Editor"));
