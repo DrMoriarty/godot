@@ -37,7 +37,10 @@
 void CPUParticles2D::set_emitting(bool p_emitting) {
 
 	emitting = p_emitting;
-	set_process_internal(true);
+	if (emitting) {
+		time = 0;
+		set_process_internal(true);
+	}
 }
 
 void CPUParticles2D::set_amount(int p_amount) {
