@@ -80,6 +80,7 @@ public:
 	};
 
 private:
+	bool inited;
 	bool emitting;
 
 	struct Particle {
@@ -171,6 +172,7 @@ private:
 
 	Vector2 gravity;
 
+	void internal_init();
 	void _particles_process(float p_delta);
 	void _update_particle_data_buffer();
 

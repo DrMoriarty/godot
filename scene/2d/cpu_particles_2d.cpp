@@ -57,7 +57,9 @@ void CPUParticles2D::set_amount(int p_amount) {
 	}
 
 	particle_data.resize((8 + 4 + 1) * p_amount);
-	VS::get_singleton()->multimesh_allocate(multimesh, p_amount, VS::MULTIMESH_TRANSFORM_2D, VS::MULTIMESH_COLOR_8BIT, VS::MULTIMESH_CUSTOM_DATA_FLOAT);
+	if (multimesh.is_valid()) {
+		VS::get_singleton()->multimesh_allocate(multimesh, p_amount, VS::MULTIMESH_TRANSFORM_2D, VS::MULTIMESH_COLOR_8BIT, VS::MULTIMESH_CUSTOM_DATA_FLOAT);
+	}
 
 	particle_order.resize(p_amount);
 }
@@ -145,6 +147,7 @@ CPUParticles2D::DrawOrder CPUParticles2D::get_draw_order() const {
 
 void CPUParticles2D::_update_mesh_texture() {
 
+	if (!inited) return;
 	Size2 tex_size;
 	if (texture.is_valid()) {
 		tex_size = texture->get_size();
@@ -958,7 +961,9 @@ void CPUParticles2D::_update_render_thread() {
 	update_mutex->lock();
 #endif
 
-	VS::get_singleton()->multimesh_set_as_bulk_array(multimesh, particle_data);
+	if (multimesh.is_valid()) {
+		VS::get_singleton()->multimesh_set_as_bulk_array(multimesh, particle_data);
+	}
 
 #ifndef NO_THREADS
 	update_mutex->unlock();
@@ -966,6 +971,12 @@ void CPUParticles2D::_update_render_thread() {
 }
 
 void CPUParticles2D::_notification(int p_what) {
+
+	if (p_what == NOTIFICATION_INTERNAL_PHYSICS_PROCESS && !inited) {
+		internal_init();
+	}
+	if (!inited)
+		return;
 
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 		_set_redraw(true);
@@ -1337,15 +1348,13 @@ void CPUParticles2D::_bind_methods() {
 
 CPUParticles2D::CPUParticles2D() {
 
+	inited = false;
+
 	time = 0;
 	inactive_time = 0;
 	frame_remainder = 0;
 	cycle = 0;
 	redraw = false;
-
-	mesh = VisualServer::get_singleton()->mesh_create();
-	multimesh = VisualServer::get_singleton()->multimesh_create();
-	VisualServer::get_singleton()->multimesh_set_mesh(multimesh, mesh);
 
 	set_emitting(true);
 	set_one_shot(false);
@@ -1395,14 +1404,29 @@ CPUParticles2D::CPUParticles2D() {
 	update_mutex = Mutex::create();
 #endif
 
+	set_physics_process_internal(true);
+}
+
+void CPUParticles2D::internal_init() {
+
+	inited = true;
+
+	mesh = VisualServer::get_singleton()->mesh_create();
+	multimesh = VisualServer::get_singleton()->multimesh_create();
+	VisualServer::get_singleton()->multimesh_set_mesh(multimesh, mesh);
+
+	VS::get_singleton()->multimesh_allocate(multimesh, particles.size(), VS::MULTIMESH_TRANSFORM_2D, VS::MULTIMESH_COLOR_8BIT, VS::MULTIMESH_CUSTOM_DATA_FLOAT);
+
 	_update_mesh_texture();
 }
 
 CPUParticles2D::~CPUParticles2D() {
-	VS::get_singleton()->free(multimesh);
-	VS::get_singleton()->free(mesh);
+	if (inited) {
+		VS::get_singleton()->free(multimesh);
+		VS::get_singleton()->free(mesh);
 
 #ifndef NO_THREADS
-	memdelete(update_mutex);
+		memdelete(update_mutex);
 #endif
+	}
 }
