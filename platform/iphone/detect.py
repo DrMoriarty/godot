@@ -53,9 +53,11 @@ def configure(env):
 
         if env["target"] == "release_debug":
             env.Append(CPPFLAGS=['-DDEBUG_ENABLED'])
+	    env.Append(CPPDEFINES=['DEBUG_ENABLED'])
 
     elif (env["target"] == "debug"):
         env.Append(CPPFLAGS=['-D_DEBUG', '-DDEBUG=1', '-gdwarf-2', '-O0', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
+	env.Append(CPPDEFINES=['DEBUG_ENABLED'])
 
     if (env["use_lto"]):
         env.Append(CPPFLAGS=['-flto'])
