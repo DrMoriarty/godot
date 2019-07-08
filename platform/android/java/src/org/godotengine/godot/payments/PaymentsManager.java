@@ -407,7 +407,7 @@ public class PaymentsManager {
 					} catch (RemoteException e) {
 						e.printStackTrace();
 						godotPaymentV3.errorSkuDetail("RemoteException error!");
-					} catch (Exception) {
+					} catch (Exception e) {
                         // sometimes mService is NULL
 						godotPaymentV3.errorSkuDetail("General Exception error!");
                     }

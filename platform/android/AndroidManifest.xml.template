@@ -18,7 +18,7 @@ $$ADD_PERMISSION_CHUNKS$$
     <application android:label="@string/godot_project_name_string" android:icon="@drawable/icon" android:allowBackup="false" tools:ignore="GoogleAppIndexingWarning" $$ADD_APPATTRIBUTE_CHUNKS$$ >
         <activity android:name="org.godotengine.godot.Godot"
                   android:label="@string/godot_project_name_string"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+                  android:theme="@style/Theme.Splash"
                   android:launchMode="singleTask"
                   android:screenOrientation="landscape"
                   android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
