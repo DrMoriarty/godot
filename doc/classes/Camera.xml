@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Camera" inherits="Spatial" category="Core" version="3.1.1">
+<class name="Camera" inherits="Spatial" category="Core" version="3.1.2">
 	<brief_description>
 		Camera node, displays from a point of view.
 	</brief_description>
@@ -180,7 +180,7 @@
 			Perspective Projection (object's size on the screen becomes smaller when far away).
 		</constant>
 		<constant name="PROJECTION_ORTHOGONAL" value="1" enum="Projection">
-			Orthogonal Projection (objects remain the same size on the screen no matter how far away they are).
+			Orthogonal Projection (objects remain the same size on the screen no matter how far away they are; also known as orthographic projection).
 		</constant>
 		<constant name="KEEP_WIDTH" value="0" enum="KeepAspect">
 			Preserves the horizontal aspect ratio.

@@ -774,10 +774,7 @@ Ref<Image> RasterizerStorageGLES2::texture_get_data(RID p_texture, int p_layer) 
 
 	for (int i = 0; i < texture->mipmaps; i++) {
 
-		int ofs = 0;
-		if (i > 0) {
-			ofs = Image::get_image_data_size(texture->alloc_width, texture->alloc_height, real_format, i - 1);
-		}
+		int ofs = Image::get_image_mipmap_offset(texture->alloc_width, texture->alloc_height, real_format, i);
 
 		if (texture->compressed) {
 			glPixelStorei(GL_PACK_ALIGNMENT, 4);
@@ -2399,6 +2396,18 @@ void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS:
 	}
 	surface->data = array;
 	surface->index_data = p_index_array;
+#else
+	// Even on non-tools builds, a copy of the surface->data is needed in certain circumstances.
+	// Rigged meshes using the USE_SKELETON_SOFTWARE path need to read bone data
+	// from surface->data.
+
+	// if USE_SKELETON_SOFTWARE is active
+	if (!config.float_texture_supported) {
+		// if this geometry is used specifically for skinning
+		if (p_format & (VS::ARRAY_FORMAT_BONES | VS::ARRAY_FORMAT_WEIGHTS))
+			surface->data = array;
+	}
+	// An alternative is to always make a copy of surface->data.
 #endif
 
 	surface->total_data_size += surface->array_byte_size + surface->index_array_byte_size;

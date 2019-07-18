@@ -502,7 +502,8 @@ public:
 		enum {
 			MAX_LIGHTS = 255,
 			MAX_REFLECTION_PROBES = 255,
-			DEFAULT_MAX_ELEMENTS = 65536
+			DEFAULT_MAX_ELEMENTS = 65536,
+			SORT_KEY_PRIORITY_SHIFT = 56
 		};
 
 		int max_elements;
@@ -591,6 +592,27 @@ public:
 		void sort_by_depth(bool p_alpha) { //used for shadows
 
 			SortArray<Element *, SortByDepth> sorter;
+			if (p_alpha) {
+				sorter.sort(&elements[max_elements - alpha_element_count], alpha_element_count);
+			} else {
+				sorter.sort(elements, element_count);
+			}
+		}
+
+		struct SortByReverseDepthAndPriority {
+
+			_FORCE_INLINE_ bool operator()(const Element *A, const Element *B) const {
+				if (A->priority == B->priority) {
+					return A->instance->depth > B->instance->depth;
+				} else {
+					return A->priority < B->priority;
+				}
+			}
+		};
+
+		void sort_by_reverse_depth_and_priority(bool p_alpha) { //used for alpha
+
+			SortArray<Element *, SortByReverseDepthAndPriority> sorter;
 			if (p_alpha) {
 				sorter.sort(&elements[max_elements - alpha_element_count], alpha_element_count);
 			} else {
