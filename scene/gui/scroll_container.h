@@ -62,6 +62,7 @@ class ScrollContainer : public Container {
 	bool scroll_v;
 
 	int deadzone;
+    float scroll_divisor;
 
 	void _cancel_drag();
 
@@ -91,6 +92,9 @@ public:
 
 	int get_deadzone() const;
 	void set_deadzone(int p_deadzone);
+
+    float get_scroll_divisor() const;
+    void set_scroll_divisor(float p_scroll_divisor);
 
 	HScrollBar *get_h_scrollbar();
 	VScrollBar *get_v_scrollbar();

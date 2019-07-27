@@ -95,30 +95,30 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 		if (mb->get_button_index() == BUTTON_WHEEL_UP && mb->is_pressed()) {
 			// only horizontal is enabled, scroll horizontally
 			if (h_scroll->is_visible() && !v_scroll->is_visible()) {
-				h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() / 8 * mb->get_factor());
+				h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() / scroll_divisor * mb->get_factor());
 			} else if (v_scroll->is_visible_in_tree()) {
-				v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() / 8 * mb->get_factor());
+				v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() / scroll_divisor * mb->get_factor());
 			}
 		}
 
 		if (mb->get_button_index() == BUTTON_WHEEL_DOWN && mb->is_pressed()) {
 			// only horizontal is enabled, scroll horizontally
 			if (h_scroll->is_visible() && !v_scroll->is_visible()) {
-				h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() / 8 * mb->get_factor());
+				h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() / scroll_divisor * mb->get_factor());
 			} else if (v_scroll->is_visible()) {
-				v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() / 8 * mb->get_factor());
+				v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() / scroll_divisor * mb->get_factor());
 			}
 		}
 
 		if (mb->get_button_index() == BUTTON_WHEEL_LEFT && mb->is_pressed()) {
 			if (h_scroll->is_visible_in_tree()) {
-				h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() * mb->get_factor() / 8);
+				h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() * mb->get_factor() / scroll_divisor);
 			}
 		}
 
 		if (mb->get_button_index() == BUTTON_WHEEL_RIGHT && mb->is_pressed()) {
 			if (h_scroll->is_visible_in_tree()) {
-				h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() * mb->get_factor() / 8);
+				h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() * mb->get_factor() / scroll_divisor);
 			}
 		}
 
@@ -198,10 +198,10 @@ void ScrollContainer::_gui_input(const Ref<InputEvent> &p_gui_input) {
 	if (pan_gesture.is_valid()) {
 
 		if (h_scroll->is_visible_in_tree()) {
-			h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() * pan_gesture->get_delta().x / 8);
+			h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() * pan_gesture->get_delta().x / scroll_divisor);
 		}
 		if (v_scroll->is_visible_in_tree()) {
-			v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() * pan_gesture->get_delta().y / 8);
+			v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() * pan_gesture->get_delta().y / scroll_divisor);
 		}
 	}
 }
@@ -461,6 +461,14 @@ void ScrollContainer::set_deadzone(int p_deadzone) {
 	deadzone = p_deadzone;
 }
 
+float ScrollContainer::get_scroll_divisor() const {
+    return scroll_divisor;
+}
+
+void ScrollContainer::set_scroll_divisor(float p_scroll_divisor) {
+    scroll_divisor = p_scroll_divisor;
+}
+
 String ScrollContainer::get_configuration_warning() const {
 
 	int found = 0;
@@ -509,6 +517,8 @@ void ScrollContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_v_scroll"), &ScrollContainer::get_v_scroll);
 	ClassDB::bind_method(D_METHOD("set_deadzone", "deadzone"), &ScrollContainer::set_deadzone);
 	ClassDB::bind_method(D_METHOD("get_deadzone"), &ScrollContainer::get_deadzone);
+	ClassDB::bind_method(D_METHOD("set_scroll_divisor", "scroll_divisor"), &ScrollContainer::set_scroll_divisor);
+	ClassDB::bind_method(D_METHOD("get_scroll_divisor"), &ScrollContainer::get_scroll_divisor);
 
 	ClassDB::bind_method(D_METHOD("get_h_scrollbar"), &ScrollContainer::get_h_scrollbar);
 	ClassDB::bind_method(D_METHOD("get_v_scrollbar"), &ScrollContainer::get_v_scrollbar);
@@ -522,6 +532,7 @@ void ScrollContainer::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scroll_vertical_enabled"), "set_enable_v_scroll", "is_v_scroll_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "scroll_vertical"), "set_v_scroll", "get_v_scroll");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "scroll_deadzone"), "set_deadzone", "get_deadzone");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "scroll_divisor"), "set_scroll_divisor", "get_scroll_divisor");
 
 	GLOBAL_DEF("gui/common/default_scroll_deadzone", 0);
 };
@@ -547,6 +558,8 @@ ScrollContainer::ScrollContainer() {
 	scroll_v = true;
 
 	deadzone = GLOBAL_GET("gui/common/default_scroll_deadzone");
+
+    scroll_divisor = 8;
 
 	set_clip_contents(true);
 };
