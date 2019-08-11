@@ -573,7 +573,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 				0,
 				NULL,
 				compression_method,
-				Z_DEFAULT_COMPRESSION);
+				Z_BEST_COMPRESSION);
 
 		zipWriteInFileInZip(ed->apk, p_data.ptr(), p_data.size());
 		zipCloseFileInZip(ed->apk);
@@ -1640,7 +1640,7 @@ public:
 						0,
 						NULL,
 						uncompressed ? 0 : Z_DEFLATED,
-						Z_DEFAULT_COMPRESSION);
+						Z_BEST_COMPRESSION);
 
 				zipWriteInFileInZip(unaligned_apk, data.ptr(), data.size());
 				zipCloseFileInZip(unaligned_apk);
@@ -1750,7 +1750,7 @@ public:
 					0,
 					NULL,
 					0, // No compress (little size gain and potentially slower startup)
-					Z_DEFAULT_COMPRESSION);
+					Z_BEST_COMPRESSION);
 
 			zipWriteInFileInZip(unaligned_apk, clf.ptr(), clf.size());
 			zipCloseFileInZip(unaligned_apk);
