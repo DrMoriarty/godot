@@ -43,7 +43,7 @@
 			Minimum layer value of objects that are affected by the Light2D. Default value: [code]0[/code].
 		</member>
 		<member name="range_z_max" type="int" setter="set_z_range_max" getter="get_z_range_max">
-			Maximum [code]Z[/code] value of objects that are affected by the Light2D. Default value: [code]1024[/code].
+			Maximum [code]z[/code] value of objects that are affected by the Light2D. Default value: [code]1024[/code].
 		</member>
 		<member name="range_z_min" type="int" setter="set_z_range_min" getter="get_z_range_min">
 			Minimum [code]z[/code] value of objects that are affected by the Light2D. Default value: [code]-1024[/code].
@@ -78,7 +78,7 @@
 	</members>
 	<constants>
 		<constant name="MODE_ADD" value="0" enum="Mode">
-			Adds the value of pixels corresponding to the Light2D to the values of pixels under it. This is the common behaviour of a light.
+			Adds the value of pixels corresponding to the Light2D to the values of pixels under it. This is the common behavior of a light.
 		</constant>
 		<constant name="MODE_SUB" value="1" enum="Mode">
 			Subtracts the value of pixels corresponding to the Light2D to the values of pixels under it, resulting in inversed light effect.

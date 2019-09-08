@@ -92,13 +92,13 @@
 			<argument index="0" name="condition" type="bool">
 			</argument>
 			<description>
-				Assert that the [code]condition[/code] is true. If the [code]condition[/code] is false a fatal error is generated and the program is halted. Useful for debugging to make sure a value is always true.
+				Asserts that the [code]condition[/code] is [code]true[/code] . If the [code]condition[/code] is [code]false[/code], an error is generated and the program is halted until you resume it. Only executes in debug builds, or when running the game from the editor. Use it for debugging purposes, to make sure a statement is [code]true[/code] during development.
 				[codeblock]
-				# Speed should always be between 0 and 20
+				# Imagine we always want speed to be between 0 and 20
 				speed = -10
-				assert(speed &lt; 20) # Is true and program continues
-				assert(speed &gt;= 0) # Is false and program stops
-				assert(speed &gt;= 0 &amp;&amp; speed &lt; 20) # Or combined
+				assert(speed &lt; 20) # True, the program will continue
+				assert(speed &gt;= 0) # False, the program will stop
+				assert(speed &gt;= 0 &amp;&amp; speed &lt; 20) # You can also combine the two conditional statements in one check
 				[/codeblock]
 			</description>
 		</method>
@@ -985,9 +985,9 @@
 			<description>
 				Returns a number smoothly interpolated between the [code]from[/code] and [code]to[/code], based on the [code]weight[/code]. Similar to [method lerp], but interpolates faster at the beginning and slower at the end.
 				[codeblock]
-				smooth_step(0, 2, 0.5) # returns 0.15
-				smooth_step(0, 2, 1.0) # returns 0.5
-				smooth_step(0, 2, 2.0) # returns 1.0
+				smoothstep(0, 2, 0.5) # returns 0.15
+				smoothstep(0, 2, 1.0) # returns 0.5
+				smoothstep(0, 2, 2.0) # returns 1.0
 				[/codeblock]
 			</description>
 		</method>
@@ -1191,6 +1191,16 @@
 				# infinite loop between 0.0 and 0.99
 				f = wrapf(f + 0.1, 0.0, 1.0)
 				[/codeblock]
+				[codeblock]
+				# infinite rotation (in radians)
+				angle = wrapf(angle + 0.1, 0.0, TAU)
+				[/codeblock]
+				Note: If you just want to wrap between 0.0 and [code]n[/code] (where [code]n[/code] is a positive float value) then it's better for performance to use [method fmod] method like [code]fmod(number, n)[/code].
+				The usage of [code]wrapf[/code] is more flexible than using the [method fmod] approach by giving the user a simple control over the minimum value. It also fully supports negative numbers, e.g.
+				[codeblock]
+				# infinite rotation (in radians)
+				angle = wrapf(angle + 0.1, -PI, PI)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="wrapi">
@@ -1216,6 +1226,12 @@
 				[codeblock]
 				# infinite loop between 0 and 9
 				frame = wrapi(frame + 1, 0, 10)
+				[/codeblock]
+				Note: If you just want to wrap between 0 and [code]n[/code] (where [code]n[/code] is a positive integer value) then it's better for performance to use modulo operator like [code]number % n[/code].
+				The usage of [code]wrapi[/code] is more flexible than using the modulo approach by giving the user a simple control over the minimum value. It also fully supports negative numbers, e.g.
+				[codeblock]
+				# result is -2
+				var result = wrapi(-6, -5, -1)
 				[/codeblock]
 			</description>
 		</method>
