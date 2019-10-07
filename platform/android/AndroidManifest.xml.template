@@ -15,7 +15,7 @@
 
 $$ADD_PERMISSION_CHUNKS$$
 
-    <application android:label="@string/godot_project_name_string" android:icon="@drawable/icon" android:allowBackup="false" tools:ignore="GoogleAppIndexingWarning" $$ADD_APPATTRIBUTE_CHUNKS$$ >
+    <application android:label="@string/godot_project_name_string" android:icon="@drawable/icon" android:allowBackup="false" tools:ignore="GoogleAppIndexingWarning" $$ADD_APPATTRIBUTE_CHUNKS$$ tools:replace="android:appComponentFactory" android:appComponentFactory="androidx.core.app.CoreComponentFactory">
         <activity android:name="org.godotengine.godot.Godot"
                   android:label="@string/godot_project_name_string"
                   android:theme="@style/Theme.Splash"
