@@ -77,10 +77,7 @@ def configure(env):
     env['CXX'] = 'em++'
     env['LINK'] = 'emcc'
 
-    # Emscripten's ar has issues with duplicate file names, so use cc.
-    env['AR'] = 'emcc'
-    env['ARFLAGS'] = '-o'
-    # emranlib is a noop, so it's safe to use with AR=emcc.
+    env['AR'] = 'emar'
     env['RANLIB'] = 'emranlib'
 
     # Use TempFileMunge since some AR invocations are too long for cmd.exe.
@@ -122,8 +119,18 @@ def configure(env):
 
     ## Link flags
 
+    # We use IDBFS in javascript_main.cpp. Since Emscripten 1.39.1 it needs to
+    # be linked explicitly.
+    env.Append(LIBS=['idbfs.js'])
+
     env.Append(LINKFLAGS=['-s', 'BINARYEN=1'])
-    env.Append(LINKFLAGS=['-s', 'BINARYEN_TRAP_MODE=\'clamp\''])
+
+    # This needs to be defined for Emscripten using 'fastcomp' (default pre-1.39.0)
+    # and undefined if using 'upstream'. And to make things simple, earlier
+    # Emscripten versions didn't include 'fastcomp' in their path, so we check
+    # against the presence of 'upstream' to conditionally add the flag.
+    if not "upstream" in em_config['EMSCRIPTEN_ROOT']:
+        env.Append(LINKFLAGS=['-s', 'BINARYEN_TRAP_MODE=\'clamp\''])
 
     # Allow increasing memory buffer size during runtime. This is efficient
     # when using WebAssembly (in comparison to asm.js) and works well for
