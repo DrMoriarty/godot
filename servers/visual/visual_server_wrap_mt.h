@@ -35,9 +35,6 @@
 #include "core/os/thread.h"
 #include "servers/visual_server.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 class VisualServerWrapMT : public VisualServer {
 
 	// the real visual server
@@ -95,6 +92,7 @@ public:
 	FUNC1RC(uint32_t, texture_get_height, RID)
 	FUNC1RC(uint32_t, texture_get_depth, RID)
 	FUNC4(texture_set_size_override, RID, int, int, int)
+	FUNC2(texture_bind, RID, uint32_t)
 
 	FUNC3(texture_set_detect_3d_callback, RID, TextureDetectCallback, void *)
 	FUNC3(texture_set_detect_srgb_callback, RID, TextureDetectCallback, void *)
@@ -232,7 +230,6 @@ public:
 	FUNC3(skeleton_bone_set_transform_2d, RID, int, const Transform2D &)
 	FUNC2RC(Transform2D, skeleton_bone_get_transform_2d, RID, int)
 	FUNC2(skeleton_set_base_transform_2d, RID, const Transform2D &)
-	FUNC3(skeleton_set_world_transform, RID, bool, const Transform &)
 
 	/* Light API */
 
@@ -346,6 +343,8 @@ public:
 	FUNC2(particles_set_process_material, RID, RID)
 	FUNC2(particles_set_fixed_fps, RID, int)
 	FUNC2(particles_set_fractional_delta, RID, bool)
+	FUNC1R(bool, particles_is_inactive, RID)
+	FUNC1(particles_request_process, RID)
 	FUNC1(particles_restart, RID)
 
 	FUNC2(particles_set_draw_order, RID, VS::ParticlesDrawOrder)
@@ -430,6 +429,7 @@ public:
 	FUNC2(environment_set_bg_energy, RID, float)
 	FUNC2(environment_set_canvas_max_layer, RID, int)
 	FUNC4(environment_set_ambient_light, RID, const Color &, float, float)
+	FUNC2(environment_set_camera_feed_id, RID, int)
 	FUNC7(environment_set_ssr, RID, bool, int, float, float, float, bool)
 	FUNC13(environment_set_ssao, RID, bool, float, float, float, float, float, float, float, const Color &, EnvironmentSSAOQuality, EnvironmentSSAOBlur, float)
 
@@ -520,7 +520,7 @@ public:
 	FUNC11(canvas_item_add_nine_patch, RID, const Rect2 &, const Rect2 &, RID, const Vector2 &, const Vector2 &, NinePatchAxisMode, NinePatchAxisMode, bool, const Color &, RID)
 	FUNC7(canvas_item_add_primitive, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, float, RID)
 	FUNC7(canvas_item_add_polygon, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, RID, bool)
-	FUNC10(canvas_item_add_triangle_array, RID, const Vector<int> &, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, const Vector<int> &, const Vector<float> &, RID, int, RID)
+	FUNC11(canvas_item_add_triangle_array, RID, const Vector<int> &, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, const Vector<int> &, const Vector<float> &, RID, int, RID, bool)
 	FUNC6(canvas_item_add_mesh, RID, const RID &, const Transform2D &, const Color &, RID, RID)
 	FUNC4(canvas_item_add_multimesh, RID, RID, RID, RID)
 	FUNC4(canvas_item_add_particles, RID, RID, RID, RID)
@@ -602,7 +602,7 @@ public:
 		return visual_server->get_render_info(p_info);
 	}
 
-	FUNC3(set_boot_image, const Ref<Image> &, const Color &, bool)
+	FUNC4(set_boot_image, const Ref<Image> &, const Color &, bool, bool)
 	FUNC1(set_default_clear_color, const Color &)
 
 	FUNC0R(RID, get_test_cube)

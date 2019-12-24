@@ -31,7 +31,7 @@
 #ifndef RESOURCEIMPORTEROBJ_H
 #define RESOURCEIMPORTEROBJ_H
 
-#include "import/resource_importer_scene.h"
+#include "resource_importer_scene.h"
 
 class EditorOBJImporter : public EditorSceneImporter {
 
@@ -47,7 +47,8 @@ public:
 };
 
 class ResourceImporterOBJ : public ResourceImporter {
-	GDCLASS(ResourceImporterOBJ, ResourceImporter)
+	GDCLASS(ResourceImporterOBJ, ResourceImporter);
+
 public:
 	virtual String get_importer_name() const;
 	virtual String get_visible_name() const;

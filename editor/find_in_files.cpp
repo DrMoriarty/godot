@@ -221,8 +221,8 @@ float FindInFiles::get_progress() const {
 
 void FindInFiles::_scan_dir(String path, PoolStringArray &out_folders) {
 
-	DirAccess *dir = DirAccess::open(path);
-	if (dir == NULL) {
+	DirAccessRef dir = DirAccess::open(path);
+	if (!dir) {
 		print_verbose("Cannot open directory! " + path);
 		return;
 	}
@@ -253,8 +253,8 @@ void FindInFiles::_scan_dir(String path, PoolStringArray &out_folders) {
 
 void FindInFiles::_scan_file(String fpath) {
 
-	FileAccess *f = FileAccess::open(fpath, FileAccess::READ);
-	if (f == NULL) {
+	FileAccessRef f = FileAccess::open(fpath, FileAccess::READ);
+	if (!f) {
 		print_verbose(String("Cannot open file ") + fpath);
 		return;
 	}
@@ -367,28 +367,11 @@ FindInFilesDialog::FindInFilesDialog() {
 
 	Label *filter_label = memnew(Label);
 	filter_label->set_text(TTR("Filters:"));
+	filter_label->set_tooltip(TTR("Include the files with the following extensions. Add or remove them in ProjectSettings."));
 	gc->add_child(filter_label);
 
-	{
-		HBoxContainer *hbc = memnew(HBoxContainer);
-
-		// TODO: Unhardcode this.
-		Vector<String> exts;
-		exts.push_back("gd");
-		if (Engine::get_singleton()->has_singleton("GodotSharp"))
-			exts.push_back("cs");
-		exts.push_back("shader");
-
-		for (int i = 0; i < exts.size(); ++i) {
-			CheckBox *cb = memnew(CheckBox);
-			cb->set_text(exts[i]);
-			cb->set_pressed(true);
-			hbc->add_child(cb);
-			_filters.push_back(cb);
-		}
-
-		gc->add_child(hbc);
-	}
+	_filters_container = memnew(HBoxContainer);
+	gc->add_child(_filters_container);
 
 	_find_button = add_button(TTR("Find..."), false, "find");
 	_find_button->set_disabled(true);
@@ -424,11 +407,12 @@ String FindInFilesDialog::get_folder() const {
 }
 
 Set<String> FindInFilesDialog::get_filter() const {
+	// could check the _filters_preferences but it might not have been generated yet.
 	Set<String> filters;
-	for (int i = 0; i < _filters.size(); ++i) {
-		CheckBox *cb = _filters[i];
+	for (int i = 0; i < _filters_container->get_child_count(); ++i) {
+		CheckBox *cb = (CheckBox *)_filters_container->get_child(i);
 		if (cb->is_pressed()) {
-			filters.insert(_filters[i]->get_text());
+			filters.insert(cb->get_text());
 		}
 	}
 	return filters;
@@ -440,6 +424,20 @@ void FindInFilesDialog::_notification(int p_what) {
 			// Doesn't work more than once if not deferred...
 			_search_text_line_edit->call_deferred("grab_focus");
 			_search_text_line_edit->select_all();
+			// Extensions might have changed in the meantime, we clean them and instance them again.
+			for (int i = 0; i < _filters_container->get_child_count(); i++) {
+				_filters_container->get_child(i)->queue_delete();
+			}
+			Array exts = ProjectSettings::get_singleton()->get("editor/search_in_file_extensions");
+			for (int i = 0; i < exts.size(); ++i) {
+				CheckBox *cb = memnew(CheckBox);
+				cb->set_text(exts[i]);
+				if (!_filters_preferences.has(exts[i])) {
+					_filters_preferences[exts[i]] = true;
+				}
+				cb->set_pressed(_filters_preferences[exts[i]]);
+				_filters_container->add_child(cb);
+			}
 		}
 	}
 }
@@ -449,6 +447,10 @@ void FindInFilesDialog::_on_folder_button_pressed() {
 }
 
 void FindInFilesDialog::custom_action(const String &p_action) {
+	for (int i = 0; i < _filters_container->get_child_count(); ++i) {
+		CheckBox *cb = (CheckBox *)_filters_container->get_child(i);
+		_filters_preferences[cb->get_text()] = cb->is_pressed();
+	}
 	if (p_action == "find") {
 		emit_signal(SIGNAL_FIND_REQUESTED);
 		hide();
@@ -522,6 +524,7 @@ FindInFilesPanel::FindInFilesPanel() {
 
 		_progress_bar = memnew(ProgressBar);
 		_progress_bar->set_h_size_flags(SIZE_EXPAND_FILL);
+		_progress_bar->set_v_size_flags(SIZE_SHRINK_CENTER);
 		hbc->add_child(_progress_bar);
 		set_progress_visible(false);
 
@@ -544,6 +547,7 @@ FindInFilesPanel::FindInFilesPanel() {
 	_results_display->connect("item_edited", this, "_on_item_edited");
 	_results_display->set_hide_root(true);
 	_results_display->set_select_mode(Tree::SELECT_ROW);
+	_results_display->set_allow_rmb_select(true);
 	_results_display->create_item(); // Root
 	vbc->add_child(_results_display);
 
@@ -825,7 +829,7 @@ void FindInFilesPanel::apply_replaces_in_file(String fpath, const Vector<Result>
 	// however that means either losing changes or losing replaces.
 
 	FileAccess *f = FileAccess::open(fpath, FileAccess::READ);
-	ERR_FAIL_COND(f == NULL);
+	ERR_FAIL_COND_MSG(f == NULL, "Cannot open file from path '" + fpath + "'.");
 
 	String buffer;
 	int current_line = 1;
@@ -872,7 +876,7 @@ void FindInFilesPanel::apply_replaces_in_file(String fpath, const Vector<Result>
 	// Now the modified contents are in the buffer, rewrite the file with our changes
 
 	Error err = f->reopen(fpath, FileAccess::WRITE);
-	ERR_FAIL_COND(err != OK);
+	ERR_FAIL_COND_MSG(err != OK, "Cannot create file in path '" + fpath + "'.");
 
 	f->store_string(buffer);
 
@@ -885,7 +889,6 @@ String FindInFilesPanel::get_replace_text() {
 
 void FindInFilesPanel::update_replace_buttons() {
 
-	String text = get_replace_text();
 	bool disabled = _finder->is_searching();
 
 	_replace_all_button->set_disabled(disabled);

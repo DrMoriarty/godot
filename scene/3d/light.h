@@ -35,10 +35,6 @@
 #include "scene/resources/texture.h"
 #include "servers/visual_server.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class Light : public VisualInstance {
 
 	GDCLASS(Light, VisualInstance);
@@ -221,6 +217,8 @@ protected:
 	static void _bind_methods();
 
 public:
+	virtual String get_configuration_warning() const;
+
 	SpotLight() :
 			Light(VisualServer::LIGHT_SPOT) {}
 };

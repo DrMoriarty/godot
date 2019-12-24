@@ -8,14 +8,28 @@ import subprocess
 from compat import iteritems, isbasestring, decode_utf8
 
 
-def add_source_files(self, sources, filetype, lib_env=None, shared=False):
+def add_source_files(self, sources, files, warn_duplicates=True):
+    # Convert string to list of absolute paths (including expanding wildcard)
+    if isbasestring(files):
+        # Keep SCons project-absolute path as they are (no wildcard support)
+        if files.startswith('#'):
+            if '*' in files:
+                print("ERROR: Wildcards can't be expanded in SCons project-absolute path: '{}'".format(files))
+                return
+            files = [files]
+        else:
+            dir_path = self.Dir('.').abspath
+            files = sorted(glob.glob(dir_path + "/" + files))
 
-    if isbasestring(filetype):
-        dir_path = self.Dir('.').abspath
-        filetype = sorted(glob.glob(dir_path + "/" + filetype))
-
-    for path in filetype:
-        sources.append(self.Object(path))
+    # Add each path as compiled Object following environment (self) configuration
+    for path in files:
+        obj = self.Object(path)
+        if obj in sources:
+            if warn_duplicates:
+                print("WARNING: Object \"{}\" already included in environment sources.".format(obj))
+            else:
+                continue
+        sources.append(obj)
 
 
 def disable_warnings(self):
@@ -26,7 +40,7 @@ def disable_warnings(self):
         warn_flags = ['/Wall', '/W4', '/W3', '/W2', '/W1', '/WX']
         self.Append(CCFLAGS=['/w'])
         self.Append(CFLAGS=['/w'])
-        self.Append(CPPFLAGS=['/w'])
+        self.Append(CXXFLAGS=['/w'])
         self['CCFLAGS'] = [x for x in self['CCFLAGS'] if not x in warn_flags]
         self['CFLAGS'] = [x for x in self['CFLAGS'] if not x in warn_flags]
         self['CXXFLAGS'] = [x for x in self['CXXFLAGS'] if not x in warn_flags]
@@ -61,6 +75,7 @@ def update_version(module_version_string=""):
     f.write("#define VERSION_BUILD \"" + str(build_name) + "\"\n")
     f.write("#define VERSION_MODULE_CONFIG \"" + str(version.module_config) + module_version_string + "\"\n")
     f.write("#define VERSION_YEAR " + str(version.year) + "\n")
+    f.write("#define VERSION_WEBSITE \"" + str(version.website) + "\"\n")
     f.close()
 
     # NOTE: It is safe to generate this file here, since this is still executed serially
@@ -180,7 +195,7 @@ def win32_spawn(sh, escape, cmd, args, env):
             env[e] = str(env[e])
     proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, startupinfo=startupinfo, shell=False, env=env)
-    data, err = proc.communicate()
+    _, err = proc.communicate()
     rv = proc.wait()
     if rv:
         print("=====")
@@ -241,7 +256,7 @@ def use_windows_spawn_fix(self, platform=None):
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, startupinfo=startupinfo, shell=False, env=env)
-        data, err = proc.communicate()
+        _, err = proc.communicate()
         rv = proc.wait()
         if rv:
             print("=====")
@@ -292,7 +307,7 @@ def split_lib(self, libname, src_list = None, env_lib = None):
         else:
             fname = env.File(f)[0].path
         fname = fname.replace("\\", "/")
-        base = string.join(fname.split("/")[:2], "/")
+        base = "/".join(fname.split("/")[:2])
         if base != cur_base and len(list) > max_src:
             if num > 0:
                 lib = env_lib.add_library(libname + str(num), list)
@@ -305,18 +320,30 @@ def split_lib(self, libname, src_list = None, env_lib = None):
     lib = env_lib.add_library(libname + str(num), list)
     lib_list.append(lib)
 
-    if len(lib_list) > 0:
-        if os.name == 'posix' and sys.platform == 'msys':
-            env.Replace(ARFLAGS=['rcsT'])
-            lib = env_lib.add_library(libname + "_collated", lib_list)
-            lib_list = [lib]
-
     lib_base = []
     env_lib.add_source_files(lib_base, "*.cpp")
     lib = env_lib.add_library(libname, lib_base)
     lib_list.insert(0, lib)
 
     env.Prepend(LIBS=lib_list)
+
+    # When we split modules into arbitrary chunks, we end up with linking issues
+    # due to symbol dependencies split over several libs, which may not be linked
+    # in the required order. We use --start-group and --end-group to tell the
+    # linker that those archives should be searched repeatedly to resolve all
+    # undefined references.
+    # As SCons doesn't give us much control over how inserting libs in LIBS
+    # impacts the linker call, we need to hack our way into the linking commands
+    # LINKCOM and SHLINKCOM to set those flags.
+
+    if '-Wl,--start-group' in env['LINKCOM'] and '-Wl,--start-group' in env['SHLINKCOM']:
+        # Already added by a previous call, skip.
+        return
+
+    env['LINKCOM'] = str(env['LINKCOM']).replace('$_LIBFLAGS',
+            '-Wl,--start-group $_LIBFLAGS -Wl,--end-group')
+    env['SHLINKCOM'] = str(env['LINKCOM']).replace('$_LIBFLAGS',
+            '-Wl,--start-group $_LIBFLAGS -Wl,--end-group')
 
 
 def save_active_platforms(apnames, ap):
@@ -486,7 +513,7 @@ def find_visual_c_batch_file(env):
     from SCons.Tool.MSCommon.vc import get_default_version, get_host_target, find_batch_file
 
     version = get_default_version(env)
-    (host_platform, target_platform,req_target_platform) = get_host_target(env)
+    (host_platform, target_platform, _) = get_host_target(env)
     return find_batch_file(env, version, host_platform, target_platform)[0]
 
 def generate_cpp_hint_file(filename):
@@ -597,12 +624,16 @@ def detect_darwin_sdk_path(platform, env):
             sdk_path = decode_utf8(subprocess.check_output(['xcrun', '--sdk', sdk_name, '--show-sdk-path']).strip())
             if sdk_path:
                 env[var_name] = sdk_path
-        except (subprocess.CalledProcessError, OSError) as e:
+        except (subprocess.CalledProcessError, OSError):
             print("Failed to find SDK path while running xcrun --sdk {} --show-sdk-path.".format(sdk_name))
             raise
 
 def get_compiler_version(env):
-    version = decode_utf8(subprocess.check_output([env['CXX'], '--version']).strip())
+    # Not using this method on clang because it returns 4.2.1 # https://reviews.llvm.org/D56803
+    if using_gcc(env):
+        version = decode_utf8(subprocess.check_output([env['CXX'], '-dumpversion']).strip())
+    else:
+        version = decode_utf8(subprocess.check_output([env['CXX'], '--version']).strip())
     match = re.search('[0-9][0-9.]*', version)
     if match is not None:
         return match.group().split('.')

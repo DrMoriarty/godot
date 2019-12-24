@@ -69,11 +69,13 @@ public:
 	virtual bool is_open() const = 0;
 	virtual int get_available_bytes() const = 0;
 
-	virtual void set_broadcasting_enabled(bool p_enabled) = 0;
+	virtual Error set_broadcasting_enabled(bool p_enabled) = 0; // Returns OK if the socket option has been set successfully.
 	virtual void set_blocking_enabled(bool p_enabled) = 0;
 	virtual void set_ipv6_only_enabled(bool p_enabled) = 0;
 	virtual void set_tcp_no_delay_enabled(bool p_enabled) = 0;
 	virtual void set_reuse_address_enabled(bool p_enabled) = 0;
+	virtual Error join_multicast_group(const IP_Address &p_multi_address, String p_if_name) = 0;
+	virtual Error leave_multicast_group(const IP_Address &p_multi_address, String p_if_name) = 0;
 };
 
 #endif // NET_SOCKET_H

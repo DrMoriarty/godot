@@ -44,9 +44,6 @@
 
 class DependencyRemoveDialog;
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 class EditorFileDialog : public ConfirmationDialog {
 
 	GDCLASS(EditorFileDialog, ConfirmationDialog);
@@ -109,18 +106,21 @@ private:
 	TextureRect *preview;
 	VBoxContainer *preview_vb;
 	HSplitContainer *list_hb;
+	HBoxContainer *file_box;
 	LineEdit *file;
+	OptionButton *filter;
 	AcceptDialog *mkdirerr;
 	AcceptDialog *exterr;
-	OptionButton *filter;
 	DirAccess *dir_access;
 	ConfirmationDialog *confirm_save;
 	DependencyRemoveDialog *remove_dialog;
+
 	ToolButton *mode_thumbnails;
 	ToolButton *mode_list;
 
 	ToolButton *refresh;
 	ToolButton *favorite;
+	ToolButton *show_hidden;
 
 	ToolButton *fav_up;
 	ToolButton *fav_down;
@@ -146,11 +146,12 @@ private:
 	bool invalidated;
 
 	void update_dir();
+	void update_file_name();
 	void update_file_list();
 	void update_filters();
 
 	void _update_favorites();
-	void _favorite_toggled(bool p_toggle);
+	void _favorite_pressed();
 	void _favorite_selected(int p_idx);
 	void _favorite_move_up();
 	void _favorite_move_down();

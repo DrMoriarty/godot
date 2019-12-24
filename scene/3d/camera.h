@@ -35,9 +35,7 @@
 #include "scene/3d/spatial_velocity_tracker.h"
 #include "scene/main/viewport.h"
 #include "scene/resources/environment.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class Camera : public Spatial {
 
 	GDCLASS(Camera, Spatial);
@@ -64,6 +62,7 @@ public:
 private:
 	bool force_change;
 	bool current;
+	Viewport *viewport;
 
 	Projection mode;
 
@@ -112,7 +111,7 @@ public:
 
 	void set_perspective(float p_fovy_degrees, float p_z_near, float p_z_far);
 	void set_orthogonal(float p_size, float p_z_near, float p_z_far);
-	void set_frustum(float p_size, Vector2 p_offset, float p_near, float p_far);
+	void set_frustum(float p_size, Vector2 p_offset, float p_z_near, float p_z_far);
 	void set_projection(Camera::Projection p_mode);
 
 	void make_current();
@@ -143,7 +142,7 @@ public:
 	virtual Vector3 project_local_ray_normal(const Point2 &p_pos) const;
 	virtual Point2 unproject_position(const Vector3 &p_pos) const;
 	bool is_position_behind(const Vector3 &p_pos) const;
-	virtual Vector3 project_position(const Point2 &p_point, float p_z_depth = 0) const;
+	virtual Vector3 project_position(const Point2 &p_point, float p_z_depth) const;
 
 	Vector<Vector3> get_near_plane_points() const;
 
@@ -232,6 +231,8 @@ public:
 	void remove_exception_rid(const RID &p_rid);
 	void remove_exception(const Object *p_object);
 	void clear_exceptions();
+
+	float get_clip_offset() const;
 
 	ClippedCamera();
 	~ClippedCamera();

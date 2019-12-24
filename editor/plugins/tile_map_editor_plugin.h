@@ -41,10 +41,6 @@
 #include "scene/gui/menu_button.h"
 #include "scene/gui/tool_button.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class TileMapEditor : public VBoxContainer {
 
 	GDCLASS(TileMapEditor, VBoxContainer);
@@ -74,6 +70,7 @@ class TileMapEditor : public VBoxContainer {
 
 	TileMap *node;
 	bool manual_autotile;
+	bool priority_atlastile;
 	Vector2 manual_position;
 
 	EditorNode *editor;
@@ -84,6 +81,8 @@ class TileMapEditor : public VBoxContainer {
 	HSlider *size_slider;
 	ItemList *palette;
 	ItemList *manual_palette;
+
+	Label *info_message;
 
 	HBoxContainer *toolbar;
 	HBoxContainer *toolbar_right;
@@ -103,13 +102,13 @@ class TileMapEditor : public VBoxContainer {
 	ToolButton *clear_transform_button;
 
 	CheckBox *manual_button;
+	CheckBox *priority_button;
 
 	Tool tool;
 	Tool last_tool;
 
 	bool selection_active;
 	bool mouse_over;
-	bool show_tile_info;
 
 	bool flip_h;
 	bool flip_v;
@@ -167,14 +166,14 @@ class TileMapEditor : public VBoxContainer {
 
 	PoolVector<Vector2> _bucket_fill(const Point2i &p_start, bool erase = false, bool preview = false);
 
-	void _fill_points(const PoolVector<Vector2> p_points, const Dictionary &p_op);
-	void _erase_points(const PoolVector<Vector2> p_points);
+	void _fill_points(const PoolVector<Vector2> &p_points, const Dictionary &p_op);
+	void _erase_points(const PoolVector<Vector2> &p_points);
 
 	void _select(const Point2i &p_from, const Point2i &p_to);
 	void _erase_selection();
 
-	void _draw_cell(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i p_autotile_coord, const Transform2D &p_xform);
-	void _draw_fill_preview(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i p_autotile_coord, const Transform2D &p_xform);
+	void _draw_cell(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i &p_autotile_coord, const Transform2D &p_xform);
+	void _draw_fill_preview(Control *p_viewport, int p_cell, const Point2i &p_point, bool p_flip_h, bool p_flip_v, bool p_transpose, const Point2i &p_autotile_coord, const Transform2D &p_xform);
 	void _clear_bucket_cache();
 
 	void _update_copydata();
@@ -183,6 +182,7 @@ class TileMapEditor : public VBoxContainer {
 	void set_selected_tiles(Vector<int> p_tile);
 
 	void _manual_toggled(bool p_enabled);
+	void _priority_toggled(bool p_enabled);
 	void _text_entered(const String &p_text);
 	void _text_changed(const String &p_text);
 	void _sbox_input(const Ref<InputEvent> &p_ie);
@@ -197,7 +197,7 @@ class TileMapEditor : public VBoxContainer {
 	void _start_undo(const String &p_action);
 	void _finish_undo();
 	void _create_set_cell_undo_redo(const Vector2 &p_vec, const CellOp &p_cell_old, const CellOp &p_cell_new);
-	void _set_cell(const Point2i &p_pos, Vector<int> p_values, bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false, const Point2i p_autotile_coord = Point2());
+	void _set_cell(const Point2i &p_pos, Vector<int> p_values, bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false, const Point2i &p_autotile_coord = Point2());
 
 	void _canvas_mouse_enter();
 	void _canvas_mouse_exit();
@@ -217,6 +217,7 @@ protected:
 public:
 	HBoxContainer *get_toolbar() const { return toolbar; }
 	HBoxContainer *get_toolbar_right() const { return toolbar_right; }
+	Label *get_tile_info() const { return tile_info; }
 
 	bool forward_gui_input(const Ref<InputEvent> &p_event);
 	void forward_canvas_draw_over_viewport(Control *p_overlay);

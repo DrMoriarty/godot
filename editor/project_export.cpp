@@ -166,7 +166,7 @@ void ProjectExportDialog::_update_presets() {
 
 void ProjectExportDialog::_update_export_all() {
 
-	bool can_export = EditorExport::get_singleton()->get_export_preset_count() > 0 ? true : false;
+	bool can_export = EditorExport::get_singleton()->get_export_preset_count() > 0;
 
 	for (int i = 0; i < EditorExport::get_singleton()->get_export_preset_count(); i++) {
 		Ref<EditorExportPreset> preset = EditorExport::get_singleton()->get_export_preset(i);
@@ -253,9 +253,9 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	TreeItem *patch_add = patches->create_item(patch_root);
 	patch_add->set_metadata(0, patchlist.size());
 	if (patchlist.size() == 0)
-		patch_add->set_text(0, "Add initial export...");
+		patch_add->set_text(0, TTR("Add initial export..."));
 	else
-		patch_add->set_text(0, "Add previous patches...");
+		patch_add->set_text(0, TTR("Add previous patches..."));
 
 	patch_add->add_button(0, get_icon("folder", "FileDialog"), 1);
 
@@ -286,11 +286,13 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 			export_templates_error->hide();
 
 		export_button->set_disabled(true);
+		get_ok()->set_disabled(true);
 
 	} else {
 		export_error->hide();
 		export_templates_error->hide();
 		export_button->set_disabled(false);
+		get_ok()->set_disabled(false);
 	}
 
 	custom_features->set_text(current->get_custom_features());
@@ -623,6 +625,7 @@ void ProjectExportDialog::_delete_preset_confirm() {
 	int idx = presets->get_current();
 	_edit_preset(-1);
 	export_button->set_disabled(true);
+	get_ok()->set_disabled(true);
 	EditorExport::get_singleton()->remove_export_preset(idx);
 	_update_presets();
 }
@@ -986,7 +989,7 @@ void ProjectExportDialog::_export_all_dialog_action(const String &p_str) {
 
 	export_all_dialog->hide();
 
-	_export_all(p_str == "release" ? false : true);
+	_export_all(p_str != "release");
 }
 
 void ProjectExportDialog::_export_all(bool p_debug) {
@@ -1104,6 +1107,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	name->connect("text_changed", this, "_name_changed");
 	runnable = memnew(CheckButton);
 	runnable->set_text(TTR("Runnable"));
+	runnable->set_tooltip(TTR("If checked, the preset will be available for use in one-click deploy.\nOnly one preset per platform may be marked as runnable."));
 	runnable->connect("pressed", this, "_runnable_pressed");
 	settings_vb->add_child(runnable);
 
@@ -1116,6 +1120,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	sections = memnew(TabContainer);
 	sections->set_tab_align(TabContainer::ALIGN_LEFT);
+	sections->set_use_hidden_tabs_for_min_size(true);
 	settings_vb->add_child(sections);
 	sections->set_v_size_flags(SIZE_EXPAND_FILL);
 
@@ -1148,11 +1153,15 @@ ProjectExportDialog::ProjectExportDialog() {
 	include_files->connect("item_edited", this, "_tree_changed");
 
 	include_filters = memnew(LineEdit);
-	resources_vb->add_margin_child(TTR("Filters to export non-resource files (comma separated, e.g: *.json, *.txt)"), include_filters);
+	resources_vb->add_margin_child(
+			TTR("Filters to export non-resource files/folders\n(comma-separated, e.g: *.json, *.txt, docs/*)"),
+			include_filters);
 	include_filters->connect("text_changed", this, "_filter_changed");
 
 	exclude_filters = memnew(LineEdit);
-	resources_vb->add_margin_child(TTR("Filters to exclude files from project (comma separated, e.g: *.json, *.txt)"), exclude_filters);
+	resources_vb->add_margin_child(
+			TTR("Filters to exclude files/folders from project\n(comma-separated, e.g: *.json, *.txt, docs/*)"),
+			exclude_filters);
 	exclude_filters->connect("text_changed", this, "_filter_changed");
 
 	VBoxContainer *patch_vb = memnew(VBoxContainer);
@@ -1177,7 +1186,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	patches_hb->add_spacer();
 
 	patch_dialog = memnew(EditorFileDialog);
-	patch_dialog->add_filter("*.pck ; Pack File");
+	patch_dialog->add_filter("*.pck ; " + TTR("Pack File"));
 	patch_dialog->set_mode(EditorFileDialog::MODE_OPEN_FILE);
 	patch_dialog->connect("file_selected", this, "_patch_selected");
 	add_child(patch_dialog);
@@ -1244,6 +1253,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_button->connect("pressed", this, "_export_project");
 	// Disable initially before we select a valid preset
 	export_button->set_disabled(true);
+	get_ok()->set_disabled(true);
 
 	export_all_dialog = memnew(ConfirmationDialog);
 	add_child(export_all_dialog);
@@ -1259,8 +1269,8 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_all_button->set_disabled(true);
 
 	export_pck_zip = memnew(EditorFileDialog);
-	export_pck_zip->add_filter("*.zip ; ZIP File");
-	export_pck_zip->add_filter("*.pck ; Godot Game Pack");
+	export_pck_zip->add_filter("*.zip ; " + TTR("ZIP File"));
+	export_pck_zip->add_filter("*.pck ; " + TTR("Godot Game Pack"));
 	export_pck_zip->set_access(EditorFileDialog::ACCESS_FILESYSTEM);
 	export_pck_zip->set_mode(EditorFileDialog::MODE_SAVE_FILE);
 	add_child(export_pck_zip);

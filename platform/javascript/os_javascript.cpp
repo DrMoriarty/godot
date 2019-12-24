@@ -70,6 +70,20 @@ static bool is_canvas_focused() {
 	/* clang-format on */
 }
 
+static Point2 correct_canvas_position(int x, int y) {
+	int canvas_width;
+	int canvas_height;
+	emscripten_get_canvas_element_size(NULL, &canvas_width, &canvas_height);
+
+	double element_width;
+	double element_height;
+	emscripten_get_element_css_size(NULL, &element_width, &element_height);
+
+	x = (int)(canvas_width / element_width * x);
+	y = (int)(canvas_height / element_height * y);
+	return Point2(x, y);
+}
+
 static bool cursor_inside_canvas = true;
 
 EM_BOOL OS_JavaScript::fullscreen_change_callback(int p_event_type, const EmscriptenFullscreenChangeEvent *p_event, void *p_user_data) {
@@ -178,9 +192,8 @@ void OS_JavaScript::set_window_fullscreen(bool p_enabled) {
 		strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
 		strategy.canvasResizedCallback = NULL;
 		EMSCRIPTEN_RESULT result = emscripten_request_fullscreen_strategy(NULL, false, &strategy);
-		ERR_EXPLAIN("Enabling fullscreen is only possible from an input callback for the HTML5 platform");
-		ERR_FAIL_COND(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED);
-		ERR_FAIL_COND(result != EMSCRIPTEN_RESULT_SUCCESS);
+		ERR_FAIL_COND_MSG(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED, "Enabling fullscreen is only possible from an input callback for the HTML5 platform.");
+		ERR_FAIL_COND_MSG(result != EMSCRIPTEN_RESULT_SUCCESS, "Enabling fullscreen is only possible from an input callback for the HTML5 platform.");
 		// Not fullscreen yet, so prevent "windowed" canvas dimensions from
 		// being overwritten.
 		entering_fullscreen = true;
@@ -285,7 +298,7 @@ EM_BOOL OS_JavaScript::mouse_button_callback(int p_event_type, const EmscriptenM
 	Ref<InputEventMouseButton> ev;
 	ev.instance();
 	ev->set_pressed(p_event_type == EMSCRIPTEN_EVENT_MOUSEDOWN);
-	ev->set_position(Point2(p_event->canvasX, p_event->canvasY));
+	ev->set_position(correct_canvas_position(p_event->canvasX, p_event->canvasY));
 	ev->set_global_position(ev->get_position());
 	dom2godot_mod(p_event, ev);
 	switch (p_event->button) {
@@ -349,7 +362,7 @@ EM_BOOL OS_JavaScript::mousemove_callback(int p_event_type, const EmscriptenMous
 	OS_JavaScript *os = get_singleton();
 
 	int input_mask = os->input->get_mouse_button_mask();
-	Point2 pos = Point2(p_event->canvasX, p_event->canvasY);
+	Point2 pos = correct_canvas_position(p_event->canvasX, p_event->canvasY);
 	// For motion outside the canvas, only read mouse movement if dragging
 	// started inside the canvas; imitating desktop app behaviour.
 	if (!cursor_inside_canvas && !input_mask)
@@ -434,6 +447,18 @@ void OS_JavaScript::set_cursor_shape(CursorShape p_shape) {
 void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, const Vector2 &p_hotspot) {
 
 	if (p_cursor.is_valid()) {
+
+		Map<CursorShape, Vector<Variant> >::Element *cursor_c = cursors_cache.find(p_shape);
+
+		if (cursor_c) {
+			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
+				set_cursor_shape(p_shape);
+				return;
+			}
+
+			cursors_cache.erase(p_shape);
+		}
+
 		Ref<Texture> texture = p_cursor;
 		Ref<AtlasTexture> atlas_texture = p_cursor;
 		Ref<Image> image;
@@ -537,6 +562,11 @@ void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_s
 
 		cursors[p_shape] = url;
 
+		Vector<Variant> params;
+		params.push_back(p_cursor);
+		params.push_back(p_hotspot);
+		cursors_cache.insert(p_shape, params);
+
 	} else if (cursors[p_shape] != "") {
 		/* clang-format off */
 		EM_ASM({
@@ -544,6 +574,8 @@ void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_s
 		}, cursors[p_shape].utf8().get_data());
 		/* clang-format on */
 		cursors[p_shape] = "";
+
+		cursors_cache.erase(p_shape);
 	}
 
 	set_cursor_shape(cursor_shape);
@@ -551,8 +583,7 @@ void OS_JavaScript::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_s
 
 void OS_JavaScript::set_mouse_mode(OS::MouseMode p_mode) {
 
-	ERR_EXPLAIN("MOUSE_MODE_CONFINED is not supported for the HTML5 platform");
-	ERR_FAIL_COND(p_mode == MOUSE_MODE_CONFINED);
+	ERR_FAIL_COND_MSG(p_mode == MOUSE_MODE_CONFINED, "MOUSE_MODE_CONFINED is not supported for the HTML5 platform.");
 	if (p_mode == get_mouse_mode())
 		return;
 
@@ -571,9 +602,8 @@ void OS_JavaScript::set_mouse_mode(OS::MouseMode p_mode) {
 	} else if (p_mode == MOUSE_MODE_CAPTURED) {
 
 		EMSCRIPTEN_RESULT result = emscripten_request_pointerlock("canvas", false);
-		ERR_EXPLAIN("MOUSE_MODE_CAPTURED can only be entered from within an appropriate input callback");
-		ERR_FAIL_COND(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED);
-		ERR_FAIL_COND(result != EMSCRIPTEN_RESULT_SUCCESS);
+		ERR_FAIL_COND_MSG(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED, "MOUSE_MODE_CAPTURED can only be entered from within an appropriate input callback.");
+		ERR_FAIL_COND_MSG(result != EMSCRIPTEN_RESULT_SUCCESS, "MOUSE_MODE_CAPTURED can only be entered from within an appropriate input callback.");
 		// set_css_cursor must be called before set_cursor_shape to make the cursor visible
 		set_css_cursor(godot2dom_cursor(cursor_shape));
 		set_cursor_shape(cursor_shape);
@@ -666,7 +696,7 @@ EM_BOOL OS_JavaScript::touch_press_callback(int p_event_type, const EmscriptenTo
 		if (!touch.isChanged)
 			continue;
 		ev->set_index(touch.identifier);
-		ev->set_position(Point2(touch.canvasX, touch.canvasY));
+		ev->set_position(correct_canvas_position(touch.canvasX, touch.canvasY));
 		os->touches[i] = ev->get_position();
 		ev->set_pressed(p_event_type == EMSCRIPTEN_EVENT_TOUCHSTART);
 
@@ -691,7 +721,7 @@ EM_BOOL OS_JavaScript::touchmove_callback(int p_event_type, const EmscriptenTouc
 		if (!touch.isChanged)
 			continue;
 		ev->set_index(touch.identifier);
-		ev->set_position(Point2(touch.canvasX, touch.canvasY));
+		ev->set_position(correct_canvas_position(touch.canvasX, touch.canvasY));
 		Point2 &prev = os->touches[i];
 		ev->set_relative(ev->get_position() - prev);
 		prev = ev->get_position();
@@ -779,8 +809,7 @@ const char *OS_JavaScript::get_video_driver_name(int p_driver) const {
 		case VIDEO_DRIVER_GLES2:
 			return "GLES2";
 	}
-	ERR_EXPLAIN("Invalid video driver index " + itos(p_driver));
-	ERR_FAIL_V(NULL);
+	ERR_FAIL_V_MSG(NULL, "Invalid video driver index: " + itos(p_driver) + ".");
 }
 
 // Audio
@@ -793,6 +822,46 @@ int OS_JavaScript::get_audio_driver_count() const {
 const char *OS_JavaScript::get_audio_driver_name(int p_driver) const {
 
 	return "JavaScript";
+}
+
+// Clipboard
+extern "C" EMSCRIPTEN_KEEPALIVE void update_clipboard(const char *p_text) {
+	// Only call set_clipboard from OS (sets local clipboard)
+	OS::get_singleton()->OS::set_clipboard(p_text);
+}
+
+void OS_JavaScript::set_clipboard(const String &p_text) {
+	OS::set_clipboard(p_text);
+	/* clang-format off */
+	int err = EM_ASM_INT({
+		var text = UTF8ToString($0);
+		if (!navigator.clipboard || !navigator.clipboard.writeText)
+			return 1;
+		navigator.clipboard.writeText(text).catch(function(e) {
+			// Setting OS clipboard is only possible from an input callback.
+			console.error("Setting OS clipboard is only possible from an input callback for the HTML5 plafrom. Exception:", e);
+		});
+		return 0;
+	}, p_text.utf8().get_data());
+	/* clang-format on */
+	ERR_FAIL_COND_MSG(err, "Clipboard API is not supported.");
+}
+
+String OS_JavaScript::get_clipboard() const {
+	/* clang-format off */
+	EM_ASM({
+		try {
+			navigator.clipboard.readText().then(function (result) {
+				ccall('update_clipboard', 'void', ['string'], [result]);
+			}).catch(function (e) {
+				// Fail graciously.
+			});
+		} catch (e) {
+			// Fail graciously.
+		}
+	});
+	/* clang-format on */
+	return this->OS::get_clipboard();
 }
 
 // Lifecycle
@@ -939,6 +1008,11 @@ Error OS_JavaScript::initialize(const VideoMode &p_desired, int p_video_driver, 
 		(['mouseover', 'mouseleave', 'focus', 'blur']).forEach(function(event, index) {
 			Module.canvas.addEventListener(event, send_notification.bind(null, notifications[index]));
 		});
+		// Clipboard
+		const update_clipboard = cwrap('update_clipboard', null, ['string']);
+		window.addEventListener('paste', function(evt) {
+			update_clipboard(evt.clipboardData.getData('text'));
+		}, true);
 	},
 		MainLoop::NOTIFICATION_WM_MOUSE_ENTER,
 		MainLoop::NOTIFICATION_WM_MOUSE_EXIT,
@@ -1037,20 +1111,17 @@ void OS_JavaScript::finalize() {
 
 Error OS_JavaScript::execute(const String &p_path, const List<String> &p_arguments, bool p_blocking, ProcessID *r_child_id, String *r_pipe, int *r_exitcode, bool read_stderr, Mutex *p_pipe_mutex) {
 
-	ERR_EXPLAIN("OS::execute() is not available on the HTML5 platform");
-	ERR_FAIL_V(ERR_UNAVAILABLE);
+	ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "OS::execute() is not available on the HTML5 platform.");
 }
 
 Error OS_JavaScript::kill(const ProcessID &p_pid) {
 
-	ERR_EXPLAIN("OS::kill() is not available on the HTML5 platform");
-	ERR_FAIL_V(ERR_UNAVAILABLE);
+	ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "OS::kill() is not available on the HTML5 platform.");
 }
 
 int OS_JavaScript::get_process_id() const {
 
-	ERR_EXPLAIN("OS::get_process_id() is not available on the HTML5 platform");
-	ERR_FAIL_V(0);
+	ERR_FAIL_V_MSG(0, "OS::get_process_id() is not available on the HTML5 platform.");
 }
 
 extern "C" EMSCRIPTEN_KEEPALIVE void send_notification(int p_notification) {
@@ -1098,7 +1169,7 @@ void OS_JavaScript::set_icon(const Ref<Image> &p_icon) {
 	Ref<Image> icon = p_icon;
 	if (icon->is_compressed()) {
 		icon = icon->duplicate();
-		ERR_FAIL_COND(icon->decompress() != OK)
+		ERR_FAIL_COND(icon->decompress() != OK);
 	}
 	if (icon->get_format() != Image::FORMAT_RGBA8) {
 		if (icon == p_icon)

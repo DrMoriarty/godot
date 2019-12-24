@@ -122,13 +122,13 @@ Error ImageLoaderTinyEXR::load_image(Ref<Image> p_image, FileAccess *f, bool p_f
 		}
 
 		if (idxG == -1) {
-			ERR_PRINT("TinyEXR: G channel not found.")
+			ERR_PRINT("TinyEXR: G channel not found.");
 			// @todo { free exr_image }
 			return ERR_FILE_CORRUPT;
 		}
 
 		if (idxB == -1) {
-			ERR_PRINT("TinyEXR: B channel not found.")
+			ERR_PRINT("TinyEXR: B channel not found.");
 			// @todo { free exr_image }
 			return ERR_FILE_CORRUPT;
 		}
@@ -235,7 +235,7 @@ Error ImageLoaderTinyEXR::load_image(Ref<Image> p_image, FileAccess *f, bool p_f
 
 	p_image->create(exr_image.width, exr_image.height, false, format, imgdata);
 
-	w = PoolVector<uint8_t>::Write();
+	w.release();
 
 	FreeEXRHeader(&exr_header);
 	FreeEXRImage(&exr_image);

@@ -54,8 +54,6 @@ void Physics2DServerWrapMT::thread_loop() {
 
 	server_thread = Thread::get_caller_id();
 
-	OS::get_singleton()->make_rendering_thread();
-
 	physics_2d_server->init();
 
 	exit = false;
@@ -141,6 +139,7 @@ void Physics2DServerWrapMT::finish() {
 	segment_shape_free_cached_ids();
 	circle_shape_free_cached_ids();
 	rectangle_shape_free_cached_ids();
+	capsule_shape_free_cached_ids();
 	convex_polygon_shape_free_cached_ids();
 	concave_polygon_shape_free_cached_ids();
 

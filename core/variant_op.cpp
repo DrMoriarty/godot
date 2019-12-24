@@ -1118,6 +1118,8 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 			CASE_TYPE(math, OP_SHIFT_LEFT, INT) {
 				if (p_b.type != INT)
 					_RETURN_FAIL;
+				if (p_b._data._int < 0 || p_b._data._int >= 64)
+					_RETURN_FAIL;
 				_RETURN(p_a._data._int << p_b._data._int);
 			}
 
@@ -1128,6 +1130,8 @@ void Variant::evaluate(const Operator &p_op, const Variant &p_a,
 		SWITCH_OP(math, OP_SHIFT_RIGHT, p_a.type) {
 			CASE_TYPE(math, OP_SHIFT_RIGHT, INT) {
 				if (p_b.type != INT)
+					_RETURN_FAIL;
+				if (p_b._data._int < 0 || p_b._data._int >= 64)
 					_RETURN_FAIL;
 				_RETURN(p_a._data._int >> p_b._data._int);
 			}
@@ -2183,7 +2187,8 @@ void Variant::set(const Variant &p_index, const Variant &p_value, bool *r_valid)
 					return;
 				}
 
-				return obj->set(p_index, p_value, r_valid);
+				obj->set(p_index, p_value, r_valid);
+				return;
 			}
 		} break;
 		case DICTIONARY: {
@@ -2612,7 +2617,7 @@ bool Variant::in(const Variant &p_index, bool *r_valid) const {
 						if (r_valid) {
 							*r_valid = false;
 						}
-						return "Attempted get on stray pointer.";
+						return true; // Attempted get on stray pointer.
 					}
 				}
 #endif

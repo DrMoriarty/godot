@@ -36,13 +36,9 @@
 #include "scene/3d/particles.h"
 #include "scene/gui/spin_box.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class ParticlesEditorBase : public Control {
 
-	GDCLASS(ParticlesEditorBase, Control)
+	GDCLASS(ParticlesEditorBase, Control);
 
 protected:
 	Spatial *base_node;
@@ -52,8 +48,6 @@ protected:
 
 	EditorFileDialog *emission_file_dialog;
 	SceneTreeDialog *emission_tree_dialog;
-
-	ConfirmationDialog *err_dialog;
 
 	ConfirmationDialog *emission_dialog;
 	SpinBox *emission_amount;
@@ -86,6 +80,7 @@ class ParticlesEditor : public ParticlesEditorBase {
 		MENU_OPTION_CREATE_EMISSION_VOLUME_FROM_MESH,
 		MENU_OPTION_CLEAR_EMISSION_VOLUME,
 		MENU_OPTION_CONVERT_TO_CPU_PARTICLES,
+		MENU_OPTION_RESTART,
 
 	};
 

@@ -35,8 +35,8 @@
 #include "core/os/os.h"
 
 #ifdef TOOLS_ENABLED
-#include "editor_scale.h"
-#include "editor_settings.h"
+#include "editor/editor_scale.h"
+#include "editor/editor_settings.h"
 #endif
 #include "scene/main/viewport.h"
 
@@ -93,6 +93,28 @@ void ColorPicker::set_focus_on_line_edit() {
 
 void ColorPicker::_update_controls() {
 
+	const char *rgb[3] = { "R", "G", "B" };
+	const char *hsv[3] = { "H", "S", "V" };
+
+	if (hsv_mode_enabled) {
+		for (int i = 0; i < 3; i++)
+			labels[i]->set_text(hsv[i]);
+	} else {
+		for (int i = 0; i < 3; i++)
+			labels[i]->set_text(rgb[i]);
+	}
+
+	if (hsv_mode_enabled) {
+		set_raw_mode(false);
+		btn_raw->set_disabled(true);
+	} else if (raw_mode_enabled) {
+		set_hsv_mode(false);
+		btn_hsv->set_disabled(true);
+	} else {
+		btn_raw->set_disabled(false);
+		btn_hsv->set_disabled(false);
+	}
+
 	if (edit_alpha) {
 		values[3]->show();
 		scroll[3]->show();
@@ -104,7 +126,7 @@ void ColorPicker::_update_controls() {
 	}
 }
 
-void ColorPicker::set_pick_color(const Color &p_color) {
+void ColorPicker::_set_pick_color(const Color &p_color, bool p_update_sliders) {
 
 	color = p_color;
 	if (color != last_hsv) {
@@ -117,7 +139,12 @@ void ColorPicker::set_pick_color(const Color &p_color) {
 	if (!is_inside_tree())
 		return;
 
-	_update_color();
+	_update_color(p_update_sliders);
+}
+
+void ColorPicker::set_pick_color(const Color &p_color) {
+
+	_set_pick_color(p_color, true); //because setters can't have more arguments
 }
 
 void ColorPicker::set_edit_alpha(bool p_show) {
@@ -142,11 +169,18 @@ void ColorPicker::_value_changed(double) {
 	if (updating)
 		return;
 
-	for (int i = 0; i < 4; i++) {
-		color.components[i] = scroll[i]->get_value() / (raw_mode_enabled ? 1.0 : 255.0);
+	if (hsv_mode_enabled) {
+		color.set_hsv(scroll[0]->get_value() / 360.0,
+				scroll[1]->get_value() / 100.0,
+				scroll[2]->get_value() / 100.0,
+				scroll[3]->get_value() / 255.0);
+	} else {
+		for (int i = 0; i < 4; i++) {
+			color.components[i] = scroll[i]->get_value() / (raw_mode_enabled ? 1.0 : 255.0);
+		}
 	}
 
-	set_pick_color(color);
+	_set_pick_color(color, false);
 	emit_signal("color_changed", color);
 }
 
@@ -167,22 +201,40 @@ void ColorPicker::_html_entered(const String &p_html) {
 	emit_signal("color_changed", color);
 }
 
-void ColorPicker::_update_color() {
+void ColorPicker::_update_color(bool p_update_sliders) {
 
 	updating = true;
 
-	for (int i = 0; i < 4; i++) {
-		if (raw_mode_enabled) {
-			scroll[i]->set_step(0.01);
-			scroll[i]->set_max(100);
-			if (i == 3)
-				scroll[i]->set_max(1);
-			scroll[i]->set_value(color.components[i]);
+	if (p_update_sliders) {
+
+		if (hsv_mode_enabled) {
+			for (int i = 0; i < 4; i++) {
+				scroll[i]->set_step(1.0);
+			}
+
+			scroll[0]->set_max(359);
+			scroll[0]->set_value(h * 360.0);
+			scroll[1]->set_max(100);
+			scroll[1]->set_value(s * 100.0);
+			scroll[2]->set_max(100);
+			scroll[2]->set_value(v * 100.0);
+			scroll[3]->set_max(255);
+			scroll[3]->set_value(color.components[3] * 255.0);
 		} else {
-			scroll[i]->set_step(1);
-			const float byte_value = color.components[i] * 255.0;
-			scroll[i]->set_max(next_power_of_2(MAX(255, byte_value)) - 1);
-			scroll[i]->set_value(byte_value);
+			for (int i = 0; i < 4; i++) {
+				if (raw_mode_enabled) {
+					scroll[i]->set_step(0.01);
+					scroll[i]->set_max(100);
+					if (i == 3)
+						scroll[i]->set_max(1);
+					scroll[i]->set_value(color.components[i]);
+				} else {
+					scroll[i]->set_step(1);
+					const float byte_value = color.components[i] * 255.0;
+					scroll[i]->set_max(next_power_of_2(MAX(255, byte_value)) - 1);
+					scroll[i]->set_value(byte_value);
+				}
+			}
 		}
 	}
 
@@ -195,15 +247,19 @@ void ColorPicker::_update_color() {
 }
 
 void ColorPicker::_update_presets() {
+	presets_per_row = 10;
 	Size2 size = bt_add_preset->get_size();
-	Size2 preset_size = Size2(size.width * presets.size(), size.height);
+	Size2 preset_size = Size2(MIN(size.width * presets.size(), presets_per_row * size.width), size.height * (Math::ceil((float)presets.size() / presets_per_row)));
 	preset->set_custom_minimum_size(preset_size);
-
-	preset->draw_texture_rect(get_icon("preset_bg", "ColorPicker"), Rect2(Point2(), preset_size), true);
+	preset_container->set_custom_minimum_size(preset_size);
+	preset->draw_rect(Rect2(Point2(), preset_size), Color(1, 1, 1, 0));
 
 	for (int i = 0; i < presets.size(); i++) {
-		preset->draw_rect(Rect2(Point2(size.width * i, 0), size), presets[i]);
+		int x = (i % presets_per_row) * size.width;
+		int y = (Math::floor((float)i / presets_per_row)) * size.height;
+		preset->draw_rect(Rect2(Point2(x, y), size), presets[i]);
 	}
+	_notification(NOTIFICATION_VISIBILITY_CHANGED);
 }
 
 void ColorPicker::_text_type_toggled() {
@@ -236,8 +292,6 @@ void ColorPicker::add_preset(const Color &p_color) {
 		presets.push_back(p_color);
 	}
 	preset->update();
-	if (presets.size() == 10)
-		bt_add_preset->hide();
 
 #ifdef TOOLS_ENABLED
 	if (Engine::get_singleton()->is_editor_hint()) {
@@ -272,13 +326,33 @@ PoolColorArray ColorPicker::get_presets() const {
 	return arr;
 }
 
+void ColorPicker::set_hsv_mode(bool p_enabled) {
+
+	if (hsv_mode_enabled == p_enabled || raw_mode_enabled)
+		return;
+	hsv_mode_enabled = p_enabled;
+	if (btn_hsv->is_pressed() != p_enabled)
+		btn_hsv->set_pressed(p_enabled);
+
+	if (!is_inside_tree())
+		return;
+
+	_update_controls();
+	_update_color();
+}
+
+bool ColorPicker::is_hsv_mode() const {
+
+	return hsv_mode_enabled;
+}
+
 void ColorPicker::set_raw_mode(bool p_enabled) {
 
-	if (raw_mode_enabled == p_enabled)
+	if (raw_mode_enabled == p_enabled || hsv_mode_enabled)
 		return;
 	raw_mode_enabled = p_enabled;
-	if (btn_mode->is_pressed() != p_enabled)
-		btn_mode->set_pressed(p_enabled);
+	if (btn_raw->is_pressed() != p_enabled)
+		btn_raw->set_pressed(p_enabled);
 
 	if (!is_inside_tree())
 		return;
@@ -322,11 +396,18 @@ void ColorPicker::_update_text_value() {
 }
 
 void ColorPicker::_sample_draw() {
-	Rect2 r = Rect2(Point2(), Size2(uv_edit->get_size().width, sample->get_size().height * 0.95));
+	const Rect2 r = Rect2(Point2(), Size2(uv_edit->get_size().width, sample->get_size().height * 0.95));
+
 	if (color.a < 1.0) {
 		sample->draw_texture_rect(get_icon("preset_bg", "ColorPicker"), r, true);
 	}
+
 	sample->draw_rect(r, color);
+
+	if (color.r > 1 || color.g > 1 || color.b > 1) {
+		// Draw an indicator to denote that the color is "overbright" and can't be displayed accurately in the preview
+		sample->draw_texture(get_icon("overbright_indicator", "ColorPicker"), Point2());
+	}
 }
 
 void ColorPicker::_hsv_draw(int p_which, Control *c) {
@@ -461,14 +542,20 @@ void ColorPicker::_preset_input(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> bev = p_event;
 
 	if (bev.is_valid()) {
-
+		int index = 0;
 		if (bev->is_pressed() && bev->get_button_index() == BUTTON_LEFT) {
-			int index = bev->get_position().x / (preset->get_size().x / presets.size());
+			for (int i = 0; i < presets.size(); i++) {
+				int x = (i % presets_per_row) * bt_add_preset->get_size().x;
+				int y = (Math::floor((float)i / presets_per_row)) * bt_add_preset->get_size().y;
+				if (bev->get_position().x > x && bev->get_position().x < x + preset->get_size().x && bev->get_position().y > y && bev->get_position().y < y + preset->get_size().y) {
+					index = i;
+				}
+			}
 			set_pick_color(presets[index]);
 			_update_color();
 			emit_signal("color_changed", color);
 		} else if (bev->is_pressed() && bev->get_button_index() == BUTTON_RIGHT && presets_enabled) {
-			int index = bev->get_position().x / (preset->get_size().x / presets.size());
+			index = bev->get_position().x / (preset->get_size().x / presets.size());
 			Color clicked_preset = presets[index];
 			erase_preset(clicked_preset);
 			emit_signal("preset_removed", clicked_preset);
@@ -592,6 +679,8 @@ void ColorPicker::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_pick_color", "color"), &ColorPicker::set_pick_color);
 	ClassDB::bind_method(D_METHOD("get_pick_color"), &ColorPicker::get_pick_color);
+	ClassDB::bind_method(D_METHOD("set_hsv_mode", "mode"), &ColorPicker::set_hsv_mode);
+	ClassDB::bind_method(D_METHOD("is_hsv_mode"), &ColorPicker::is_hsv_mode);
 	ClassDB::bind_method(D_METHOD("set_raw_mode", "mode"), &ColorPicker::set_raw_mode);
 	ClassDB::bind_method(D_METHOD("is_raw_mode"), &ColorPicker::is_raw_mode);
 	ClassDB::bind_method(D_METHOD("set_deferred_mode", "mode"), &ColorPicker::set_deferred_mode);
@@ -623,6 +712,7 @@ void ColorPicker::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "set_pick_color", "get_pick_color");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "edit_alpha"), "set_edit_alpha", "is_editing_alpha");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "hsv_mode"), "set_hsv_mode", "is_hsv_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "raw_mode"), "set_raw_mode", "is_raw_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "deferred_mode"), "set_deferred_mode", "is_deferred_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "presets_enabled"), "set_presets_enabled", "are_presets_enabled");
@@ -639,6 +729,7 @@ ColorPicker::ColorPicker() :
 	updating = true;
 	edit_alpha = true;
 	text_is_constructor = false;
+	hsv_mode_enabled = false;
 	raw_mode_enabled = false;
 	deferred_mode_enabled = false;
 	changing_color = false;
@@ -689,13 +780,12 @@ ColorPicker::ColorPicker() :
 	VBoxContainer *vbr = memnew(VBoxContainer);
 	add_child(vbr);
 	vbr->set_h_size_flags(SIZE_EXPAND_FILL);
-	const char *lt[4] = { "R", "G", "B", "A" };
 
 	for (int i = 0; i < 4; i++) {
 
 		HBoxContainer *hbc = memnew(HBoxContainer);
 
-		labels[i] = memnew(Label(lt[i]));
+		labels[i] = memnew(Label());
 		labels[i]->set_custom_minimum_size(Size2(get_constant("label_width"), 0));
 		labels[i]->set_v_size_flags(SIZE_SHRINK_CENTER);
 		hbc->add_child(labels[i]);
@@ -719,14 +809,20 @@ ColorPicker::ColorPicker() :
 
 		vbr->add_child(hbc);
 	}
+	labels[3]->set_text("A");
 
 	HBoxContainer *hhb = memnew(HBoxContainer);
 	vbr->add_child(hhb);
 
-	btn_mode = memnew(CheckButton);
-	hhb->add_child(btn_mode);
-	btn_mode->set_text(TTR("Raw Mode"));
-	btn_mode->connect("toggled", this, "set_raw_mode");
+	btn_hsv = memnew(CheckButton);
+	hhb->add_child(btn_hsv);
+	btn_hsv->set_text(TTR("HSV"));
+	btn_hsv->connect("toggled", this, "set_hsv_mode");
+
+	btn_raw = memnew(CheckButton);
+	hhb->add_child(btn_raw);
+	btn_raw->set_text(TTR("Raw"));
+	btn_raw->connect("toggled", this, "set_raw_mode");
 
 	text_type = memnew(Button);
 	hhb->add_child(text_type);
@@ -760,6 +856,7 @@ ColorPicker::ColorPicker() :
 	add_child(preset_separator);
 
 	preset_container = memnew(HBoxContainer);
+	preset_container->set_h_size_flags(SIZE_EXPAND_FILL);
 	add_child(preset_container);
 
 	preset = memnew(TextureRect);
@@ -767,8 +864,11 @@ ColorPicker::ColorPicker() :
 	preset->connect("gui_input", this, "_preset_input");
 	preset->connect("draw", this, "_update_presets");
 
+	preset_container2 = memnew(HBoxContainer);
+	preset_container2->set_h_size_flags(SIZE_EXPAND_FILL);
+	add_child(preset_container2);
 	bt_add_preset = memnew(Button);
-	preset_container->add_child(bt_add_preset);
+	preset_container2->add_child(bt_add_preset);
 	bt_add_preset->set_tooltip(TTR("Add current color as a preset."));
 	bt_add_preset->connect("pressed", this, "_add_preset_pressed");
 }
@@ -801,10 +901,15 @@ void ColorPickerButton::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_DRAW: {
 
-			Ref<StyleBox> normal = get_stylebox("normal");
-			Rect2 r = Rect2(normal->get_offset(), get_size() - normal->get_minimum_size());
+			const Ref<StyleBox> normal = get_stylebox("normal");
+			const Rect2 r = Rect2(normal->get_offset(), get_size() - normal->get_minimum_size());
 			draw_texture_rect(Control::get_icon("bg", "ColorPickerButton"), r, true);
 			draw_rect(r, color);
+
+			if (color.r > 1 || color.g > 1 || color.b > 1) {
+				// Draw an indicator to denote that the color is "overbright" and can't be displayed accurately in the preview
+				draw_texture(Control::get_icon("overbright_indicator", "ColorPicker"), normal->get_offset());
+			}
 		} break;
 		case MainLoop::NOTIFICATION_WM_QUIT_REQUEST: {
 
@@ -871,6 +976,7 @@ void ColorPickerButton::_update_picker() {
 		popup->connect("popup_hide", this, "set_pressed", varray(false));
 		picker->set_pick_color(color);
 		picker->set_edit_alpha(edit_alpha);
+		emit_signal("picker_created");
 	}
 }
 
@@ -887,6 +993,7 @@ void ColorPickerButton::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("color_changed", PropertyInfo(Variant::COLOR, "color")));
 	ADD_SIGNAL(MethodInfo("popup_closed"));
+	ADD_SIGNAL(MethodInfo("picker_created"));
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "set_pick_color", "get_pick_color");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "edit_alpha"), "set_edit_alpha", "is_editing_alpha");
 }

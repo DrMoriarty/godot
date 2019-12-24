@@ -157,10 +157,7 @@ void PhysicsBody2D::add_collision_exception_with(Node *p_node) {
 
 	ERR_FAIL_NULL(p_node);
 	PhysicsBody2D *physics_body = Object::cast_to<PhysicsBody2D>(p_node);
-	if (!physics_body) {
-		ERR_EXPLAIN("Collision exception only works between two objects of PhysicsBody type");
-	}
-	ERR_FAIL_COND(!physics_body);
+	ERR_FAIL_COND_MSG(!physics_body, "Collision exception only works between two objects of PhysicsBody type.");
 	Physics2DServer::get_singleton()->body_add_collision_exception(get_rid(), physics_body->get_rid());
 }
 
@@ -168,10 +165,7 @@ void PhysicsBody2D::remove_collision_exception_with(Node *p_node) {
 
 	ERR_FAIL_NULL(p_node);
 	PhysicsBody2D *physics_body = Object::cast_to<PhysicsBody2D>(p_node);
-	if (!physics_body) {
-		ERR_EXPLAIN("Collision exception only works between two objects of PhysicsBody type");
-	}
-	ERR_FAIL_COND(!physics_body);
+	ERR_FAIL_COND_MSG(!physics_body, "Collision exception only works between two objects of PhysicsBody type.");
 	Physics2DServer::get_singleton()->body_remove_collision_exception(get_rid(), physics_body->get_rid());
 }
 
@@ -203,10 +197,9 @@ void StaticBody2D::set_friction(real_t p_friction) {
 		return;
 	}
 
-	ERR_EXPLAIN("The method set_friction has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method set_friction has been deprecated and will be removed in the future, use physics material instead.");
 
-	ERR_FAIL_COND(p_friction < 0 || p_friction > 1);
+	ERR_FAIL_COND_MSG(p_friction < 0 || p_friction > 1, "Friction must be between 0 and 1.");
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
@@ -217,8 +210,7 @@ void StaticBody2D::set_friction(real_t p_friction) {
 
 real_t StaticBody2D::get_friction() const {
 
-	ERR_EXPLAIN("The method get_friction has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method get_friction has been deprecated and will be removed in the future, use physics material instead.");
 
 	if (physics_material_override.is_null()) {
 		return 1;
@@ -233,10 +225,9 @@ void StaticBody2D::set_bounce(real_t p_bounce) {
 		return;
 	}
 
-	ERR_EXPLAIN("The method set_bounce has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method set_bounce has been deprecated and will be removed in the future, use physics material instead.");
 
-	ERR_FAIL_COND(p_bounce < 0 || p_bounce > 1);
+	ERR_FAIL_COND_MSG(p_bounce < 0 || p_bounce > 1, "Bounce must be between 0 and 1.");
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
@@ -247,8 +238,7 @@ void StaticBody2D::set_bounce(real_t p_bounce) {
 
 real_t StaticBody2D::get_bounce() const {
 
-	ERR_EXPLAIN("The method get_bounce has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method get_bounce has been deprecated and will be removed in the future, use physics material instead.");
 
 	if (physics_material_override.is_null()) {
 		return 0;
@@ -604,7 +594,7 @@ real_t RigidBody2D::get_mass() const {
 
 void RigidBody2D::set_inertia(real_t p_inertia) {
 
-	ERR_FAIL_COND(p_inertia <= 0);
+	ERR_FAIL_COND(p_inertia < 0);
 	Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_INERTIA, p_inertia);
 }
 
@@ -630,10 +620,9 @@ void RigidBody2D::set_friction(real_t p_friction) {
 		return;
 	}
 
-	ERR_EXPLAIN("The method set_friction has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method set_friction has been deprecated and will be removed in the future, use physics material instead.");
 
-	ERR_FAIL_COND(p_friction < 0 || p_friction > 1);
+	ERR_FAIL_COND_MSG(p_friction < 0 || p_friction > 1, "Friction must be between 0 and 1.");
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
@@ -643,8 +632,7 @@ void RigidBody2D::set_friction(real_t p_friction) {
 }
 real_t RigidBody2D::get_friction() const {
 
-	ERR_EXPLAIN("The method get_friction has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method get_friction has been deprecated and will be removed in the future, use physics material instead.");
 
 	if (physics_material_override.is_null()) {
 		return 1;
@@ -659,8 +647,7 @@ void RigidBody2D::set_bounce(real_t p_bounce) {
 		return;
 	}
 
-	ERR_EXPLAIN("The method set_bounce has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method set_bounce has been deprecated and will be removed in the future, use physics material instead.");
 
 	ERR_FAIL_COND(p_bounce < 0 || p_bounce > 1);
 
@@ -672,8 +659,7 @@ void RigidBody2D::set_bounce(real_t p_bounce) {
 }
 real_t RigidBody2D::get_bounce() const {
 
-	ERR_EXPLAIN("The method get_bounce has been deprecated and will be removed in the future, use physics material instead.")
-	WARN_DEPRECATED
+	WARN_DEPRECATED_MSG("The method get_bounce has been deprecated and will be removed in the future, use physics material instead.");
 
 	if (physics_material_override.is_null()) {
 		return 0;
@@ -905,10 +891,7 @@ void RigidBody2D::set_contact_monitor(bool p_enabled) {
 
 	if (!p_enabled) {
 
-		if (contact_monitor->locked) {
-			ERR_EXPLAIN("Can't disable contact monitoring during in/out callback. Use call_deferred(\"set_contact_monitor\",false) instead");
-		}
-		ERR_FAIL_COND(contact_monitor->locked);
+		ERR_FAIL_COND_MSG(contact_monitor->locked, "Can't disable contact monitoring during in/out callback. Use call_deferred(\"set_contact_monitor\", false) instead.");
 
 		for (Map<ObjectID, BodyState>::Element *E = contact_monitor->body_map.front(); E; E = E->next()) {
 
@@ -963,7 +946,7 @@ String RigidBody2D::get_configuration_warning() const {
 
 	if ((get_mode() == MODE_RIGID || get_mode() == MODE_CHARACTER) && (ABS(t.elements[0].length() - 1.0) > 0.05 || ABS(t.elements[1].length() - 1.0) > 0.05)) {
 		if (warning != String()) {
-			warning += "\n";
+			warning += "\n\n";
 		}
 		warning += TTR("Size changes to RigidBody2D (in character or rigid modes) will be overridden by the physics engine when running.\nChange the size in children collision shapes instead.");
 	}
@@ -1068,16 +1051,16 @@ void RigidBody2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "gravity_scale", PROPERTY_HINT_RANGE, "-128,128,0.01"), "set_gravity_scale", "get_gravity_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "custom_integrator"), "set_use_custom_integrator", "is_using_custom_integrator");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "continuous_cd", PROPERTY_HINT_ENUM, "Disabled,Cast Ray,Cast Shape"), "set_continuous_collision_detection_mode", "get_continuous_collision_detection_mode");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "contacts_reported"), "set_max_contacts_reported", "get_max_contacts_reported");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "contacts_reported", PROPERTY_HINT_RANGE, "0,64,1,or_greater"), "set_max_contacts_reported", "get_max_contacts_reported");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "contact_monitor"), "set_contact_monitor", "is_contact_monitor_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sleeping"), "set_sleeping", "is_sleeping");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "can_sleep"), "set_can_sleep", "is_able_to_sleep");
 	ADD_GROUP("Linear", "linear_");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "linear_velocity"), "set_linear_velocity", "get_linear_velocity");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "linear_damp", PROPERTY_HINT_RANGE, "-1,128,0.01"), "set_linear_damp", "get_linear_damp");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "linear_damp", PROPERTY_HINT_RANGE, "-1,100,0.001,or_greater"), "set_linear_damp", "get_linear_damp");
 	ADD_GROUP("Angular", "angular_");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "angular_velocity"), "set_angular_velocity", "get_angular_velocity");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "angular_damp", PROPERTY_HINT_RANGE, "-1,128,0.01"), "set_angular_damp", "get_angular_damp");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "angular_damp", PROPERTY_HINT_RANGE, "-1,100,0.001,or_greater"), "set_angular_damp", "get_angular_damp");
 	ADD_GROUP("Applied Forces", "applied_");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "applied_force"), "set_applied_force", "get_applied_force");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "applied_torque"), "set_applied_torque", "get_applied_torque");
@@ -1226,23 +1209,25 @@ bool KinematicBody2D::move_and_collide(const Vector2 &p_motion, bool p_infinite_
 	return colliding;
 }
 
-//so, if you pass 45 as limit, avoid numerical precision erros when angle is 45.
+//so, if you pass 45 as limit, avoid numerical precision errors when angle is 45.
 #define FLOOR_ANGLE_THRESHOLD 0.01
 
 Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const Vector2 &p_floor_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia) {
 
-	Vector2 floor_motion = floor_velocity;
+	Vector2 body_velocity = p_linear_velocity;
+	Vector2 body_velocity_normal = body_velocity.normalized();
+
+	Vector2 current_floor_velocity = floor_velocity;
 	if (on_floor && on_floor_body.is_valid()) {
 		//this approach makes sure there is less delay between the actual body velocity and the one we saved
 		Physics2DDirectBodyState *bs = Physics2DServer::get_singleton()->body_get_direct_state(on_floor_body);
 		if (bs) {
-			floor_motion = bs->get_linear_velocity();
+			current_floor_velocity = bs->get_linear_velocity();
 		}
 	}
 
 	// Hack in order to work with calling from _process as well as from _physics_process; calling from thread is risky
-	Vector2 motion = (floor_motion + p_linear_velocity) * (Engine::get_singleton()->is_in_physics_frame() ? get_physics_process_delta_time() : get_process_delta_time());
-	Vector2 lv = p_linear_velocity;
+	Vector2 motion = (current_floor_velocity + body_velocity) * (Engine::get_singleton()->is_in_physics_frame() ? get_physics_process_delta_time() : get_process_delta_time());
 
 	on_floor = false;
 	on_floor_body = RID();
@@ -1251,14 +1236,12 @@ Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const 
 	colliders.clear();
 	floor_velocity = Vector2();
 
-	Vector2 lv_n = p_linear_velocity.normalized();
-
 	while (p_max_slides) {
 
 		Collision collision;
 		bool found_collision = false;
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; ++i) {
 			bool collided;
 			if (i == 0) { //collide
 				collided = move_and_collide(motion, p_infinite_inertia, collision);
@@ -1283,43 +1266,39 @@ Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const 
 					//all is a wall
 					on_wall = true;
 				} else {
-					if (collision.normal.dot(p_floor_direction) >= Math::cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { //floor
+					if (Math::acos(collision.normal.dot(p_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { //floor
 
 						on_floor = true;
 						on_floor_body = collision.collider_rid;
 						floor_velocity = collision.collider_vel;
 
 						if (p_stop_on_slope) {
-							if ((lv_n + p_floor_direction).length() < 0.01 && collision.travel.length() < 1) {
+							if ((body_velocity_normal + p_floor_direction).length() < 0.01 && collision.travel.length() < 1) {
 								Transform2D gt = get_global_transform();
-								gt.elements[2] -= collision.travel.project(p_floor_direction.tangent());
+								gt.elements[2] -= collision.travel.slide(p_floor_direction);
 								set_global_transform(gt);
 								return Vector2();
 							}
 						}
-
-					} else if (collision.normal.dot(-p_floor_direction) >= Math::cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { //ceiling
+					} else if (Math::acos(collision.normal.dot(-p_floor_direction)) <= p_floor_max_angle + FLOOR_ANGLE_THRESHOLD) { //ceiling
 						on_ceiling = true;
 					} else {
 						on_wall = true;
 					}
 				}
 
-				Vector2 n = collision.normal;
-				motion = motion.slide(n);
-				lv = lv.slide(n);
+				motion = motion.slide(collision.normal);
+				body_velocity = body_velocity.slide(collision.normal);
 			}
 		}
 
-		if (!found_collision) {
+		if (!found_collision || motion == Vector2())
 			break;
-		}
-		p_max_slides--;
-		if (motion == Vector2())
-			break;
+
+		--p_max_slides;
 	}
 
-	return lv;
+	return body_velocity;
 }
 
 Vector2 KinematicBody2D::move_and_slide_with_snap(const Vector2 &p_linear_velocity, const Vector2 &p_snap, const Vector2 &p_floor_direction, bool p_stop_on_slope, int p_max_slides, float p_floor_max_angle, bool p_infinite_inertia) {
@@ -1463,6 +1442,14 @@ void KinematicBody2D::_direct_state_changed(Object *p_state) {
 void KinematicBody2D::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 		last_valid_transform = get_global_transform();
+
+		// Reset move_and_slide() data.
+		on_floor = false;
+		on_floor_body = RID();
+		on_ceiling = false;
+		on_wall = false;
+		colliders.clear();
+		floor_velocity = Vector2();
 	}
 
 	if (p_what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED) {
@@ -1541,7 +1528,7 @@ Vector2 KinematicCollision2D::get_remainder() const {
 	return collision.remainder;
 }
 Object *KinematicCollision2D::get_local_shape() const {
-	ERR_FAIL_COND_V(!owner, NULL);
+	if (!owner) return NULL;
 	uint32_t ownerid = owner->shape_find_owner(collision.local_shape);
 	return owner->shape_owner_get_owner(ownerid);
 }

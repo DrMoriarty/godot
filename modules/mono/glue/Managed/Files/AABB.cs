@@ -5,6 +5,7 @@
 // file: core/variant_call.cpp
 // commit: 5ad9be4c24e9d7dc5672fdc42cea896622fe5685
 using System;
+using System.Runtime.InteropServices;
 #if REAL_T_IS_DOUBLE
 using real_t = System.Double;
 #else
@@ -13,6 +14,8 @@ using real_t = System.Single;
 
 namespace Godot
 {
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct AABB : IEquatable<AABB>
     {
         private Vector3 _position;
@@ -453,6 +456,11 @@ namespace Godot
         public bool Equals(AABB other)
         {
             return _position == other._position && _size == other._size;
+        }
+
+        public bool IsEqualApprox(AABB other)
+        {
+            return _position.IsEqualApprox(other._position) && _size.IsEqualApprox(other._size);
         }
 
         public override int GetHashCode()

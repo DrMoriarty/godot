@@ -162,6 +162,7 @@ protected:
 		ShapePair(int p_bs, int p_ls) {
 			body_shape = p_bs;
 			local_shape = p_ls;
+			tagged = false;
 		}
 	};
 	struct RigidBody_RemoveAction {
@@ -314,6 +315,7 @@ private:
 	Ref<KinematicCollision> _get_slide_collision(int p_bounce);
 
 protected:
+	void _notification(int p_what);
 	static void _bind_methods();
 
 public:
@@ -633,6 +635,9 @@ public:
 
 	void set_gravity_scale(real_t p_gravity_scale);
 	real_t get_gravity_scale() const;
+
+	void apply_central_impulse(const Vector3 &p_impulse);
+	void apply_impulse(const Vector3 &p_pos, const Vector3 &p_impulse);
 
 	PhysicalBone();
 	~PhysicalBone();

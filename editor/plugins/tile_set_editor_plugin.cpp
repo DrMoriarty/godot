@@ -176,6 +176,86 @@ Error TileSetEditor::update_library_file(Node *p_base_scene, Ref<TileSet> ml, bo
 	return OK;
 }
 
+Variant TileSetEditor::get_drag_data_fw(const Point2 &p_point, Control *p_from) {
+
+	return false;
+}
+
+bool TileSetEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
+
+	Dictionary d = p_data;
+
+	if (!d.has("type"))
+		return false;
+
+	if (d.has("from") && (Object *)(d["from"]) == texture_list)
+		return false;
+
+	if (String(d["type"]) == "resource" && d.has("resource")) {
+		RES r = d["resource"];
+
+		Ref<Texture> texture = r;
+
+		if (texture.is_valid()) {
+
+			return true;
+		}
+	}
+
+	if (String(d["type"]) == "files") {
+
+		Vector<String> files = d["files"];
+
+		if (files.size() == 0)
+			return false;
+
+		for (int i = 0; i < files.size(); i++) {
+			String file = files[i];
+			String ftype = EditorFileSystem::get_singleton()->get_file_type(file);
+
+			if (!ClassDB::is_parent_class(ftype, "Texture")) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+	return false;
+}
+
+void TileSetEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
+
+	if (!can_drop_data_fw(p_point, p_data, p_from))
+		return;
+
+	Dictionary d = p_data;
+
+	if (!d.has("type"))
+		return;
+
+	if (String(d["type"]) == "resource" && d.has("resource")) {
+		RES r = d["resource"];
+
+		Ref<Texture> texture = r;
+
+		if (texture.is_valid())
+			add_texture(texture);
+
+		if (texture_list->get_item_count() > 0) {
+			update_texture_list_icon();
+			texture_list->select(texture_list->get_item_count() - 1);
+			_on_texture_list_selected(texture_list->get_item_count() - 1);
+		}
+	}
+
+	if (String(d["type"]) == "files") {
+
+		PoolVector<String> files = d["files"];
+
+		_on_textures_added(files);
+	}
+}
+
 void TileSetEditor::_bind_methods() {
 
 	ClassDB::bind_method("_undo_redo_import_scene", &TileSetEditor::_undo_redo_import_scene);
@@ -202,6 +282,10 @@ void TileSetEditor::_bind_methods() {
 	ClassDB::bind_method("_zoom_reset", &TileSetEditor::_zoom_reset);
 	ClassDB::bind_method("_select_edited_shape_coord", &TileSetEditor::_select_edited_shape_coord);
 	ClassDB::bind_method("_sort_tiles", &TileSetEditor::_sort_tiles);
+
+	ClassDB::bind_method(D_METHOD("get_drag_data_fw"), &TileSetEditor::get_drag_data_fw);
+	ClassDB::bind_method(D_METHOD("can_drop_data_fw"), &TileSetEditor::can_drop_data_fw);
+	ClassDB::bind_method(D_METHOD("drop_data_fw"), &TileSetEditor::drop_data_fw);
 
 	ClassDB::bind_method("edit", &TileSetEditor::edit);
 	ClassDB::bind_method("add_texture", &TileSetEditor::add_texture);
@@ -263,7 +347,7 @@ void TileSetEditor::_notification(int p_what) {
 TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 
 	editor = p_editor;
-	undo_redo = editor->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 	current_tile = -1;
 
 	VBoxContainer *left_container = memnew(VBoxContainer);
@@ -274,6 +358,7 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	texture_list->set_v_size_flags(SIZE_EXPAND_FILL);
 	texture_list->set_custom_minimum_size(Size2(200, 0));
 	texture_list->connect("item_selected", this, "_on_texture_list_selected");
+	texture_list->set_drag_forwarding(this);
 
 	HBoxContainer *tileset_toolbar_container = memnew(HBoxContainer);
 	left_container->add_child(tileset_toolbar_container);
@@ -319,10 +404,15 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	HBoxContainer *tool_hb = memnew(HBoxContainer);
 	Ref<ButtonGroup> g(memnew(ButtonGroup));
 
-	String workspace_label[WORKSPACE_MODE_MAX] = { "Edit", "New Single Tile", "New Autotile", "New Atlas" };
+	String workspace_label[WORKSPACE_MODE_MAX] = {
+		TTR("Edit"),
+		TTR("New Single Tile"),
+		TTR("New Autotile"),
+		TTR("New Atlas")
+	};
 	for (int i = 0; i < (int)WORKSPACE_MODE_MAX; i++) {
 		tool_workspacemode[i] = memnew(Button);
-		tool_workspacemode[i]->set_text(TTR(workspace_label[i]));
+		tool_workspacemode[i]->set_text(workspace_label[i]);
 		tool_workspacemode[i]->set_toggle_mode(true);
 		tool_workspacemode[i]->set_button_group(g);
 		tool_workspacemode[i]->connect("pressed", this, "_on_workspace_mode_changed", varray(i));
@@ -360,7 +450,16 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	tool_hb = memnew(HBoxContainer);
 
 	g = Ref<ButtonGroup>(memnew(ButtonGroup));
-	String label[EDITMODE_MAX] = { "Region", "Collision", "Occlusion", "Navigation", "Bitmask", "Priority", "Icon", "Z Index" };
+	String label[EDITMODE_MAX] = {
+		TTR("Region"),
+		TTR("Collision"),
+		TTR("Occlusion"),
+		TTR("Navigation"),
+		TTR("Bitmask"),
+		TTR("Priority"),
+		TTR("Icon"),
+		TTR("Z Index")
+	};
 	for (int i = 0; i < (int)EDITMODE_MAX; i++) {
 		tool_editmode[i] = memnew(Button);
 		tool_editmode[i]->set_text(label[i]);
@@ -494,6 +593,15 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	scroll->set_v_size_flags(SIZE_EXPAND_FILL);
 	scroll->set_clip_contents(true);
 
+	empty_message = memnew(Label);
+	empty_message->set_text(TTR("Add or select a texture on the left panel to edit the tiles bound to it."));
+	empty_message->set_valign(Label::VALIGN_CENTER);
+	empty_message->set_align(Label::ALIGN_CENTER);
+	empty_message->set_autowrap(true);
+	empty_message->set_custom_minimum_size(Size2(100 * EDSCALE, 0));
+	empty_message->set_v_size_flags(SIZE_EXPAND_FILL);
+	main_vb->add_child(empty_message);
+
 	workspace_container = memnew(Control);
 	scroll->add_child(workspace_container);
 
@@ -542,9 +650,9 @@ TileSetEditor::TileSetEditor(EditorNode *p_editor) {
 	helper = memnew(TilesetEditorContext(this));
 	tile_names_visible = false;
 
-	// config scale
-	max_scale = 10.0f;
-	min_scale = 0.1f;
+	// Config scale.
+	max_scale = 16.0f;
+	min_scale = 0.01f;
 	scale_ratio = 1.2f;
 }
 
@@ -646,8 +754,7 @@ void TileSetEditor::_on_textures_added(const PoolStringArray &p_paths) {
 	for (int i = 0; i < p_paths.size(); i++) {
 		Ref<Texture> t = Ref<Texture>(ResourceLoader::load(p_paths[i]));
 
-		ERR_EXPLAIN("'" + p_paths[i] + "' is not a valid texture.");
-		ERR_CONTINUE(!t.is_valid());
+		ERR_CONTINUE_MSG(!t.is_valid(), "'" + p_paths[i] + "' is not a valid texture.");
 
 		if (texture_map.has(t->get_rid())) {
 			invalid_count++;
@@ -829,8 +936,8 @@ void TileSetEditor::_on_workspace_draw() {
 			case EDITMODE_BITMASK: {
 				Color c(1, 0, 0, 0.5);
 				Color ci(0.3, 0.6, 1, 0.5);
-				for (float x = 0; x < region.size.x / (spacing + size.x); x++) {
-					for (float y = 0; y < region.size.y / (spacing + size.y); y++) {
+				for (int x = 0; x < region.size.x / (spacing + size.x); x++) {
+					for (int y = 0; y < region.size.y / (spacing + size.y); y++) {
 						Vector2 coord(x, y);
 						Point2 anchor(coord.x * (spacing + size.x), coord.y * (spacing + size.y));
 						anchor += WORKSPACE_MARGIN;
@@ -924,8 +1031,7 @@ void TileSetEditor::_on_workspace_draw() {
 			case EDITMODE_OCCLUSION:
 			case EDITMODE_NAVIGATION: {
 				if (tileset->tile_get_tile_mode(get_current_tile()) == TileSet::AUTO_TILE || tileset->tile_get_tile_mode(get_current_tile()) == TileSet::ATLAS_TILE) {
-					Vector2 coord = edited_shape_coord;
-					draw_highlight_subtile(coord);
+					draw_highlight_subtile(edited_shape_coord);
 				}
 				draw_polygon_shapes();
 				draw_grid_snap();
@@ -974,6 +1080,7 @@ void TileSetEditor::_on_workspace_draw() {
 			workspace->draw_rect(region, c, false);
 		}
 	}
+	delete tiles;
 
 	if (edit_mode == EDITMODE_REGION) {
 		if (workspace_mode != WORKSPACE_EDIT) {
@@ -1068,6 +1175,7 @@ void TileSetEditor::_on_workspace_overlay_draw() {
 			c = Color(0.1, 0.1, 0.1);
 			workspace_overlay->draw_string(font, region.position, tile_id_name, c);
 		}
+		delete tiles;
 	}
 
 	int t_id = get_current_tile();
@@ -1080,6 +1188,31 @@ void TileSetEditor::_on_workspace_overlay_draw() {
 			workspace_overlay->draw_texture(handle, current_shape[i] * workspace->get_scale().x - handle->get_size() * 0.5);
 		}
 	}
+}
+
+int TileSetEditor::get_grabbed_point(const Vector2 &p_mouse_pos, real_t p_grab_threshold) {
+	Transform2D xform = workspace->get_transform();
+
+	int grabbed_point = -1;
+	real_t min_distance = 1e10;
+
+	for (int i = 0; i < current_shape.size(); i++) {
+		const real_t distance = xform.xform(current_shape[i]).distance_to(xform.xform(p_mouse_pos));
+		if (distance < p_grab_threshold && distance < min_distance) {
+			min_distance = distance;
+			grabbed_point = i;
+		}
+	}
+
+	return grabbed_point;
+}
+
+bool TileSetEditor::is_within_grabbing_distance_of_first_point(const Vector2 &p_pos, real_t p_grab_threshold) {
+	Transform2D xform = workspace->get_transform();
+
+	const real_t distance = xform.xform(current_shape[0]).distance_to(xform.xform(p_pos));
+
+	return distance < p_grab_threshold;
 }
 
 void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
@@ -1115,10 +1248,12 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 							set_current_tile(t_id);
 							workspace->update();
 							workspace_overlay->update();
+							delete tiles;
 							return;
 						}
 					}
 				}
+				delete tiles;
 			}
 		}
 
@@ -1432,18 +1567,19 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 						shape_anchor.x *= (size.x + spacing);
 						shape_anchor.y *= (size.y + spacing);
 					}
+
 					const real_t grab_threshold = EDITOR_GET("editors/poly_editor/point_grab_radius");
 					shape_anchor += current_tile_region.position;
 					if (tools[TOOL_SELECT]->is_pressed()) {
 						if (mb.is_valid()) {
 							if (mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								if (edit_mode != EDITMODE_PRIORITY && current_shape.size() > 0) {
-									for (int i = 0; i < current_shape.size(); i++) {
-										if ((current_shape[i] - mb->get_position()).length_squared() <= grab_threshold) {
-											dragging_point = i;
-											workspace->update();
-											return;
-										}
+									int grabbed_point = get_grabbed_point(mb->get_position(), grab_threshold);
+
+									if (grabbed_point >= 0) {
+										dragging_point = grabbed_point;
+										workspace->update();
+										return;
 									}
 								}
 								if ((tileset->tile_get_tile_mode(get_current_tile()) == TileSet::AUTO_TILE || tileset->tile_get_tile_mode(get_current_tile()) == TileSet::ATLAS_TILE) && current_tile_region.has_point(mb->get_position())) {
@@ -1487,7 +1623,7 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 											w[i] = current_shape[i] - shape_anchor;
 										}
 
-										w = PoolVector<Vector2>::Write();
+										w.release();
 
 										undo_redo->create_action(TTR("Edit Occlusion Polygon"));
 										undo_redo->add_do_method(edited_occlusion_shape.ptr(), "set_polygon", polygon);
@@ -1510,11 +1646,13 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 											indices.push_back(i);
 										}
 
-										w = PoolVector<Vector2>::Write();
+										w.release();
 
 										undo_redo->create_action(TTR("Edit Navigation Polygon"));
 										undo_redo->add_do_method(edited_navigation_shape.ptr(), "set_vertices", polygon);
 										undo_redo->add_undo_method(edited_navigation_shape.ptr(), "set_vertices", edited_navigation_shape->get_vertices());
+										undo_redo->add_do_method(edited_navigation_shape.ptr(), "clear_polygons");
+										undo_redo->add_undo_method(edited_navigation_shape.ptr(), "clear_polygons");
 										undo_redo->add_do_method(edited_navigation_shape.ptr(), "add_polygon", indices);
 										undo_redo->add_undo_method(edited_navigation_shape.ptr(), "add_polygon", edited_navigation_shape->get_polygon(0));
 										undo_redo->add_do_method(this, "_select_edited_shape_coord");
@@ -1535,13 +1673,12 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 								Vector2 pos = mb->get_position();
 								pos = snap_point(pos);
 								if (creating_shape) {
-									if (current_shape.size() > 0) {
-										if ((pos - current_shape[0]).length_squared() <= grab_threshold) {
-											if (current_shape.size() > 2) {
-												close_shape(shape_anchor);
-												workspace->update();
-												return;
-											}
+									if (current_shape.size() > 2) {
+
+										if (is_within_grabbing_distance_of_first_point(mb->get_position(), grab_threshold)) {
+											close_shape(shape_anchor);
+											workspace->update();
+											return;
 										}
 									}
 									current_shape.push_back(pos);
@@ -1587,12 +1724,15 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 								}
 							} else if (!mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 								if (creating_shape) {
-									if ((current_shape[0] - current_shape[1]).length_squared() <= grab_threshold) {
+
+									// if the first two corners are within grabbing distance of one another, expand the rect to fill the tile
+									if (is_within_grabbing_distance_of_first_point(current_shape[1], grab_threshold)) {
 										current_shape.set(0, snap_point(shape_anchor));
 										current_shape.set(1, snap_point(shape_anchor + Vector2(current_tile_region.size.x, 0)));
 										current_shape.set(2, snap_point(shape_anchor + current_tile_region.size));
 										current_shape.set(3, snap_point(shape_anchor + Vector2(0, current_tile_region.size.y)));
 									}
+
 									close_shape(shape_anchor);
 									workspace->update();
 									return;
@@ -1829,7 +1969,7 @@ Vector<Vector2> TileSetEditor::_get_edited_shape_points() {
 	return _get_collision_shape_points(edited_collision_shape);
 }
 
-void TileSetEditor::_set_edited_shape_points(const Vector<Vector2> points) {
+void TileSetEditor::_set_edited_shape_points(const Vector<Vector2> &points) {
 	Ref<ConvexPolygonShape2D> convex = edited_collision_shape;
 	Ref<ConcavePolygonShape2D> concave = edited_collision_shape;
 	if (convex.is_valid()) {
@@ -1868,7 +2008,7 @@ void TileSetEditor::_update_tile_data() {
 	} else {
 		int spacing = tileset->autotile_get_spacing(get_current_tile());
 		Vector2 size = tileset->tile_get_region(get_current_tile()).size;
-		Vector2i cell_count = size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing));
+		Vector2 cell_count = (size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing))).floor();
 		for (int y = 0; y < cell_count.y; y++) {
 			for (int x = 0; x < cell_count.x; x++) {
 				SubtileData data;
@@ -1970,7 +2110,7 @@ void TileSetEditor::_select_previous_tile() {
 			case EDITMODE_Z_INDEX: {
 				int spacing = tileset->autotile_get_spacing(get_current_tile());
 				Vector2 size = tileset->tile_get_region(get_current_tile()).size;
-				Vector2i cell_count = size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing));
+				Vector2 cell_count = (size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing))).floor();
 				cell_count -= Vector2(1, 1);
 				edited_shape_coord = cell_count;
 				_select_edited_shape_coord();
@@ -2009,11 +2149,7 @@ bool TileSetEditor::_sort_tiles(Variant p_a, Variant p_b) {
 		return true;
 
 	} else if (pos_a.y == pos_b.y) {
-		if (pos_a.x < pos_b.x) {
-			return true;
-		} else {
-			return false;
-		}
+		return (pos_a.x < pos_b.x);
 	} else {
 		return false;
 	}
@@ -2031,7 +2167,7 @@ void TileSetEditor::_select_next_subtile() {
 	} else {
 		int spacing = tileset->autotile_get_spacing(get_current_tile());
 		Vector2 size = tileset->tile_get_region(get_current_tile()).size;
-		Vector2i cell_count = size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing));
+		Vector2 cell_count = (size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing))).floor();
 		if (edited_shape_coord.x >= cell_count.x - 1 && edited_shape_coord.y >= cell_count.y - 1) {
 			_select_next_tile();
 		} else {
@@ -2057,7 +2193,7 @@ void TileSetEditor::_select_previous_subtile() {
 	} else {
 		int spacing = tileset->autotile_get_spacing(get_current_tile());
 		Vector2 size = tileset->tile_get_region(get_current_tile()).size;
-		Vector2i cell_count = size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing));
+		Vector2 cell_count = (size / (tileset->autotile_get_size(get_current_tile()) + Vector2(spacing, spacing))).floor();
 		if (edited_shape_coord.x <= 0 && edited_shape_coord.y <= 0) {
 			_select_previous_tile();
 		} else {
@@ -2077,9 +2213,9 @@ void TileSetEditor::_select_next_shape() {
 	} else if (edit_mode != EDITMODE_COLLISION) {
 		_select_next_subtile();
 	} else {
-		Vector2i edited_coord = Vector2();
+		Vector2i edited_coord = Vector2i();
 		if (tileset->tile_get_tile_mode(get_current_tile()) != TileSet::SINGLE_TILE) {
-			edited_coord = edited_shape_coord;
+			edited_coord = Vector2i(edited_shape_coord);
 		}
 		SubtileData data = current_tile_data[edited_coord];
 		if (data.collisions.size() == 0) {
@@ -2130,9 +2266,9 @@ void TileSetEditor::_select_previous_shape() {
 	} else if (edit_mode != EDITMODE_COLLISION) {
 		_select_previous_subtile();
 	} else {
-		Vector2i edited_coord = Vector2();
+		Vector2i edited_coord = Vector2i();
 		if (tileset->tile_get_tile_mode(get_current_tile()) != TileSet::SINGLE_TILE) {
-			edited_coord = edited_shape_coord;
+			edited_coord = Vector2i(edited_shape_coord);
 		}
 		SubtileData data = current_tile_data[edited_coord];
 		if (data.collisions.size() == 0) {
@@ -2441,7 +2577,7 @@ void TileSetEditor::draw_grid_snap() {
 				if (i == 0 && snap_offset.y != 0) {
 					last_p = snap_offset.y;
 				}
-				if (snap_separation.x != 0) {
+				if (snap_separation.y != 0) {
 					if (i != 0) {
 						workspace->draw_rect(Rect2(0, last_p, s.width, snap_separation.y), grid_color);
 						last_p += snap_separation.y;
@@ -2785,7 +2921,7 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 			w[i] = current_shape[i] - shape_anchor;
 		}
 
-		w = PoolVector<Vector2>::Write();
+		w.release();
 		shape->set_polygon(polygon);
 
 		undo_redo->create_action(TTR("Create Occlusion Polygon"));
@@ -2813,7 +2949,7 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 			indices.push_back(i);
 		}
 
-		w = PoolVector<Vector2>::Write();
+		w.release();
 		shape->set_vertices(polygon);
 		shape->add_polygon(indices);
 
@@ -2945,8 +3081,8 @@ Vector2 TileSetEditor::snap_point(const Vector2 &point) {
 	}
 
 	if (tools[TOOL_GRID_SNAP]->is_pressed()) {
-		p.x = Math::snap_scalar_seperation(snap_offset.x, snap_step.x, p.x, snap_separation.x);
-		p.y = Math::snap_scalar_seperation(snap_offset.y, snap_step.y, p.y, snap_separation.y);
+		p.x = Math::snap_scalar_separation(snap_offset.x, snap_step.x, p.x, snap_separation.x);
+		p.y = Math::snap_scalar_separation(snap_offset.y, snap_step.y, p.y, snap_separation.y);
 	}
 	if (tools[SHAPE_KEEP_INSIDE_TILE]->is_pressed()) {
 		if (p.x < region.position.x)
@@ -3038,12 +3174,28 @@ void TileSetEditor::update_workspace_tile_mode() {
 		}
 		tools[SELECT_NEXT]->set_disabled(true);
 		tools[SELECT_PREVIOUS]->set_disabled(true);
+
+		tools[ZOOM_OUT]->hide();
+		tools[ZOOM_1]->hide();
+		tools[ZOOM_IN]->hide();
+		tools[VISIBLE_INFO]->hide();
+
+		scroll->hide();
+		empty_message->show();
 	} else {
 		for (int i = 1; i < WORKSPACE_MODE_MAX; i++) {
 			tool_workspacemode[i]->set_disabled(false);
 		}
 		tools[SELECT_NEXT]->set_disabled(false);
 		tools[SELECT_PREVIOUS]->set_disabled(false);
+
+		tools[ZOOM_OUT]->show();
+		tools[ZOOM_1]->show();
+		tools[ZOOM_IN]->show();
+		tools[VISIBLE_INFO]->show();
+
+		scroll->show();
+		empty_message->hide();
 	}
 
 	if (workspace_mode != WORKSPACE_EDIT) {
@@ -3104,7 +3256,6 @@ void TileSetEditor::update_workspace_tile_mode() {
 			_select_edited_shape_coord();
 
 		tool_editmode[EDITMODE_BITMASK]->hide();
-		tool_editmode[EDITMODE_PRIORITY]->hide();
 	}
 	_on_edit_mode_changed(edit_mode);
 }
@@ -3123,10 +3274,11 @@ void TileSetEditor::update_workspace_minsize() {
 				workspace_min_size.y = region.position.y + region.size.y;
 		}
 	}
+	delete tiles;
 
 	workspace->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
-	workspace_container->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
-	workspace_overlay->set_custom_minimum_size(workspace_min_size + WORKSPACE_MARGIN * 2);
+	workspace_container->set_custom_minimum_size(workspace_min_size * workspace->get_scale() + WORKSPACE_MARGIN * 2);
+	workspace_overlay->set_custom_minimum_size(workspace_min_size * workspace->get_scale() + WORKSPACE_MARGIN * 2);
 }
 
 void TileSetEditor::update_edited_region(const Vector2 &end_point) {

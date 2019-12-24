@@ -33,7 +33,7 @@
 #include "emws_server.h"
 #include "core/os/os.h"
 
-Error EMWSServer::listen(int p_port, PoolVector<String> p_protocols, bool gd_mp_api) {
+Error EMWSServer::listen(int p_port, Vector<String> p_protocols, bool gd_mp_api) {
 
 	return FAILED;
 }
@@ -77,6 +77,10 @@ void EMWSServer::poll() {
 
 int EMWSServer::get_max_packet_size() const {
 	return 0;
+}
+
+Error EMWSServer::set_buffers(int p_in_buffer, int p_in_packets, int p_out_buffer, int p_out_packets) {
+	return OK;
 }
 
 EMWSServer::EMWSServer() {

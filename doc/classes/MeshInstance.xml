@@ -43,6 +43,7 @@
 			<return type="int">
 			</return>
 			<description>
+				Returns the number of surface materials.
 			</description>
 		</method>
 		<method name="set_surface_material">
@@ -61,8 +62,10 @@
 		<member name="mesh" type="Mesh" setter="set_mesh" getter="get_mesh">
 			The [Mesh] resource for the instance.
 		</member>
-		<member name="skeleton" type="NodePath" setter="set_skeleton_path" getter="get_skeleton_path">
+		<member name="skeleton" type="NodePath" setter="set_skeleton_path" getter="get_skeleton_path" default="NodePath(&quot;..&quot;)">
 			[NodePath] to the [Skeleton] associated with the instance.
+		</member>
+		<member name="skin" type="Skin" setter="set_skin" getter="get_skin">
 		</member>
 	</members>
 	<constants>

@@ -75,20 +75,18 @@ void EditorRunNative::_notification(int p_what) {
 
 				Ref<EditorExportPlatform> eep = EditorExport::get_singleton()->get_export_platform(E->key());
 				MenuButton *mb = E->get();
-				int dc = eep->get_device_count();
+				int dc = eep->get_options_count();
 
 				if (dc == 0) {
 					mb->hide();
 				} else {
 					mb->get_popup()->clear();
 					mb->show();
-					if (dc == 1) {
-						mb->set_tooltip(eep->get_device_name(0) + "\n\n" + eep->get_device_info(0).strip_edges());
-					} else {
-						mb->set_tooltip("Select device from the list");
+					mb->set_tooltip(eep->get_options_tooltip());
+					if (dc > 1) {
 						for (int i = 0; i < dc; i++) {
-							mb->get_popup()->add_icon_item(get_icon("Play", "EditorIcons"), eep->get_device_name(i));
-							mb->get_popup()->set_item_tooltip(mb->get_popup()->get_item_count() - 1, eep->get_device_info(i).strip_edges());
+							mb->get_popup()->add_icon_item(eep->get_option_icon(i), eep->get_option_label(i));
+							mb->get_popup()->set_item_tooltip(mb->get_popup()->get_item_count() - 1, eep->get_option_tooltip(i));
 						}
 					}
 				}
@@ -101,11 +99,17 @@ void EditorRunNative::_notification(int p_what) {
 
 void EditorRunNative::_run_native(int p_idx, int p_platform) {
 
+	if (!EditorNode::get_singleton()->ensure_main_scene(true)) {
+		resume_idx = p_idx;
+		resume_platform = p_platform;
+		return;
+	}
+
 	Ref<EditorExportPlatform> eep = EditorExport::get_singleton()->get_export_platform(p_platform);
 	ERR_FAIL_COND(eep.is_null());
 
 	if (p_idx == -1) {
-		if (eep->get_device_count() == 1) {
+		if (eep->get_options_count() == 1) {
 			menus[p_platform]->get_popup()->hide();
 			p_idx = 0;
 		} else {
@@ -142,6 +146,10 @@ void EditorRunNative::_run_native(int p_idx, int p_platform) {
 		flags |= EditorExportPlatform::DEBUG_FLAG_VIEW_NAVIGATION;
 
 	eep->run(preset, p_idx, flags);
+}
+
+void EditorRunNative::resume_run_native() {
+	_run_native(resume_idx, resume_platform);
 }
 
 void EditorRunNative::_bind_methods() {
@@ -198,4 +206,6 @@ EditorRunNative::EditorRunNative() {
 	deploy_debug_remote = false;
 	debug_collisions = false;
 	debug_navigation = false;
+	resume_idx = 0;
+	resume_platform = 0;
 }

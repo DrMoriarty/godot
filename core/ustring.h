@@ -36,10 +36,6 @@
 #include "core/typedefs.h"
 #include "core/vector.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 template <class T>
 class CharProxy {
 	friend class CharString;
@@ -137,6 +133,7 @@ class String {
 	void copy_from(const CharType &p_char);
 	void copy_from_unchecked(const CharType *p_char, const int p_length);
 	bool _base_is_subsequence_of(const String &p_string, bool case_insensitive) const;
+	int _count(const String &p_string, int p_from, int p_to, bool p_case_insensitive) const;
 
 public:
 	enum {
@@ -201,7 +198,7 @@ public:
 	}
 
 	/* complex helpers */
-	String substr(int p_from, int p_chars) const;
+	String substr(int p_from, int p_chars = -1) const;
 	int find(const String &p_str, int p_from = 0) const; ///< return <0 if failed
 	int find(const char *p_str, int p_from = 0) const; ///< return <0 if failed
 	int find_char(const CharType &p_char, int p_from = 0) const; ///< return <0 if failed
@@ -226,6 +223,7 @@ public:
 	String replace(const String &p_key, const String &p_with) const;
 	String replace(const char *p_key, const char *p_with) const;
 	String replacen(const String &p_key, const String &p_with) const;
+	String repeat(int p_count) const;
 	String insert(int p_at_pos, const String &p_string) const;
 	String pad_decimals(int p_digits) const;
 	String pad_zeros(int p_digits) const;
@@ -279,6 +277,9 @@ public:
 	String to_upper() const;
 	String to_lower() const;
 
+	int count(const String &p_string, int p_from = 0, int p_to = 0) const;
+	int countn(const String &p_string, int p_from = 0, int p_to = 0) const;
+
 	String left(int p_pos) const;
 	String right(int p_pos) const;
 	String dedent() const;
@@ -305,8 +306,10 @@ public:
 	uint32_t hash() const; /* hash the string */
 	uint64_t hash64() const; /* hash the string */
 	String md5_text() const;
+	String sha1_text() const;
 	String sha256_text() const;
 	Vector<uint8_t> md5_buffer() const;
+	Vector<uint8_t> sha1_buffer() const;
 	Vector<uint8_t> sha256_buffer() const;
 
 	_FORCE_INLINE_ bool empty() const { return length() == 0; }
@@ -319,7 +322,7 @@ public:
 	String path_to_file(const String &p_path) const;
 	String get_base_dir() const;
 	String get_file() const;
-	static String humanize_size(size_t p_size);
+	static String humanize_size(uint64_t p_size);
 	String simplify_path() const;
 
 	String xml_escape(bool p_escape_quotes = false) const;
@@ -334,6 +337,8 @@ public:
 
 	String percent_encode() const;
 	String percent_decode() const;
+
+	String property_name_encode() const;
 
 	bool is_valid_identifier() const;
 	bool is_valid_integer() const;
@@ -366,6 +371,7 @@ String operator+(const char *p_chr, const String &p_str);
 String operator+(CharType p_chr, const String &p_str);
 
 String itos(int64_t p_val);
+String uitos(uint64_t p_val);
 String rtos(double p_val);
 String rtoss(double p_val); //scientific version
 
@@ -404,8 +410,6 @@ _FORCE_INLINE_ bool is_str_less(const L *l_ptr, const R *r_ptr) {
 		l_ptr++;
 		r_ptr++;
 	}
-
-	CRASH_COND(true); // unreachable
 }
 
 /* end of namespace */
@@ -415,16 +419,16 @@ _FORCE_INLINE_ bool is_str_less(const L *l_ptr, const R *r_ptr) {
 
 //gets parsed
 String TTR(const String &);
-//use for c strings
-#define TTRC(m_value) m_value
+//use for C strings
+#define TTRC(m_value) (m_value)
 //use to avoid parsing (for use later with C strings)
 #define TTRGET(m_value) TTR(m_value)
 
 #else
 
-#define TTR(m_val) (String())
-#define TTRCDEF(m_value) (m_value)
+#define TTR(m_value) (String())
 #define TTRC(m_value) (m_value)
+#define TTRGET(m_value) (m_value)
 
 #endif
 

@@ -35,10 +35,6 @@
 #include "core/object.h"
 #include "core/print_string.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 /**	To bind more then 6 parameters include this:
  *  #include "core/method_bind_ext.gen.inc"
  */
@@ -162,6 +158,7 @@ public:
 	static void _add_class2(const StringName &p_class, const StringName &p_inherits);
 
 	static HashMap<StringName, HashMap<StringName, Variant> > default_values;
+	static Set<StringName> default_values_cached;
 
 public:
 	// DO NOT USE THIS!!!!!! NEEDS TO BE PUBLIC BUT DO NOT USE NO MATTER WHAT!!!
@@ -287,6 +284,15 @@ public:
 		return bind_methodfi(METHOD_FLAGS_DEFAULT, bind, p_method_name, ptr, 6);
 	}
 
+	template <class N, class M>
+	static MethodBind *bind_method(N p_method_name, M p_method, const Variant &p_def1, const Variant &p_def2, const Variant &p_def3, const Variant &p_def4, const Variant &p_def5, const Variant &p_def6, const Variant &p_def7) {
+
+		MethodBind *bind = create_method_bind(p_method);
+		const Variant *ptr[7] = { &p_def1, &p_def2, &p_def3, &p_def4, &p_def5, &p_def6, &p_def7 };
+
+		return bind_methodfi(METHOD_FLAGS_DEFAULT, bind, p_method_name, ptr, 7);
+	}
+
 	template <class M>
 	static MethodBind *bind_vararg_method(uint32_t p_flags, StringName p_name, M p_method, const MethodInfo &p_info = MethodInfo(), const Vector<Variant> &p_default_args = Vector<Variant>()) {
 
@@ -309,8 +315,7 @@ public:
 		if (type->method_map.has(p_name)) {
 			memdelete(bind);
 			// overloading not supported
-			ERR_EXPLAIN("Method already bound: " + instance_type + "::" + p_name);
-			ERR_FAIL_V(NULL);
+			ERR_FAIL_V_MSG(NULL, "Method already bound: " + instance_type + "::" + p_name + ".");
 		}
 		type->method_map[p_name] = bind;
 #ifdef DEBUG_METHODS_ENABLED
@@ -329,14 +334,15 @@ public:
 
 	static void add_property_group(StringName p_class, const String &p_name, const String &p_prefix = "");
 	static void add_property(StringName p_class, const PropertyInfo &p_pinfo, const StringName &p_setter, const StringName &p_getter, int p_index = -1);
+	static void set_property_default_value(StringName p_class, const StringName &p_name, const Variant &p_default);
 	static void get_property_list(StringName p_class, List<PropertyInfo> *p_list, bool p_no_inheritance = false, const Object *p_validator = NULL);
 	static bool set_property(Object *p_object, const StringName &p_property, const Variant &p_value, bool *r_valid = NULL);
 	static bool get_property(Object *p_object, const StringName &p_property, Variant &r_value);
 	static bool has_property(const StringName &p_class, const StringName &p_property, bool p_no_inheritance = false);
 	static int get_property_index(const StringName &p_class, const StringName &p_property, bool *r_is_valid = NULL);
 	static Variant::Type get_property_type(const StringName &p_class, const StringName &p_property, bool *r_is_valid = NULL);
-	static StringName get_property_setter(StringName p_class, const StringName p_property);
-	static StringName get_property_getter(StringName p_class, const StringName p_property);
+	static StringName get_property_setter(StringName p_class, const StringName &p_property);
+	static StringName get_property_getter(StringName p_class, const StringName &p_property);
 
 	static bool has_method(StringName p_class, StringName p_method, bool p_no_inheritance = false);
 	static void set_method_flags(StringName p_class, StringName p_method, int p_flags);
@@ -355,7 +361,7 @@ public:
 	static void get_enum_list(const StringName &p_class, List<StringName> *p_enums, bool p_no_inheritance = false);
 	static void get_enum_constants(const StringName &p_class, const StringName &p_enum, List<StringName> *p_constants, bool p_no_inheritance = false);
 
-	static Variant class_get_default_property_value(const StringName &p_class, const StringName &p_property);
+	static Variant class_get_default_property_value(const StringName &p_class, const StringName &p_property, bool *r_valid = NULL);
 
 	static StringName get_category(const StringName &p_node);
 
@@ -373,6 +379,7 @@ public:
 
 	static void set_current_api(APIType p_api);
 	static APIType get_current_api();
+	static void cleanup_defaults();
 	static void cleanup();
 };
 

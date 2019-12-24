@@ -41,10 +41,11 @@ class StyleBoxPreview : public VBoxContainer {
 
 	GDCLASS(StyleBoxPreview, VBoxContainer);
 
-	Panel *preview;
+	Control *preview;
 	Ref<StyleBox> stylebox;
 
 	void _sb_changed();
+	void _redraw();
 
 protected:
 	static void _bind_methods();
@@ -56,7 +57,8 @@ public:
 };
 
 class EditorInspectorPluginStyleBox : public EditorInspectorPlugin {
-	GDCLASS(EditorInspectorPluginStyleBox, EditorInspectorPlugin)
+	GDCLASS(EditorInspectorPluginStyleBox, EditorInspectorPlugin);
+
 public:
 	virtual bool can_handle(Object *p_object);
 	virtual void parse_begin(Object *p_object);

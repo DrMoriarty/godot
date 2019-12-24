@@ -37,9 +37,7 @@
 #include "scene/gui/button.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/tree.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class SceneTreeEditor : public Control {
 
 	GDCLASS(SceneTreeEditor, Control);
@@ -68,6 +66,7 @@ class SceneTreeEditor : public Control {
 	AcceptDialog *warning;
 
 	bool connect_to_script_mode;
+	bool connecting_signal;
 
 	int blocked;
 
@@ -155,6 +154,7 @@ public:
 	void update_tree() { _update_tree(); }
 
 	void set_connect_to_script_mode(bool p_enable);
+	void set_connecting_signal(bool p_enable);
 
 	Tree *get_scene_tree() { return tree; }
 
@@ -169,10 +169,12 @@ class SceneTreeDialog : public ConfirmationDialog {
 	SceneTreeEditor *tree;
 	//Button *select;
 	//Button *cancel;
+	LineEdit *filter;
 
 	void update_tree();
 	void _select();
 	void _cancel();
+	void _filter_changed(const String &p_filter);
 
 protected:
 	void _notification(int p_what);

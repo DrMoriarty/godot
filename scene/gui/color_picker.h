@@ -54,11 +54,13 @@ private:
 	TextureRect *sample;
 	TextureRect *preset;
 	HBoxContainer *preset_container;
+	HBoxContainer *preset_container2;
 	HSeparator *preset_separator;
 	Button *bt_add_preset;
 	List<Color> presets;
 	ToolButton *btn_pick;
-	CheckButton *btn_mode;
+	CheckButton *btn_hsv;
+	CheckButton *btn_raw;
 	HSlider *scroll[4];
 	SpinBox *values[4];
 	Label *labels[4];
@@ -67,9 +69,11 @@ private:
 	bool edit_alpha;
 	Size2i ms;
 	bool text_is_constructor;
+	int presets_per_row;
 
 	Color color;
 	bool raw_mode_enabled;
+	bool hsv_mode_enabled;
 	bool deferred_mode_enabled;
 	bool updating;
 	bool changing_color;
@@ -81,7 +85,7 @@ private:
 	void _html_entered(const String &p_html);
 	void _value_changed(double);
 	void _update_controls();
-	void _update_color();
+	void _update_color(bool p_update_sliders = true);
 	void _update_presets();
 	void _update_text_value();
 	void _text_type_toggled();
@@ -106,12 +110,16 @@ public:
 	void set_edit_alpha(bool p_show);
 	bool is_editing_alpha() const;
 
+	void _set_pick_color(const Color &p_color, bool p_update_sliders);
 	void set_pick_color(const Color &p_color);
 	Color get_pick_color() const;
 
 	void add_preset(const Color &p_color);
 	void erase_preset(const Color &p_color);
 	PoolColorArray get_presets() const;
+
+	void set_hsv_mode(bool p_enabled);
+	bool is_hsv_mode() const;
 
 	void set_raw_mode(bool p_enabled);
 	bool is_raw_mode() const;

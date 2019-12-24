@@ -88,14 +88,13 @@ void EditorProfiler::clear() {
 	frame_metrics.resize(metric_size);
 	last_metric = -1;
 	variables->clear();
-	//activate->set_pressed(false);
 	plot_sigs.clear();
 	plot_sigs.insert("physics_frame_time");
 	plot_sigs.insert("category_frame_time");
 
 	updating_frame = true;
 	cursor_metric_edit->set_min(0);
-	cursor_metric_edit->set_max(0);
+	cursor_metric_edit->set_max(100); // Doesn't make much sense, but we can't have min == max. Doesn't hurt.
 	cursor_metric_edit->set_value(0);
 	updating_frame = false;
 	hover_metric = -1;
@@ -227,8 +226,6 @@ void EditorProfiler::_update_plot() {
 		Map<StringName, int> plot_prev;
 		//Map<StringName,int> plot_max;
 
-		uint64_t time = OS::get_singleton()->get_ticks_usec();
-
 		for (int i = 0; i < w; i++) {
 
 			for (int j = 0; j < h * 4; j++) {
@@ -340,11 +337,9 @@ void EditorProfiler::_update_plot() {
 				wr[widx + 3] = 255;
 			}
 		}
-
-		time = OS::get_singleton()->get_ticks_usec() - time;
 	}
 
-	wr = PoolVector<uint8_t>::Write();
+	wr.release();
 
 	Ref<Image> img;
 	img.instance();
@@ -402,6 +397,7 @@ void EditorProfiler::_update_frame() {
 			item->set_metadata(0, it.signature);
 			item->set_metadata(1, it.script);
 			item->set_metadata(2, it.line);
+			item->set_text_align(2, TreeItem::ALIGN_RIGHT);
 			item->set_tooltip(0, it.script + ":" + itos(it.line));
 
 			float time = dtime == DISPLAY_SELF_TIME ? it.self : it.total;

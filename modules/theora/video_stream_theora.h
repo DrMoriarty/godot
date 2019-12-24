@@ -147,7 +147,7 @@ public:
 
 	void set_file(const String &p_file);
 
-	virtual Ref<Texture> get_texture();
+	virtual Ref<Texture> get_texture() const;
 	virtual void update(float p_delta);
 
 	virtual void set_mix_callback(AudioMixCallback p_callback, void *p_userdata);
@@ -186,7 +186,6 @@ public:
 };
 
 class ResourceFormatLoaderTheora : public ResourceFormatLoader {
-	GDCLASS(ResourceFormatLoaderTheora, ResourceFormatLoader)
 public:
 	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;

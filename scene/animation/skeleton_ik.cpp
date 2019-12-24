@@ -320,7 +320,7 @@ void FabrikInverseKinematic::solve(Task *p_task, real_t blending_delta, bool ove
 				new_bone_pose.basis = new_bone_pose.basis * p_task->chain.tips[0].end_effector->goal_transform.basis;
 		}
 
-		p_task->skeleton->set_bone_global_pose(ci->bone, new_bone_pose);
+		p_task->skeleton->set_bone_global_pose_override(ci->bone, new_bone_pose, 1.0);
 
 		if (!ci->children.empty())
 			ci = &ci->children.write[0];
@@ -406,6 +406,7 @@ void SkeletonIK::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			skeleton = Object::cast_to<Skeleton>(get_parent());
+			set_process_priority(1);
 			reload_chain();
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
@@ -423,7 +424,6 @@ void SkeletonIK::_notification(int p_what) {
 }
 
 SkeletonIK::SkeletonIK() :
-		Node(),
 		interpolation(1),
 		override_tip_basis(true),
 		use_magnet(false),
@@ -432,8 +432,6 @@ SkeletonIK::SkeletonIK() :
 		skeleton(NULL),
 		target_node_override(NULL),
 		task(NULL) {
-
-	set_process_priority(1);
 }
 
 SkeletonIK::~SkeletonIK() {

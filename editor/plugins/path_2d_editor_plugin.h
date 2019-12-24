@@ -36,9 +36,6 @@
 #include "scene/2d/path_2d.h"
 #include "scene/gui/tool_button.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 class CanvasItemEditor;
 
 class Path2DEditor : public HBoxContainer {
@@ -123,7 +120,7 @@ class Path2DEditorPlugin : public EditorPlugin {
 
 public:
 	virtual bool forward_canvas_gui_input(const Ref<InputEvent> &p_event) { return path2d_editor->forward_gui_input(p_event); }
-	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) { return path2d_editor->forward_canvas_draw_over_viewport(p_overlay); }
+	virtual void forward_canvas_draw_over_viewport(Control *p_overlay) { path2d_editor->forward_canvas_draw_over_viewport(p_overlay); }
 
 	virtual String get_name() const { return "Path2D"; }
 	bool has_main_screen() const { return false; }

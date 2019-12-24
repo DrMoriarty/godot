@@ -55,9 +55,70 @@
 #include <windows.h>
 #include <windowsx.h>
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+#ifndef POINTER_STRUCTURES
+
+#define POINTER_STRUCTURES
+
+typedef DWORD POINTER_INPUT_TYPE;
+typedef UINT32 POINTER_FLAGS;
+typedef UINT32 PEN_FLAGS;
+typedef UINT32 PEN_MASK;
+
+enum tagPOINTER_INPUT_TYPE {
+	PT_POINTER = 0x00000001,
+	PT_TOUCH = 0x00000002,
+	PT_PEN = 0x00000003,
+	PT_MOUSE = 0x00000004,
+	PT_TOUCHPAD = 0x00000005
+};
+
+typedef enum tagPOINTER_BUTTON_CHANGE_TYPE {
+	POINTER_CHANGE_NONE,
+	POINTER_CHANGE_FIRSTBUTTON_DOWN,
+	POINTER_CHANGE_FIRSTBUTTON_UP,
+	POINTER_CHANGE_SECONDBUTTON_DOWN,
+	POINTER_CHANGE_SECONDBUTTON_UP,
+	POINTER_CHANGE_THIRDBUTTON_DOWN,
+	POINTER_CHANGE_THIRDBUTTON_UP,
+	POINTER_CHANGE_FOURTHBUTTON_DOWN,
+	POINTER_CHANGE_FOURTHBUTTON_UP,
+	POINTER_CHANGE_FIFTHBUTTON_DOWN,
+	POINTER_CHANGE_FIFTHBUTTON_UP,
+} POINTER_BUTTON_CHANGE_TYPE;
+
+typedef struct tagPOINTER_INFO {
+	POINTER_INPUT_TYPE pointerType;
+	UINT32 pointerId;
+	UINT32 frameId;
+	POINTER_FLAGS pointerFlags;
+	HANDLE sourceDevice;
+	HWND hwndTarget;
+	POINT ptPixelLocation;
+	POINT ptHimetricLocation;
+	POINT ptPixelLocationRaw;
+	POINT ptHimetricLocationRaw;
+	DWORD dwTime;
+	UINT32 historyCount;
+	INT32 InputData;
+	DWORD dwKeyStates;
+	UINT64 PerformanceCount;
+	POINTER_BUTTON_CHANGE_TYPE ButtonChangeType;
+} POINTER_INFO;
+
+typedef struct tagPOINTER_PEN_INFO {
+	POINTER_INFO pointerInfo;
+	PEN_FLAGS penFlags;
+	PEN_MASK penMask;
+	UINT32 pressure;
+	UINT32 rotation;
+	INT32 tiltX;
+	INT32 tiltY;
+} POINTER_PEN_INFO;
+
+#endif
+
+typedef BOOL(WINAPI *GetPointerTypePtr)(uint32_t p_id, POINTER_INPUT_TYPE *p_type);
+typedef BOOL(WINAPI *GetPointerPenInfoPtr)(uint32_t p_id, POINTER_PEN_INFO *p_pen_info);
 
 typedef struct {
 	BYTE bWidth; // Width, in pixels, of the image
@@ -80,11 +141,16 @@ typedef struct {
 class JoypadWindows;
 class OS_Windows : public OS {
 
+	static GetPointerTypePtr win8p_GetPointerType;
+	static GetPointerPenInfoPtr win8p_GetPointerPenInfo;
+
 	enum {
 		KEY_EVENT_BUFFER_SIZE = 512
 	};
 
+#ifdef STDOUT_FILE
 	FILE *stdo;
+#endif
 
 	struct KeyEvent {
 
@@ -109,7 +175,6 @@ class OS_Windows : public OS {
 #endif
 	VisualServer *visual_server;
 	int pressrc;
-	HDC hDC; // Private GDI Device Context
 	HINSTANCE hInstance; // Holds The Instance Of The Application
 	HWND hWnd;
 	Point2 last_pos;
@@ -123,6 +188,9 @@ class OS_Windows : public OS {
 	uint32_t move_timer_id;
 
 	HCURSOR hCursor;
+
+	Size2 min_size;
+	Size2 max_size;
 
 	Size2 window_rect;
 	VideoMode video_mode;
@@ -150,6 +218,7 @@ class OS_Windows : public OS {
 
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
 	CursorShape cursor_shape;
+	Map<CursorShape, Vector<Variant> > cursors_cache;
 
 	InputDefault *input;
 	JoypadWindows *joypad;
@@ -173,7 +242,7 @@ class OS_Windows : public OS {
 	void _drag_event(float p_x, float p_y, int idx);
 	void _touch_event(bool p_pressed, float p_x, float p_y, int idx);
 
-	void _update_window_style(bool repaint = true);
+	void _update_window_style(bool p_repaint = true, bool p_maximized = false);
 
 	void _set_mouse_mode_impl(MouseMode p_mode);
 
@@ -205,6 +274,8 @@ protected:
 	bool maximized;
 	bool minimized;
 	bool borderless;
+	bool console_visible;
+	bool was_maximized;
 
 public:
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -236,6 +307,10 @@ public:
 	virtual void set_window_position(const Point2 &p_position);
 	virtual Size2 get_window_size() const;
 	virtual Size2 get_real_window_size() const;
+	virtual Size2 get_max_window_size() const;
+	virtual Size2 get_min_window_size() const;
+	virtual void set_min_window_size(const Size2 p_size);
+	virtual void set_max_window_size(const Size2 p_size);
 	virtual void set_window_size(const Size2 p_size);
 	virtual void set_window_fullscreen(bool p_enabled);
 	virtual bool is_window_fullscreen() const;
@@ -247,6 +322,8 @@ public:
 	virtual bool is_window_maximized() const;
 	virtual void set_window_always_on_top(bool p_enabled);
 	virtual bool is_window_always_on_top() const;
+	virtual void set_console_visible(bool p_enabled);
+	virtual bool is_console_visible() const;
 	virtual void request_attention();
 
 	virtual void set_borderless_window(bool p_borderless);

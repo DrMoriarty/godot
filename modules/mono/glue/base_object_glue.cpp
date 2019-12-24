@@ -36,6 +36,7 @@
 #include "core/string_name.h"
 
 #include "../csharp_script.h"
+#include "../mono_gd/gd_mono_cache.h"
 #include "../mono_gd/gd_mono_class.h"
 #include "../mono_gd/gd_mono_internals.h"
 #include "../mono_gd/gd_mono_utils.h"
@@ -166,7 +167,7 @@ MonoArray *godot_icall_DynamicGodotObject_SetMemberList(Object *p_ptr) {
 	int i = 0;
 	for (List<PropertyInfo>::Element *E = property_list.front(); E; E = E->next()) {
 		MonoString *boxed = GDMonoMarshal::mono_string_from_godot(E->get().name);
-		mono_array_set(result, MonoString *, i, boxed);
+		mono_array_setref(result, i, boxed);
 		i++;
 	}
 
@@ -219,7 +220,18 @@ MonoBoolean godot_icall_DynamicGodotObject_SetMember(Object *p_ptr, MonoString *
 }
 
 MonoString *godot_icall_Object_ToString(Object *p_ptr) {
-	return GDMonoMarshal::mono_string_from_godot(Variant(p_ptr).operator String());
+#ifdef DEBUG_ENABLED
+	// Cannot happen in C#; would get an ObjectDisposedException instead.
+	CRASH_COND(p_ptr == NULL);
+
+	if (ScriptDebugger::get_singleton() && !Object::cast_to<Reference>(p_ptr)) { // Only if debugging!
+		// Cannot happen either in C#; the handle is nullified when the object is destroyed
+		CRASH_COND(!ObjectDB::instance_validate(p_ptr));
+	}
+#endif
+
+	String result = "[" + p_ptr->get_class() + ":" + itos(p_ptr->get_instance_id()) + "]";
+	return GDMonoMarshal::mono_string_from_godot(result);
 }
 
 void godot_register_object_icalls() {

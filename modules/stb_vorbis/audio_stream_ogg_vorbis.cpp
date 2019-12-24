@@ -188,7 +188,7 @@ void AudioStreamOGGVorbis::set_data(const PoolVector<uint8_t> &p_data) {
 		ogg_stream = stb_vorbis_open_memory((const unsigned char *)src_datar.ptr(), src_data_len, &error, &ogg_alloc);
 
 		if (!ogg_stream && error == VORBIS_outofmem) {
-			w = PoolVector<char>::Write();
+			w.release();
 			alloc_try *= 2;
 		} else {
 
@@ -266,8 +266,8 @@ void AudioStreamOGGVorbis::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_loop_offset"), &AudioStreamOGGVorbis::get_loop_offset);
 
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_BYTE_ARRAY, "data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_data", "get_data");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "loop", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_loop", "has_loop");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "loop_offset", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_loop_offset", "get_loop_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "loop"), "set_loop", "has_loop");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "loop_offset"), "set_loop_offset", "get_loop_offset");
 }
 
 AudioStreamOGGVorbis::AudioStreamOGGVorbis() {

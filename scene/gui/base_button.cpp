@@ -61,37 +61,7 @@ void BaseButton::_gui_input(Ref<InputEvent> p_event) {
 
 	bool button_masked = mouse_button.is_valid() && ((1 << (mouse_button->get_button_index() - 1)) & button_mask) > 0;
 	if (button_masked || ui_accept) {
-		if (p_event->is_pressed()) {
-			status.press_attempt = true;
-			status.pressing_inside = true;
-			emit_signal("button_down");
-		}
-
-		if (status.press_attempt && status.pressing_inside) {
-			if (toggle_mode) {
-				if ((p_event->is_pressed() && action_mode == ACTION_MODE_BUTTON_PRESS) || (!p_event->is_pressed() && action_mode == ACTION_MODE_BUTTON_RELEASE)) {
-					if (action_mode == ACTION_MODE_BUTTON_PRESS) {
-						status.press_attempt = false;
-						status.pressing_inside = false;
-					}
-					status.pressed = !status.pressed;
-					_unpress_group();
-					toggled(status.pressed);
-					pressed();
-				}
-			} else {
-				if (!p_event->is_pressed()) {
-					pressed();
-				}
-			}
-		}
-
-		if (!p_event->is_pressed()) { // pressed state should be correct with button_up signal
-			emit_signal("button_up");
-			status.press_attempt = false;
-		}
-
-		update();
+		on_action_event(p_event);
 		return;
 	}
 
@@ -145,9 +115,6 @@ void BaseButton::_notification(int p_what) {
 		}
 	}
 
-	if (p_what == NOTIFICATION_ENTER_TREE) {
-	}
-
 	if (p_what == NOTIFICATION_EXIT_TREE || (p_what == NOTIFICATION_VISIBILITY_CHANGED && !is_visible_in_tree())) {
 
 		if (!toggle_mode) {
@@ -159,20 +126,63 @@ void BaseButton::_notification(int p_what) {
 	}
 }
 
-void BaseButton::pressed() {
+void BaseButton::_pressed() {
 
 	if (get_script_instance()) {
 		get_script_instance()->call(SceneStringNames::get_singleton()->_pressed);
 	}
+	pressed();
 	emit_signal("pressed");
 }
 
-void BaseButton::toggled(bool p_pressed) {
+void BaseButton::_toggled(bool p_pressed) {
 
 	if (get_script_instance()) {
 		get_script_instance()->call(SceneStringNames::get_singleton()->_toggled, p_pressed);
 	}
+	toggled(p_pressed);
 	emit_signal("toggled", p_pressed);
+}
+
+void BaseButton::on_action_event(Ref<InputEvent> p_event) {
+
+	if (p_event->is_pressed()) {
+		status.press_attempt = true;
+		status.pressing_inside = true;
+		emit_signal("button_down");
+	}
+
+	if (status.press_attempt && status.pressing_inside) {
+		if (toggle_mode) {
+			if ((p_event->is_pressed() && action_mode == ACTION_MODE_BUTTON_PRESS) || (!p_event->is_pressed() && action_mode == ACTION_MODE_BUTTON_RELEASE)) {
+				if (action_mode == ACTION_MODE_BUTTON_PRESS) {
+					status.press_attempt = false;
+					status.pressing_inside = false;
+				}
+				status.pressed = !status.pressed;
+				_unpress_group();
+				_toggled(status.pressed);
+				_pressed();
+			}
+		} else {
+			if (!p_event->is_pressed()) {
+				_pressed();
+			}
+		}
+	}
+
+	if (!p_event->is_pressed()) { // pressed state should be correct with button_up signal
+		emit_signal("button_up");
+		status.press_attempt = false;
+	}
+
+	update();
+}
+
+void BaseButton::pressed() {
+}
+
+void BaseButton::toggled(bool p_pressed) {
 }
 
 void BaseButton::set_disabled(bool p_disabled) {
@@ -208,9 +218,7 @@ void BaseButton::set_pressed(bool p_pressed) {
 	if (p_pressed) {
 		_unpress_group();
 	}
-	if (toggle_mode) {
-		toggled(status.pressed);
-	}
+	_toggled(status.pressed);
 
 	update();
 }
@@ -329,9 +337,6 @@ bool BaseButton::is_keep_pressed_outside() const {
 
 void BaseButton::set_shortcut(const Ref<ShortCut> &p_shortcut) {
 
-	if (shortcut.is_null() == p_shortcut.is_null())
-		return;
-
 	shortcut = p_shortcut;
 	set_process_unhandled_input(shortcut.is_valid());
 }
@@ -342,17 +347,12 @@ Ref<ShortCut> BaseButton::get_shortcut() const {
 
 void BaseButton::_unhandled_input(Ref<InputEvent> p_event) {
 
-	if (!is_disabled() && is_visible_in_tree() && p_event->is_pressed() && !p_event->is_echo() && shortcut.is_valid() && shortcut->is_shortcut(p_event)) {
+	if (!is_disabled() && is_visible_in_tree() && !p_event->is_echo() && shortcut.is_valid() && shortcut->is_shortcut(p_event)) {
 
 		if (get_viewport()->get_modal_stack_top() && !get_viewport()->get_modal_stack_top()->is_a_parent_of(this))
 			return; //ignore because of modal window
 
-		if (is_toggle_mode()) {
-			set_pressed(!is_pressed());
-			emit_signal("toggled", is_pressed());
-		}
-
-		emit_signal("pressed");
+		on_action_event(p_event);
 	}
 }
 

@@ -8,6 +8,7 @@ using real_t = System.Single;
 
 namespace Godot
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct Transform2D : IEquatable<Transform2D>
     {
@@ -98,6 +99,8 @@ namespace Godot
                         return x[columnIndex];
                     case 1:
                         return y[columnIndex];
+                    case 2:
+                        return origin[columnIndex];
                     default:
                         throw new IndexOutOfRangeException();
                 }
@@ -111,6 +114,9 @@ namespace Godot
                         return;
                     case 1:
                         y[columnIndex] = value;
+                        return;
+                    case 2:
+                        origin[columnIndex] = value;
                         return;
                     default:
                         throw new IndexOutOfRangeException();
@@ -136,7 +142,7 @@ namespace Godot
             inv[0] *= new Vector2(detInv, -detInv);
             inv[1] *= new Vector2(-detInv, detInv);
 
-            inv[2] = BasisXform(-inv[2]);
+            inv[2] = inv.BasisXform(-inv[2]);
 
             return inv;
         }
@@ -349,6 +355,11 @@ namespace Godot
         public bool Equals(Transform2D other)
         {
             return x.Equals(other.x) && y.Equals(other.y) && origin.Equals(other.origin);
+        }
+
+        public bool IsEqualApprox(Transform2D other)
+        {
+            return x.IsEqualApprox(other.x) && y.IsEqualApprox(other.y) && origin.IsEqualApprox(other.origin);
         }
 
         public override int GetHashCode()

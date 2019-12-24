@@ -33,12 +33,10 @@
 
 #include "core/os/semaphore.h"
 
-#if defined(UNIX_ENABLED) || defined(PTHREAD_ENABLED)
+#if (defined(UNIX_ENABLED) || defined(PTHREAD_ENABLED)) && !defined(OSX_ENABLED) && !defined(IPHONE_ENABLED)
 
 #include <semaphore.h>
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class SemaphorePosix : public Semaphore {
 
 	mutable sem_t sem;

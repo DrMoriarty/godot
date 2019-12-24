@@ -33,13 +33,14 @@
 #include "core/io/marshalls.h"
 #include "core/io/resource_loader.h"
 #include "core/message_queue.h"
+#include "core/os/dir_access.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/print_string.h"
 #include "core/project_settings.h"
-#include "editor/editor_node.h"
 #include "main/input_default.h"
 #include "node.h"
+#include "scene/debugger/script_debugger_remote.h"
 #include "scene/resources/dynamic_font.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
@@ -70,13 +71,23 @@ float SceneTreeTimer::get_time_left() const {
 }
 
 void SceneTreeTimer::set_pause_mode_process(bool p_pause_mode_process) {
-	if (process_pause != p_pause_mode_process) {
-		process_pause = p_pause_mode_process;
-	}
+
+	process_pause = p_pause_mode_process;
 }
 
 bool SceneTreeTimer::is_pause_mode_process() {
 	return process_pause;
+}
+
+void SceneTreeTimer::release_connections() {
+
+	List<Connection> connections;
+	get_all_signal_connections(&connections);
+
+	for (List<Connection>::Element *E = connections.front(); E; E = E->next()) {
+		Connection const &connection = E->get();
+		disconnect(connection.signal, connection.target, connection.method);
+	}
 }
 
 SceneTreeTimer::SceneTreeTimer() {
@@ -117,10 +128,7 @@ SceneTree::Group *SceneTree::add_to_group(const StringName &p_group, Node *p_nod
 		E = group_map.insert(p_group, Group());
 	}
 
-	if (E->get().nodes.find(p_node) != -1) {
-		ERR_EXPLAIN("Already in group: " + p_group);
-		ERR_FAIL_V(&E->get());
-	}
+	ERR_FAIL_COND_V_MSG(E->get().nodes.find(p_node) != -1, &E->get(), "Already in group: " + p_group + ".");
 	E->get().nodes.push_back(p_node);
 	//E->get().last_tree_version=0;
 	E->get().changed = true;
@@ -415,7 +423,7 @@ void SceneTree::input_event(const Ref<InputEvent> &p_event) {
 
 	input_handled = false;
 
-	Ref<InputEvent> ev = p_event;
+	const Ref<InputEvent> &ev = p_event;
 
 	MainLoop::input_event(ev);
 
@@ -453,9 +461,6 @@ void SceneTree::init() {
 
 	//_quit=false;
 	initialized = true;
-	input_handled = false;
-
-	pause = false;
 
 	root->_set_tree(this);
 	MainLoop::init();
@@ -567,6 +572,8 @@ bool SceneTree::idle(float p_time) {
 		E = N;
 	}
 
+	flush_transform_notifications(); //additional transforms after timers update
+
 	_call_idle_callbacks();
 
 #ifdef TOOLS_ENABLED
@@ -614,7 +621,14 @@ void SceneTree::finish() {
 		root->_set_tree(NULL);
 		root->_propagate_after_exit_tree();
 		memdelete(root); //delete root
+		root = NULL;
 	}
+
+	// cleanup timers
+	for (List<Ref<SceneTreeTimer> >::Element *E = timers.front(); E; E = E->next()) {
+		E->get()->release_connections();
+	}
+	timers.clear();
 }
 
 void SceneTree::quit() {
@@ -635,6 +649,7 @@ void SceneTree::_notification(int p_notification) {
 				break;
 			}
 		} break;
+
 		case NOTIFICATION_WM_GO_BACK_REQUEST: {
 
 			get_root()->propagate_notification(p_notification);
@@ -644,27 +659,23 @@ void SceneTree::_notification(int p_notification) {
 				break;
 			}
 		} break;
-		case NOTIFICATION_OS_MEMORY_WARNING:
-		case NOTIFICATION_OS_IME_UPDATE:
-		case NOTIFICATION_WM_MOUSE_ENTER:
-		case NOTIFICATION_WM_MOUSE_EXIT:
-		case NOTIFICATION_WM_FOCUS_IN:
-		case NOTIFICATION_WM_FOCUS_OUT: {
 
-			if (p_notification == NOTIFICATION_WM_FOCUS_IN) {
-				InputDefault *id = Object::cast_to<InputDefault>(Input::get_singleton());
-				if (id) {
-					id->ensure_touch_mouse_raised();
-				}
+		case NOTIFICATION_WM_FOCUS_IN: {
+
+			InputDefault *id = Object::cast_to<InputDefault>(Input::get_singleton());
+			if (id) {
+				id->ensure_touch_mouse_raised();
 			}
 
 			get_root()->propagate_notification(p_notification);
 		} break;
+
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 			if (!Engine::get_singleton()->is_editor_hint()) {
 				get_root()->propagate_notification(p_notification);
 			}
 		} break;
+
 		case NOTIFICATION_WM_UNFOCUS_REQUEST: {
 
 			notify_group_flags(GROUP_CALL_REALTIME | GROUP_CALL_MULTILEVEL, "input", NOTIFICATION_WM_UNFOCUS_REQUEST);
@@ -673,20 +684,15 @@ void SceneTree::_notification(int p_notification) {
 
 		} break;
 
-		case NOTIFICATION_WM_ABOUT: {
-
-#ifdef TOOLS_ENABLED
-			if (EditorNode::get_singleton()) {
-				EditorNode::get_singleton()->show_about();
-			} else {
-#endif
-				get_root()->propagate_notification(p_notification);
-#ifdef TOOLS_ENABLED
-			}
-#endif
-		} break;
-
-		case NOTIFICATION_CRASH: {
+		case NOTIFICATION_OS_MEMORY_WARNING:
+		case NOTIFICATION_OS_IME_UPDATE:
+		case NOTIFICATION_WM_MOUSE_ENTER:
+		case NOTIFICATION_WM_MOUSE_EXIT:
+		case NOTIFICATION_WM_FOCUS_OUT:
+		case NOTIFICATION_WM_ABOUT:
+		case NOTIFICATION_CRASH:
+		case NOTIFICATION_APP_RESUMED:
+		case NOTIFICATION_APP_PAUSED: {
 
 			get_root()->propagate_notification(p_notification);
 		} break;
@@ -1089,27 +1095,6 @@ void SceneTree::get_nodes_in_group(const StringName &p_group, List<Node *> *p_li
 	}
 }
 
-static void _fill_array(Node *p_node, Array &array, int p_level) {
-
-	array.push_back(p_level);
-	array.push_back(p_node->get_name());
-	array.push_back(p_node->get_class());
-	array.push_back(p_node->get_instance_id());
-	for (int i = 0; i < p_node->get_child_count(); i++) {
-
-		_fill_array(p_node->get_child(i), array, p_level + 1);
-	}
-}
-
-void SceneTree::_debugger_request_tree(void *self) {
-
-	SceneTree *sml = (SceneTree *)self;
-
-	Array arr;
-	_fill_array(sml->root, arr, 0);
-	ScriptDebugger::get_singleton()->send_message("scene_tree", arr);
-}
-
 void SceneTree::_flush_delete_queue() {
 
 	_THREAD_SAFE_METHOD_
@@ -1244,14 +1229,14 @@ void SceneTree::_update_root_rect() {
 			root->update_canvas_items(); //force them to update just in case
 
 			if (use_font_oversampling) {
-				WARN_PRINT("Font oversampling does not work in 'Viewport' stretch mode, only '2D'.")
+				WARN_PRINT("Font oversampling does not work in 'Viewport' stretch mode, only '2D'.");
 			}
 
 		} break;
 	}
 }
 
-void SceneTree::set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 p_minsize, real_t p_shrink) {
+void SceneTree::set_screen_stretch(StretchMode p_mode, StretchAspect p_aspect, const Size2 &p_minsize, real_t p_shrink) {
 
 	stretch_mode = p_mode;
 	stretch_aspect = p_aspect;
@@ -1331,6 +1316,25 @@ void SceneTree::add_current_scene(Node *p_current) {
 	root->add_child(p_current);
 }
 #ifdef DEBUG_ENABLED
+
+static void _fill_array(Node *p_node, Array &array, int p_level) {
+
+	array.push_back(p_node->get_child_count());
+	array.push_back(p_node->get_name());
+	array.push_back(p_node->get_class());
+	array.push_back(p_node->get_instance_id());
+	for (int i = 0; i < p_node->get_child_count(); i++) {
+
+		_fill_array(p_node->get_child(i), array, p_level + 1);
+	}
+}
+
+void SceneTree::_debugger_request_tree() {
+
+	Array arr;
+	_fill_array(root, arr, 0);
+	ScriptDebugger::get_singleton()->send_message("scene_tree", arr);
+}
 
 void SceneTree::_live_edit_node_path_func(const NodePath &p_path, int p_id) {
 
@@ -1509,8 +1513,11 @@ void SceneTree::_live_edit_instance_node_func(const NodePath &p_parent, const St
 		Node *n2 = n->get_node(p_parent);
 
 		Node *no = ps->instance();
-		no->set_name(p_name);
+		if (!no) {
+			continue;
+		}
 
+		no->set_name(p_name);
 		n2->add_child(no);
 	}
 }
@@ -1686,6 +1693,12 @@ void SceneTree::drop_files(const Vector<String> &p_files, int p_from_screen) {
 
 	emit_signal("files_dropped", p_files, p_from_screen);
 	MainLoop::drop_files(p_files, p_from_screen);
+}
+
+void SceneTree::global_menu_action(const Variant &p_id, const Variant &p_meta) {
+
+	emit_signal("global_menu_action", p_id, p_meta);
+	MainLoop::global_menu_action(p_id, p_meta);
 }
 
 Ref<SceneTreeTimer> SceneTree::create_timer(float p_delay_sec, bool p_process_pause) {
@@ -1889,6 +1902,7 @@ void SceneTree::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "debug_navigation_hint"), "set_debug_navigation_hint", "is_debugging_navigation_hint");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "paused"), "set_pause", "is_paused");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "refuse_new_network_connections"), "set_refuse_new_network_connections", "is_refusing_new_network_connections");
+	ADD_PROPERTY_DEFAULT("refuse_new_network_connections", false);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_font_oversampling"), "set_use_font_oversampling", "is_using_font_oversampling");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "edited_scene_root", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "set_edited_scene_root", "get_edited_scene_root");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "current_scene", PROPERTY_HINT_RESOURCE_TYPE, "Node", 0), "set_current_scene", "get_current_scene");
@@ -1908,6 +1922,7 @@ void SceneTree::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("physics_frame"));
 
 	ADD_SIGNAL(MethodInfo("files_dropped", PropertyInfo(Variant::POOL_STRING_ARRAY, "files"), PropertyInfo(Variant::INT, "screen")));
+	ADD_SIGNAL(MethodInfo("global_menu_action", PropertyInfo(Variant::NIL, "id"), PropertyInfo(Variant::NIL, "meta")));
 	ADD_SIGNAL(MethodInfo("network_peer_connected", PropertyInfo(Variant::INT, "id")));
 	ADD_SIGNAL(MethodInfo("network_peer_disconnected", PropertyInfo(Variant::INT, "id")));
 	ADD_SIGNAL(MethodInfo("connected_to_server"));
@@ -1960,9 +1975,41 @@ bool SceneTree::is_using_font_oversampling() const {
 	return use_font_oversampling;
 }
 
+void SceneTree::get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const {
+
+	if (p_function == "change_scene") {
+		DirAccessRef dir_access = DirAccess::create(DirAccess::ACCESS_RESOURCES);
+		List<String> directories;
+		directories.push_back(dir_access->get_current_dir());
+
+		while (!directories.empty()) {
+			dir_access->change_dir(directories.back()->get());
+			directories.pop_back();
+
+			dir_access->list_dir_begin();
+			String filename = dir_access->get_next();
+
+			while (filename != "") {
+				if (filename == "." || filename == "..") {
+					filename = dir_access->get_next();
+					continue;
+				}
+
+				if (dir_access->dir_exists(filename)) {
+					directories.push_back(dir_access->get_current_dir().plus_file(filename));
+				} else if (filename.ends_with(".tscn") || filename.ends_with(".scn")) {
+					r_options->push_back("\"" + dir_access->get_current_dir().plus_file(filename) + "\"");
+				}
+
+				filename = dir_access->get_next();
+			}
+		}
+	}
+}
+
 SceneTree::SceneTree() {
 
-	singleton = this;
+	if (singleton == NULL) singleton = this;
 	_quit = false;
 	accept_quit = true;
 	quit_on_go_back = true;
@@ -1984,6 +2031,8 @@ SceneTree::SceneTree() {
 	idle_process_time = 1;
 
 	root = NULL;
+	input_handled = false;
+	pause = false;
 	current_frame = 0;
 	current_event = 0;
 	tree_changed_name = "tree_changed";
@@ -2017,7 +2066,7 @@ SceneTree::SceneTree() {
 	int ref_atlas_subdiv = GLOBAL_DEF("rendering/quality/reflections/atlas_subdiv", 8);
 	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/reflections/atlas_subdiv", PropertyInfo(Variant::INT, "rendering/quality/reflections/atlas_subdiv", PROPERTY_HINT_RANGE, "0,32,or_greater")); //next_power_of_2 will return a 0 as min value
 	int msaa_mode = GLOBAL_DEF("rendering/quality/filters/msaa", 0);
-	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/filters/msaa", PropertyInfo(Variant::INT, "rendering/quality/filters/msaa", PROPERTY_HINT_ENUM, "Disabled,2x,4x,8x,16x"));
+	ProjectSettings::get_singleton()->set_custom_property_info("rendering/quality/filters/msaa", PropertyInfo(Variant::INT, "rendering/quality/filters/msaa", PROPERTY_HINT_ENUM, "Disabled,2x,4x,8x,16x,AndroidVR 2x,AndroidVR 4x"));
 	root->set_msaa(Viewport::MSAA(msaa_mode));
 
 	GLOBAL_DEF("rendering/quality/depth/hdr", true);
@@ -2067,7 +2116,12 @@ SceneTree::SceneTree() {
 	_update_root_rect();
 
 	if (ScriptDebugger::get_singleton()) {
-		ScriptDebugger::get_singleton()->set_request_scene_tree_message_func(_debugger_request_tree, this);
+		if (ScriptDebugger::get_singleton()->is_remote()) {
+			ScriptDebuggerRemote *remote_debugger = static_cast<ScriptDebuggerRemote *>(ScriptDebugger::get_singleton());
+
+			remote_debugger->set_scene_tree(this);
+		}
+		ScriptDebugger::get_singleton()->set_multiplayer(multiplayer);
 	}
 
 	root->set_physics_object_picking(GLOBAL_DEF("physics/common/enable_object_picking", true));
@@ -2078,33 +2132,17 @@ SceneTree::SceneTree() {
 
 #ifdef DEBUG_ENABLED
 
-	live_edit_funcs.udata = this;
-	live_edit_funcs.node_path_func = _live_edit_node_path_funcs;
-	live_edit_funcs.res_path_func = _live_edit_res_path_funcs;
-	live_edit_funcs.node_set_func = _live_edit_node_set_funcs;
-	live_edit_funcs.node_set_res_func = _live_edit_node_set_res_funcs;
-	live_edit_funcs.node_call_func = _live_edit_node_call_funcs;
-	live_edit_funcs.res_set_func = _live_edit_res_set_funcs;
-	live_edit_funcs.res_set_res_func = _live_edit_res_set_res_funcs;
-	live_edit_funcs.res_call_func = _live_edit_res_call_funcs;
-	live_edit_funcs.root_func = _live_edit_root_funcs;
-
-	live_edit_funcs.tree_create_node_func = _live_edit_create_node_funcs;
-	live_edit_funcs.tree_instance_node_func = _live_edit_instance_node_funcs;
-	live_edit_funcs.tree_remove_node_func = _live_edit_remove_node_funcs;
-	live_edit_funcs.tree_remove_and_keep_node_func = _live_edit_remove_and_keep_node_funcs;
-	live_edit_funcs.tree_restore_node_func = _live_edit_restore_node_funcs;
-	live_edit_funcs.tree_duplicate_node_func = _live_edit_duplicate_node_funcs;
-	live_edit_funcs.tree_reparent_node_func = _live_edit_reparent_node_funcs;
-
-	if (ScriptDebugger::get_singleton()) {
-		ScriptDebugger::get_singleton()->set_live_edit_funcs(&live_edit_funcs);
-	}
-
 	live_edit_root = NodePath("/root");
 
 #endif
 }
 
 SceneTree::~SceneTree() {
+	if (root) {
+		root->_set_tree(NULL);
+		root->_propagate_after_exit_tree();
+		memdelete(root);
+	}
+
+	if (singleton == this) singleton = NULL;
 }

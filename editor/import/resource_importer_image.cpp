@@ -77,9 +77,8 @@ void ResourceImporterImage::get_import_options(List<ImportOption> *r_options, in
 Error ResourceImporterImage::import(const String &p_source_file, const String &p_save_path, const Map<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files, Variant *r_metadata) {
 
 	FileAccess *f = FileAccess::open(p_source_file, FileAccess::READ);
-	if (!f) {
-		ERR_FAIL_COND_V(!f, ERR_CANT_OPEN);
-	}
+
+	ERR_FAIL_COND_V_MSG(!f, ERR_CANT_OPEN, "Cannot open file from path '" + p_source_file + "'.");
 
 	size_t len = f->get_len();
 
@@ -91,6 +90,7 @@ Error ResourceImporterImage::import(const String &p_source_file, const String &p
 	memdelete(f);
 
 	f = FileAccess::open(p_save_path + ".image", FileAccess::WRITE);
+	ERR_FAIL_COND_V_MSG(!f, ERR_CANT_CREATE, "Cannot create file in path '" + p_save_path + ".image'.");
 
 	//save the header GDIM
 	const uint8_t header[4] = { 'G', 'D', 'I', 'M' };

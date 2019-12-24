@@ -150,7 +150,7 @@ void TextureRegionEditor::_region_draw() {
 		int next = (i + 1) % 4;
 
 		Vector2 ofs = ((endpoints[i] - endpoints[prev]).normalized() + ((endpoints[i] - endpoints[next]).normalized())).normalized();
-		ofs *= 1.4144 * (select_handle->get_size().width / 2);
+		ofs *= Math_SQRT2 * (select_handle->get_size().width / 2);
 
 		edit_draw->draw_line(endpoints[i] - draw_ofs * draw_zoom, endpoints[next] - draw_ofs * draw_zoom, color, 2);
 
@@ -192,8 +192,8 @@ void TextureRegionEditor::_region_draw() {
 	}
 	updating_scroll = false;
 
-	float margins[4];
 	if (node_ninepatch || obj_styleBox.is_valid()) {
+		float margins[4] = { 0 };
 		if (node_ninepatch) {
 			margins[0] = node_ninepatch->get_patch_margin(MARGIN_TOP);
 			margins[1] = node_ninepatch->get_patch_margin(MARGIN_BOTTOM);
@@ -205,6 +205,7 @@ void TextureRegionEditor::_region_draw() {
 			margins[2] = obj_styleBox->get_margin_size(MARGIN_LEFT);
 			margins[3] = obj_styleBox->get_margin_size(MARGIN_RIGHT);
 		}
+
 		Vector2 pos[4] = {
 			mtx.basis_xform(Vector2(0, margins[0])) + Vector2(0, endpoints[0].y - draw_ofs.y * draw_zoom),
 			-mtx.basis_xform(Vector2(0, margins[1])) + Vector2(0, endpoints[2].y - draw_ofs.y * draw_zoom),
@@ -243,7 +244,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 			if (mb->is_pressed()) {
 				if (node_ninepatch || obj_styleBox.is_valid()) {
 					edited_margin = -1;
-					float margins[4];
+					float margins[4] = { 0 };
 					if (node_ninepatch) {
 						margins[0] = node_ninepatch->get_patch_margin(MARGIN_TOP);
 						margins[1] = node_ninepatch->get_patch_margin(MARGIN_BOTTOM);
@@ -255,6 +256,7 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 						margins[2] = obj_styleBox->get_margin_size(MARGIN_LEFT);
 						margins[3] = obj_styleBox->get_margin_size(MARGIN_RIGHT);
 					}
+
 					Vector2 pos[4] = {
 						mtx.basis_xform(rect.position + Vector2(0, margins[0])) - draw_ofs * draw_zoom,
 						mtx.basis_xform(rect.position + rect.size - Vector2(0, margins[1])) - draw_ofs * draw_zoom,
@@ -428,9 +430,9 @@ void TextureRegionEditor::_region_input(const Ref<InputEvent> &p_input) {
 
 		if (mm->get_button_mask() & BUTTON_MASK_MIDDLE || Input::get_singleton()->is_key_pressed(KEY_SPACE)) {
 
-			Vector2 draged(mm->get_relative().x / draw_zoom, mm->get_relative().y / draw_zoom);
-			hscroll->set_value(hscroll->get_value() - draged.x);
-			vscroll->set_value(vscroll->get_value() - draged.y);
+			Vector2 dragged(mm->get_relative().x / draw_zoom, mm->get_relative().y / draw_zoom);
+			hscroll->set_value(hscroll->get_value() - dragged.x);
+			vscroll->set_value(vscroll->get_value() - dragged.y);
 
 		} else if (drag) {
 
@@ -623,9 +625,12 @@ void TextureRegionEditor::_update_rect() {
 		rect = node_sprite->get_region_rect();
 	else if (node_sprite_3d)
 		rect = node_sprite_3d->get_region_rect();
-	else if (node_ninepatch)
+	else if (node_ninepatch) {
 		rect = node_ninepatch->get_region_rect();
-	else if (obj_styleBox.is_valid())
+		if (rect == Rect2()) {
+			rect = Rect2(Vector2(), node_ninepatch->get_texture()->get_size());
+		}
+	} else if (obj_styleBox.is_valid())
 		rect = obj_styleBox->get_region_rect();
 	else if (atlas_tex.is_valid())
 		rect = atlas_tex->get_region();
@@ -861,8 +866,8 @@ void TextureRegionEditor::_edit_region() {
 
 Vector2 TextureRegionEditor::snap_point(Vector2 p_target) const {
 	if (snap_mode == SNAP_GRID) {
-		p_target.x = Math::snap_scalar_seperation(snap_offset.x, snap_step.x, p_target.x, snap_separation.x);
-		p_target.y = Math::snap_scalar_seperation(snap_offset.y, snap_step.y, p_target.y, snap_separation.y);
+		p_target.x = Math::snap_scalar_separation(snap_offset.x, snap_step.x, p_target.x, snap_separation.x);
+		p_target.y = Math::snap_scalar_separation(snap_offset.y, snap_step.y, p_target.y, snap_separation.y);
 	}
 
 	return p_target;
@@ -1016,15 +1021,21 @@ bool TextureRegionEditorPlugin::handles(Object *p_object) const {
 	return p_object->is_class("Sprite") || p_object->is_class("Sprite3D") || p_object->is_class("NinePatchRect") || p_object->is_class("StyleBoxTexture") || p_object->is_class("AtlasTexture");
 }
 
+void TextureRegionEditorPlugin::_editor_visiblity_changed() {
+	manually_hidden = !region_editor->is_visible_in_tree();
+}
+
 void TextureRegionEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
 		texture_region_button->show();
-		if (region_editor->is_stylebox() || region_editor->is_atlas_texture() || region_editor->is_ninepatch() || (region_editor->get_sprite() && region_editor->get_sprite()->is_region()) || (region_editor->get_sprite_3d() && region_editor->get_sprite_3d()->is_region()) || texture_region_button->is_pressed()) {
+		bool is_node_configured = region_editor->is_stylebox() || region_editor->is_atlas_texture() || region_editor->is_ninepatch() || (region_editor->get_sprite() && region_editor->get_sprite()->is_region()) || (region_editor->get_sprite_3d() && region_editor->get_sprite_3d()->is_region());
+		if ((is_node_configured && !manually_hidden) || texture_region_button->is_pressed()) {
 			editor->make_bottom_panel_item_visible(region_editor);
 		}
 	} else {
 		if (region_editor->is_visible_in_tree()) {
 			editor->hide_bottom_panel();
+			manually_hidden = false;
 		}
 		texture_region_button->hide();
 		region_editor->edit(NULL);
@@ -1071,12 +1082,18 @@ void TextureRegionEditorPlugin::set_state(const Dictionary &p_state) {
 	}
 }
 
-TextureRegionEditorPlugin::TextureRegionEditorPlugin(EditorNode *p_node) {
-	editor = p_node;
-	region_editor = memnew(TextureRegionEditor(p_node));
+void TextureRegionEditorPlugin::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_editor_visiblity_changed"), &TextureRegionEditorPlugin::_editor_visiblity_changed);
+}
 
+TextureRegionEditorPlugin::TextureRegionEditorPlugin(EditorNode *p_node) {
+	manually_hidden = false;
+	editor = p_node;
+
+	region_editor = memnew(TextureRegionEditor(p_node));
 	region_editor->set_custom_minimum_size(Size2(0, 200) * EDSCALE);
 	region_editor->hide();
+	region_editor->connect("visibility_changed", this, "_editor_visiblity_changed");
 
 	texture_region_button = p_node->add_bottom_panel_item(TTR("TextureRegion"), region_editor);
 	texture_region_button->hide();

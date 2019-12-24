@@ -18,7 +18,7 @@ namespace Godot
             int pos = 0;
             int slices = 1;
 
-            while ((pos = instance.Find(splitter, pos)) >= 0)
+            while ((pos = instance.Find(splitter, pos, caseSensitive: true)) >= 0)
             {
                 slices++;
                 pos += splitter.Length;
@@ -98,6 +98,66 @@ namespace Godot
         }
 
         // <summary>
+        // Return the amount of substrings in string.
+        // </summary>
+        public static int Count(this string instance, string what, bool caseSensitive = true, int from = 0, int to = 0)
+        {
+            if (what.Length == 0)
+            {
+                return 0;
+            }
+
+            int len = instance.Length;
+            int slen = what.Length;
+
+            if (len < slen)
+            {
+                return 0;
+            }
+
+            string str;
+
+            if (from >= 0 && to >= 0)
+            {
+                if (to == 0)
+                {
+                    to = len;
+                }
+                else if (from >= to)
+                {
+                    return 0;
+                }
+                if (from == 0 && to == len)
+                {
+                    str = instance;
+                }
+                else
+                {
+                    str = instance.Substring(from, to - from);
+                }
+            }
+            else
+            {
+                return 0;
+            }
+
+            int c = 0;
+            int idx;
+
+            do
+            {
+                idx = str.IndexOf(what, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                if (idx != -1)
+                {
+                    str = str.Substring(idx + slen);
+                    ++c;
+                }
+            } while (idx != -1);
+
+            return c;
+        }
+
+        // <summary>
         // Return a copy of the string with special characters escaped using the C language standard.
         // </summary>
         public static string CEscape(this string instance)
@@ -169,7 +229,7 @@ namespace Godot
         // </summary>
         public static int CasecmpTo(this string instance, string to)
         {
-            return instance.CompareTo(to, true);
+            return instance.CompareTo(to, caseSensitive: true);
         }
 
         // <summary>
@@ -262,28 +322,32 @@ namespace Godot
             return instance.Substring(pos + 1);
         }
 
-        // <summary>
-        // Find the first occurrence of a substring, return the starting position of the substring or -1 if not found. Optionally, the initial search index can be passed.
-        // </summary>
-        public static int Find(this string instance, string what, int from = 0)
+        /// <summary>Find the first occurrence of a substring. Optionally, the search starting position can be passed.</summary>
+        /// <returns>The starting position of the substring, or -1 if not found.</returns>
+        public static int Find(this string instance, string what, int from = 0, bool caseSensitive = true)
         {
-            return instance.IndexOf(what, StringComparison.OrdinalIgnoreCase);
+            return instance.IndexOf(what, from, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
         }
 
-        // <summary>
-        // Find the last occurrence of a substring, return the starting position of the substring or -1 if not found. Optionally, the initial search index can be passed.
-        // </summary>
-        public static int FindLast(this string instance, string what)
+        /// <summary>Find the last occurrence of a substring.</summary>
+        /// <returns>The starting position of the substring, or -1 if not found.</returns>
+        public static int FindLast(this string instance, string what, bool caseSensitive = true)
         {
-            return instance.LastIndexOf(what, StringComparison.OrdinalIgnoreCase);
+            return instance.FindLast(what, instance.Length - 1, caseSensitive);
         }
 
-        // <summary>
-        // Find the first occurrence of a substring but search as case-insensitive, return the starting position of the substring or -1 if not found. Optionally, the initial search index can be passed.
-        // </summary>
+        /// <summary>Find the last occurrence of a substring specifying the search starting position.</summary>
+        /// <returns>The starting position of the substring, or -1 if not found.</returns>
+        public static int FindLast(this string instance, string what, int from, bool caseSensitive = true)
+        {
+            return instance.LastIndexOf(what, from, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Find the first occurrence of a substring but search as case-insensitive. Optionally, the search starting position can be passed.</summary>
+        /// <returns>The starting position of the substring, or -1 if not found.</returns>
         public static int FindN(this string instance, string what, int from = 0)
         {
-            return instance.IndexOf(what, StringComparison.Ordinal);
+            return instance.IndexOf(what, from, StringComparison.OrdinalIgnoreCase);
         }
 
         // <summary>
@@ -299,14 +363,14 @@ namespace Godot
             if (basepos != -1)
             {
                 var end = basepos + 3;
-                rs = instance.Substring(end, instance.Length);
+                rs = instance.Substring(end);
                 @base = instance.Substring(0, end);
             }
             else
             {
                 if (instance.BeginsWith("/"))
                 {
-                    rs = instance.Substring(1, instance.Length);
+                    rs = instance.Substring(1);
                     @base = "/";
                 }
                 else
@@ -333,7 +397,7 @@ namespace Godot
             if (sep == -1)
                 return instance;
 
-            return instance.Substring(sep + 1, instance.Length);
+            return instance.Substring(sep + 1);
         }
 
         // <summary>
@@ -442,7 +506,7 @@ namespace Godot
         // </summary>
         public static bool IsSubsequenceOfI(this string instance, string text)
         {
-            return instance.IsSubsequenceOf(text, false);
+            return instance.IsSubsequenceOf(text, caseSensitive: false);
         }
 
         // <summary>
@@ -602,7 +666,7 @@ namespace Godot
         // </summary>
         public static bool MatchN(this string instance, string expr)
         {
-            return instance.ExprMatch(expr, false);
+            return instance.ExprMatch(expr, caseSensitive: false);
         }
 
         // <summary>
@@ -632,7 +696,7 @@ namespace Godot
         // </summary>
         public static int NocasecmpTo(this string instance, string to)
         {
-            return instance.CompareTo(to, false);
+            return instance.CompareTo(to, caseSensitive: false);
         }
 
         // <summary>
@@ -868,7 +932,7 @@ namespace Godot
 
             while (true)
             {
-                int end = instance.Find(divisor, from);
+                int end = instance.Find(divisor, from, caseSensitive: true);
                 if (end < 0)
                     end = len;
                 if (allowEmpty || end > from)
@@ -911,7 +975,8 @@ namespace Godot
         // </summary>
         public static string Substr(this string instance, int from, int len)
         {
-            return instance.Substring(from, len);
+            int max = instance.Length - from;
+            return instance.Substring(from, len > max ? max : len);
         }
 
         // <summary>

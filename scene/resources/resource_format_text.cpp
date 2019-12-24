@@ -1225,10 +1225,7 @@ Ref<ResourceInteractiveLoader> ResourceFormatLoaderText::load_interactive(const 
 	Error err;
 	FileAccess *f = FileAccess::open(p_path, FileAccess::READ, &err);
 
-	if (err != OK) {
-
-		ERR_FAIL_COND_V(err != OK, Ref<ResourceInteractiveLoader>());
-	}
+	ERR_FAIL_COND_V_MSG(err != OK, Ref<ResourceInteractiveLoader>(), "Cannot open file '" + p_path + "'.");
 
 	Ref<ResourceInteractiveLoaderText> ria = memnew(ResourceInteractiveLoaderText);
 	String path = p_original_path != "" ? p_original_path : p_path;
@@ -1324,13 +1321,10 @@ Error ResourceFormatLoaderText::convert_file_to_binary(const String &p_src_path,
 	Error err;
 	FileAccess *f = FileAccess::open(p_src_path, FileAccess::READ, &err);
 
-	if (err != OK) {
-
-		ERR_FAIL_COND_V(err != OK, ERR_CANT_OPEN);
-	}
+	ERR_FAIL_COND_V_MSG(err != OK, ERR_CANT_OPEN, "Cannot open file '" + p_src_path + "'.");
 
 	Ref<ResourceInteractiveLoaderText> ria = memnew(ResourceInteractiveLoaderText);
-	String path = p_src_path;
+	const String &path = p_src_path;
 	ria->local_path = ProjectSettings::get_singleton()->localize_path(path);
 	ria->res_path = ria->local_path;
 	//ria->set_local_path( ProjectSettings::get_singleton()->localize_path(p_path) );
@@ -1372,13 +1366,10 @@ String ResourceFormatSaverTextInstance::_write_resource(const RES &res) {
 			String path = relative_paths ? local_path.path_to_file(res->get_path()) : res->get_path();
 			return "Resource( \"" + path + "\" )";
 		} else {
-			ERR_EXPLAIN("Resource was not pre cached for the resource section, bug?");
-			ERR_FAIL_V("null");
+			ERR_FAIL_V_MSG("null", "Resource was not pre cached for the resource section, bug?");
 			//internal resource
 		}
 	}
-
-	return "null";
 }
 
 void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, bool p_main) {
@@ -1447,7 +1438,7 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 			int len = varray.size();
 			for (int i = 0; i < len; i++) {
 
-				Variant v = varray.get(i);
+				const Variant &v = varray.get(i);
 				_find_resources(v);
 			}
 
@@ -1468,20 +1459,6 @@ void ResourceFormatSaverTextInstance::_find_resources(const Variant &p_variant, 
 	}
 }
 
-static String _valprop(const String &p_name) {
-
-	// Escape and quote strings with extended ASCII or further Unicode characters
-	// as well as '"', '=' or ' ' (32)
-	const CharType *cstr = p_name.c_str();
-	for (int i = 0; cstr[i]; i++) {
-		if (cstr[i] == '=' || cstr[i] == '"' || cstr[i] < 33 || cstr[i] > 126) {
-			return "\"" + p_name.c_escape_multiline() + "\"";
-		}
-	}
-	// Keep as is
-	return p_name;
-}
-
 Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_resource, uint32_t p_flags) {
 
 	if (p_path.ends_with(".tscn")) {
@@ -1490,7 +1467,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 	Error err;
 	f = FileAccess::open(p_path, FileAccess::WRITE, &err);
-	ERR_FAIL_COND_V(err, ERR_CANT_OPEN);
+	ERR_FAIL_COND_V_MSG(err, ERR_CANT_OPEN, "Cannot save file '" + p_path + "'.");
 	FileAccessRef _fref(f);
 
 	local_path = ProjectSettings::get_singleton()->localize_path(p_path);
@@ -1520,8 +1497,6 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 		}
 	}
 
-	ERR_FAIL_COND_V(err != OK, err);
-
 	{
 		String title = packed_scene.is_valid() ? "[gd_scene " : "[gd_resource ";
 		if (packed_scene.is_null())
@@ -1541,9 +1516,6 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 		f->store_string(title);
 		f->store_line("]\n"); //one empty line
-	}
-
-	{
 	}
 
 #ifdef TOOLS_ENABLED
@@ -1689,7 +1661,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 
 				String vars;
 				VariantWriter::write_to_string(value, vars, _write_resources, this);
-				f->store_string(_valprop(name) + " = " + vars + "\n");
+				f->store_string(name.property_name_encode() + " = " + vars + "\n");
 			}
 		}
 
@@ -1712,21 +1684,22 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			Vector<StringName> groups = state->get_node_groups(i);
 
 			String header = "[node";
-			header += " name=\"" + String(name) + "\"";
+			header += " name=\"" + String(name).c_escape() + "\"";
 			if (type != StringName()) {
 				header += " type=\"" + String(type) + "\"";
 			}
 			if (path != NodePath()) {
-				header += " parent=\"" + String(path.simplified()) + "\"";
+				header += " parent=\"" + String(path.simplified()).c_escape() + "\"";
 			}
 			if (owner != NodePath() && owner != NodePath(".")) {
-				header += " owner=\"" + String(owner.simplified()) + "\"";
+				header += " owner=\"" + String(owner.simplified()).c_escape() + "\"";
 			}
 			if (index >= 0) {
 				header += " index=\"" + itos(index) + "\"";
 			}
 
 			if (groups.size()) {
+				groups.sort_custom<StringName::AlphCompare>();
 				String sgroups = " groups=[\n";
 				for (int j = 0; j < groups.size(); j++) {
 					sgroups += "\"" + String(groups[j]).c_escape() + "\",\n";
@@ -1760,7 +1733,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 				String vars;
 				VariantWriter::write_to_string(state->get_node_property_value(i, j), vars, _write_resources, this);
 
-				f->store_string(_valprop(String(state->get_node_property_name(i, j))) + " = " + vars + "\n");
+				f->store_string(String(state->get_node_property_name(i, j)).property_name_encode() + " = " + vars + "\n");
 			}
 
 			if (i < state->get_node_count() - 1)

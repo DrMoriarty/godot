@@ -35,7 +35,7 @@
 
 class Line2D : public Node2D {
 
-	GDCLASS(Line2D, Node2D)
+	GDCLASS(Line2D, Node2D);
 
 public:
 	enum LineJointMode {
@@ -78,6 +78,9 @@ public:
 	void set_width(float width);
 	float get_width() const;
 
+	void set_curve(const Ref<Curve> &curve);
+	Ref<Curve> get_curve() const;
+
 	void set_default_color(Color color);
 	Color get_default_color() const;
 
@@ -105,6 +108,9 @@ public:
 	void set_round_precision(int precision);
 	int get_round_precision() const;
 
+	void set_antialiased(bool p_antialiased);
+	bool get_antialiased() const;
+
 protected:
 	void _notification(int p_what);
 	void _draw();
@@ -113,6 +119,7 @@ protected:
 
 private:
 	void _gradient_changed();
+	void _curve_changed();
 
 private:
 	PoolVector<Vector2> _points;
@@ -120,12 +127,14 @@ private:
 	LineCapMode _begin_cap_mode;
 	LineCapMode _end_cap_mode;
 	float _width;
+	Ref<Curve> _curve;
 	Color _default_color;
 	Ref<Gradient> _gradient;
 	Ref<Texture> _texture;
 	LineTextureMode _texture_mode;
 	float _sharp_limit;
 	int _round_precision;
+	bool _antialiased;
 };
 
 #endif // LINE2D_H

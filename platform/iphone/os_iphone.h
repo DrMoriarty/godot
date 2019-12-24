@@ -40,6 +40,7 @@
 #include "game_center.h"
 #include "icloud.h"
 #include "in_app_store.h"
+#include "ios.h"
 #include "main/input_default.h"
 #include "servers/audio_server.h"
 #include "servers/visual/rasterizer.h"
@@ -69,6 +70,7 @@ private:
 #ifdef ICLOUD_ENABLED
 	ICloud *icloud;
 #endif
+	iOS *ios;
 
 	MainLoop *main_loop;
 
@@ -175,6 +177,7 @@ public:
 	void set_data_dir(String p_dir);
 
 	virtual String get_name() const;
+	virtual String get_model_name() const;
 
 	Error shell_open(String p_uri);
 
@@ -192,6 +195,7 @@ public:
 	virtual void native_video_unpause();
 	virtual void native_video_focus_out();
 	virtual void native_video_stop();
+	virtual void vibrate_handheld(int p_duration_ms = 500);
 
 	virtual bool _check_internal_feature_support(const String &p_feature);
 	OSIPhone(int width, int height, String p_data_dir);

@@ -267,7 +267,7 @@ RID BulletPhysicsServer::area_get_space(RID p_area) const {
 
 void BulletPhysicsServer::area_set_space_override_mode(RID p_area, AreaSpaceOverrideMode p_mode) {
 	AreaBullet *area = area_owner.get(p_area);
-	ERR_FAIL_COND(!area)
+	ERR_FAIL_COND(!area);
 
 	area->set_spOv_mode(p_mode);
 }
@@ -1548,8 +1548,7 @@ void BulletPhysicsServer::free(RID p_rid) {
 		bulletdelete(space);
 	} else {
 
-		ERR_EXPLAIN("Invalid ID");
-		ERR_FAIL();
+		ERR_FAIL_MSG("Invalid ID.");
 	}
 }
 

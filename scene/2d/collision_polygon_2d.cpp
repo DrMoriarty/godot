@@ -70,7 +70,7 @@ void CollisionPolygon2D::_build_polygon() {
 			w[(i << 1) + 1] = polygon[(i + 1) % polygon.size()];
 		}
 
-		w = PoolVector<Vector2>::Write();
+		w.release();
 		concave->set_segments(segments);
 
 		parent->shape_owner_add_shape(owner_id, concave);
@@ -169,8 +169,8 @@ void CollisionPolygon2D::_notification(int p_what) {
 				Vector<Vector2> pts;
 				float tsize = 8;
 				pts.push_back(line_to + (Vector2(0, tsize)));
-				pts.push_back(line_to + (Vector2(0.707 * tsize, 0)));
-				pts.push_back(line_to + (Vector2(-0.707 * tsize, 0)));
+				pts.push_back(line_to + (Vector2(Math_SQRT12 * tsize, 0)));
+				pts.push_back(line_to + (Vector2(-Math_SQRT12 * tsize, 0)));
 				Vector<Color> cols;
 				for (int i = 0; i < 3; i++)
 					cols.push_back(dcol);

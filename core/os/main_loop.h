@@ -35,10 +35,6 @@
 #include "core/reference.h"
 #include "core/script_language.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class MainLoop : public Object {
 
 	GDCLASS(MainLoop, Object);
@@ -64,6 +60,8 @@ public:
 		NOTIFICATION_WM_ABOUT = 1011,
 		NOTIFICATION_CRASH = 1012,
 		NOTIFICATION_OS_IME_UPDATE = 1013,
+		NOTIFICATION_APP_RESUMED = 1014,
+		NOTIFICATION_APP_PAUSED = 1015,
 	};
 
 	virtual void input_event(const Ref<InputEvent> &p_event);
@@ -75,6 +73,7 @@ public:
 	virtual void finish();
 
 	virtual void drop_files(const Vector<String> &p_files, int p_from_screen = 0);
+	virtual void global_menu_action(const Variant &p_id, const Variant &p_meta);
 
 	void set_init_script(const Ref<Script> &p_init_script);
 

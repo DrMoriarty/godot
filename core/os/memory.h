@@ -31,13 +31,10 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "core/error_macros.h"
 #include "core/safe_refcount.h"
 
 #include <stddef.h>
-
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 #ifndef PAD_ALIGN
 #define PAD_ALIGN 16 //must always be greater than this at much
@@ -66,7 +63,7 @@ public:
 class DefaultAllocator {
 public:
 	_FORCE_INLINE_ static void *alloc(size_t p_memory) { return Memory::alloc_static(p_memory, false); }
-	_FORCE_INLINE_ static void free(void *p_ptr) { return Memory::free_static(p_ptr, false); }
+	_FORCE_INLINE_ static void free(void *p_ptr) { Memory::free_static(p_ptr, false); }
 };
 
 void *operator new(size_t p_size, const char *p_description); ///< operator new that takes a description and uses MemoryStaticPool

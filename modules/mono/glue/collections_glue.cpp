@@ -34,6 +34,7 @@
 
 #include <mono/metadata/exception.h>
 
+#include "../mono_gd/gd_mono_cache.h"
 #include "../mono_gd/gd_mono_class.h"
 #include "../mono_gd/gd_mono_utils.h"
 
@@ -46,7 +47,7 @@ void godot_icall_Array_Dtor(Array *ptr) {
 }
 
 MonoObject *godot_icall_Array_At(Array *ptr, int index) {
-	if (index < 0 || index > ptr->size()) {
+	if (index < 0 || index >= ptr->size()) {
 		GDMonoUtils::set_pending_exception(mono_get_exception_index_out_of_range());
 		return NULL;
 	}
@@ -54,7 +55,7 @@ MonoObject *godot_icall_Array_At(Array *ptr, int index) {
 }
 
 MonoObject *godot_icall_Array_At_Generic(Array *ptr, int index, uint32_t type_encoding, GDMonoClass *type_class) {
-	if (index < 0 || index > ptr->size()) {
+	if (index < 0 || index >= ptr->size()) {
 		GDMonoUtils::set_pending_exception(mono_get_exception_index_out_of_range());
 		return NULL;
 	}
@@ -62,7 +63,7 @@ MonoObject *godot_icall_Array_At_Generic(Array *ptr, int index, uint32_t type_en
 }
 
 void godot_icall_Array_SetAt(Array *ptr, int index, MonoObject *value) {
-	if (index < 0 || index > ptr->size()) {
+	if (index < 0 || index >= ptr->size()) {
 		GDMonoUtils::set_pending_exception(mono_get_exception_index_out_of_range());
 		return;
 	}
@@ -102,6 +103,10 @@ void godot_icall_Array_CopyTo(Array *ptr, MonoArray *array, int array_index) {
 	}
 }
 
+Array *godot_icall_Array_Duplicate(Array *ptr, MonoBoolean deep) {
+	return memnew(Array(ptr->duplicate(deep)));
+}
+
 int godot_icall_Array_IndexOf(Array *ptr, MonoObject *item) {
 	return ptr->find(GDMonoMarshal::mono_object_to_variant(item));
 }
@@ -124,7 +129,7 @@ MonoBoolean godot_icall_Array_Remove(Array *ptr, MonoObject *item) {
 }
 
 void godot_icall_Array_RemoveAt(Array *ptr, int index) {
-	if (index < 0 || index > ptr->size()) {
+	if (index < 0 || index >= ptr->size()) {
 		GDMonoUtils::set_pending_exception(mono_get_exception_index_out_of_range());
 		return;
 	}
@@ -223,6 +228,10 @@ MonoBoolean godot_icall_Dictionary_ContainsKey(Dictionary *ptr, MonoObject *key)
 	return ptr->has(GDMonoMarshal::mono_object_to_variant(key));
 }
 
+Dictionary *godot_icall_Dictionary_Duplicate(Dictionary *ptr, MonoBoolean deep) {
+	return memnew(Dictionary(ptr->duplicate(deep)));
+}
+
 MonoBoolean godot_icall_Dictionary_RemoveKey(Dictionary *ptr, MonoObject *key) {
 	return ptr->erase(GDMonoMarshal::mono_object_to_variant(key));
 }
@@ -283,6 +292,7 @@ void godot_register_collections_icalls() {
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_Clear", (void *)godot_icall_Array_Clear);
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_Contains", (void *)godot_icall_Array_Contains);
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_CopyTo", (void *)godot_icall_Array_CopyTo);
+	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_Duplicate", (void *)godot_icall_Array_Duplicate);
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_IndexOf", (void *)godot_icall_Array_IndexOf);
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_Insert", (void *)godot_icall_Array_Insert);
 	mono_add_internal_call("Godot.Collections.Array::godot_icall_Array_Remove", (void *)godot_icall_Array_Remove);
@@ -303,6 +313,7 @@ void godot_register_collections_icalls() {
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_Clear", (void *)godot_icall_Dictionary_Clear);
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_Contains", (void *)godot_icall_Dictionary_Contains);
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_ContainsKey", (void *)godot_icall_Dictionary_ContainsKey);
+	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_Duplicate", (void *)godot_icall_Dictionary_Duplicate);
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_RemoveKey", (void *)godot_icall_Dictionary_RemoveKey);
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_Remove", (void *)godot_icall_Dictionary_Remove);
 	mono_add_internal_call("Godot.Collections.Dictionary::godot_icall_Dictionary_TryGetValue", (void *)godot_icall_Dictionary_TryGetValue);

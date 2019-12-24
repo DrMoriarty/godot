@@ -38,9 +38,7 @@
 #include "scene/gui/option_button.h"
 #include "scene/gui/tool_button.h"
 #include "scene/gui/tree.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class FileDialog : public ConfirmationDialog {
 
 	GDCLASS(FileDialog, ConfirmationDialog);
@@ -80,16 +78,18 @@ private:
 	LineEdit *dir;
 	OptionButton *drives;
 	Tree *tree;
+	HBoxContainer *file_box;
 	LineEdit *file;
+	OptionButton *filter;
 	AcceptDialog *mkdirerr;
 	AcceptDialog *exterr;
-	OptionButton *filter;
 	DirAccess *dir_access;
 	ConfirmationDialog *confirm_save;
 
 	ToolButton *dir_up;
 
 	ToolButton *refresh;
+	ToolButton *show_hidden;
 
 	Vector<String> filters;
 
@@ -101,6 +101,7 @@ private:
 	bool invalidated;
 
 	void update_dir();
+	void update_file_name();
 	void update_file_list();
 	void update_filters();
 

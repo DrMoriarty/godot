@@ -709,7 +709,7 @@ bool Variant::is_zero() const {
 		// atomic types
 		case BOOL: {
 
-			return _data._bool == false;
+			return !(_data._bool);
 		} break;
 		case INT: {
 
@@ -910,7 +910,15 @@ bool Variant::is_one() const {
 
 void Variant::reference(const Variant &p_variant) {
 
-	clear();
+	switch (type) {
+		case NIL:
+		case BOOL:
+		case INT:
+		case REAL:
+			break;
+		default:
+			clear();
+	}
 
 	type = p_variant.type;
 
@@ -1171,8 +1179,6 @@ Variant::operator signed int() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned int() const {
 
@@ -1188,8 +1194,6 @@ Variant::operator unsigned int() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 Variant::operator int64_t() const {
@@ -1206,8 +1210,6 @@ Variant::operator int64_t() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 /*
@@ -1244,8 +1246,6 @@ Variant::operator uint64_t() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 #ifdef NEED_LONG_INT
@@ -1300,8 +1300,6 @@ Variant::operator signed short() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned short() const {
 
@@ -1317,8 +1315,6 @@ Variant::operator unsigned short() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator signed char() const {
 
@@ -1334,8 +1330,6 @@ Variant::operator signed char() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator unsigned char() const {
 
@@ -1351,8 +1345,6 @@ Variant::operator unsigned char() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 
 Variant::operator CharType() const {
@@ -1374,8 +1366,6 @@ Variant::operator float() const {
 			return 0;
 		}
 	}
-
-	return 0;
 }
 Variant::operator double() const {
 
@@ -1391,8 +1381,6 @@ Variant::operator double() const {
 			return 0;
 		}
 	}
-
-	return true;
 }
 
 Variant::operator StringName() const {
@@ -1760,10 +1748,7 @@ Variant::operator RID() const {
 	} else if (type == OBJECT && _get_obj().obj) {
 #ifdef DEBUG_ENABLED
 		if (ScriptDebugger::get_singleton()) {
-			if (!ObjectDB::instance_validate(_get_obj().obj)) {
-				ERR_EXPLAIN("Invalid pointer (object was deleted)");
-				ERR_FAIL_V(RID());
-			};
+			ERR_FAIL_COND_V_MSG(!ObjectDB::instance_validate(_get_obj().obj), RID(), "Invalid pointer (object was deleted).");
 		};
 #endif
 		Variant::CallError ce;
@@ -1854,8 +1839,6 @@ inline DA _convert_array_from_variant(const Variant &p_variant) {
 			return DA();
 		}
 	}
-
-	return DA();
 }
 
 Variant::operator Array() const {
@@ -2319,7 +2302,7 @@ Variant::Variant(const Object *p_object) {
 Variant::Variant(const Dictionary &p_dictionary) {
 
 	type = DICTIONARY;
-	memnew_placement(_data._mem, (Dictionary)(p_dictionary));
+	memnew_placement(_data._mem, Dictionary(p_dictionary));
 }
 
 Variant::Variant(const Array &p_array) {
@@ -2438,9 +2421,6 @@ Variant::Variant(const PoolVector<Face3> &p_face_array) {
 			for (int j = 0; j < 3; j++)
 				w[i * 3 + j] = r[i].vertex[j];
 		}
-
-		r = PoolVector<Face3>::Read();
-		w = PoolVector<Vector3>::Write();
 	}
 
 	type = NIL;
@@ -3319,7 +3299,7 @@ String vformat(const String &p_text, const Variant &p1, const Variant &p2, const
 	bool error = false;
 	String fmt = p_text.sprintf(args, &error);
 
-	ERR_FAIL_COND_V(error, String());
+	ERR_FAIL_COND_V_MSG(error, String(), fmt);
 
 	return fmt;
 }

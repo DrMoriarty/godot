@@ -33,15 +33,15 @@
 
 #include "scene/gui/control.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 class Popup : public Control {
 
 	GDCLASS(Popup, Control);
 
 	bool exclusive;
 	bool popped_up;
+
+private:
+	void _popup(const Rect2 &p_bounds = Rect2(), const bool p_centered = false);
 
 protected:
 	virtual void _post_popup() {}

@@ -53,8 +53,7 @@ public:
 
 		file = FileAccess::open(p_file, FileAccess::READ);
 
-		ERR_EXPLAIN("Failed loading resource: '" + p_file + "';");
-		ERR_FAIL_COND(!file);
+		ERR_FAIL_COND_MSG(!file, "Failed loading resource: '" + p_file + "'.");
 	}
 	~MkvReader() {
 
@@ -231,7 +230,7 @@ void VideoStreamPlaybackWebm::set_audio_track(int p_idx) {
 	audio_track = p_idx;
 }
 
-Ref<Texture> VideoStreamPlaybackWebm::get_texture() {
+Ref<Texture> VideoStreamPlaybackWebm::get_texture() const {
 
 	return texture;
 }
@@ -413,10 +412,11 @@ void VideoStreamPlaybackWebm::delete_pointers() {
 
 	if (audio_frame)
 		memdelete(audio_frame);
-	for (int i = 0; i < video_frames_capacity; ++i)
-		memdelete(video_frames[i]);
-	if (video_frames)
+	if (video_frames) {
+		for (int i = 0; i < video_frames_capacity; ++i)
+			memdelete(video_frames[i]);
 		memfree(video_frames);
+	}
 
 	if (video)
 		memdelete(video);
@@ -484,6 +484,8 @@ RES ResourceFormatLoaderWebm::load(const String &p_path, const String &p_origina
 		*r_error = OK;
 	}
 
+	f->close();
+	memdelete(f);
 	return webm_stream;
 }
 

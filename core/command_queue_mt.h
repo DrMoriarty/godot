@@ -37,10 +37,6 @@
 #include "core/simple_type.h"
 #include "core/typedefs.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 #define COMMA(N) _COMMA_##N
 #define _COMMA_0
 #define _COMMA_1 ,
@@ -346,7 +342,7 @@ class CommandQueueMT {
 				}
 				return NULL;
 			}
-		} else if (write_ptr >= dealloc_ptr) {
+		} else {
 			// ahead of dealloc_ptr, check that there is room
 
 			if ((COMMAND_MEM_SIZE - write_ptr) < alloc_size + sizeof(uint32_t)) {
@@ -406,8 +402,10 @@ class CommandQueueMT {
 	tryagain:
 
 		// tried to read an empty queue
-		if (read_ptr == write_ptr)
+		if (read_ptr == write_ptr) {
+			if (p_lock) unlock();
 			return false;
+		}
 
 		uint32_t size_ptr = read_ptr;
 		uint32_t size = *(uint32_t *)&command_mem[read_ptr] >> 1;

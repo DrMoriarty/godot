@@ -39,7 +39,7 @@
 /**
 	@author Bastiaan Olij <mux213@gmail.com>
 
-	The ARVR interface is a template class ontop of which we build interface to differt AR, VR and tracking SDKs.
+	The ARVR interface is a template class ontop of which we build interface to different AR, VR and tracking SDKs.
 	The idea is that we subclass this class, implement the logic, and then instantiate a singleton of each interface
 	when Godot starts. These instances do not initialize themselves but register themselves with the AR/VR server.
 
@@ -101,6 +101,7 @@ public:
 	/** specific to AR **/
 	virtual bool get_anchor_detection_is_enabled() const;
 	virtual void set_anchor_detection_is_enabled(bool p_enable);
+	virtual int get_camera_feed_id();
 
 	/** rendering and internal **/
 

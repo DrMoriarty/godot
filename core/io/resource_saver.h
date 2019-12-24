@@ -33,12 +33,8 @@
 
 #include "core/resource.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class ResourceFormatSaver : public Reference {
-	GDCLASS(ResourceFormatSaver, Reference)
+	GDCLASS(ResourceFormatSaver, Reference);
 
 protected:
 	static void _bind_methods();

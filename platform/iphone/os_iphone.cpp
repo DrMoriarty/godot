@@ -47,8 +47,6 @@
 
 #include "semaphore_iphone.h"
 
-#include "ios.h"
-
 #include <dlfcn.h>
 
 int OSIPhone::get_video_driver_count() const {
@@ -64,8 +62,7 @@ const char *OSIPhone::get_video_driver_name(int p_driver) const {
 		case VIDEO_DRIVER_GLES2:
 			return "GLES2";
 	}
-	ERR_EXPLAIN("Invalid video driver index " + itos(p_driver));
-	ERR_FAIL_V(NULL);
+	ERR_FAIL_V_MSG(NULL, "Invalid video driver index: " + itos(p_driver) + ".");
 };
 
 OSIPhone *OSIPhone::get_singleton() {
@@ -183,7 +180,8 @@ Error OSIPhone::initialize(const VideoMode &p_desired, int p_video_driver, int p
 	Engine::get_singleton()->add_singleton(Engine::Singleton("ICloud", icloud));
 	//icloud->connect();
 #endif
-	Engine::get_singleton()->add_singleton(Engine::Singleton("iOS", memnew(iOS)));
+	ios = memnew(iOS);
+	Engine::get_singleton()->add_singleton(Engine::Singleton("iOS", ios));
 
 	return OK;
 };
@@ -464,6 +462,7 @@ extern void _show_keyboard(String p_existing);
 extern void _hide_keyboard();
 extern Error _shell_open(String p_uri);
 extern void _set_keep_screen_on(bool p_enabled);
+extern void _vibrate();
 
 void OSIPhone::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect) {
 	_show_keyboard(p_existing_text);
@@ -499,6 +498,15 @@ String OSIPhone::get_name() const {
 
 	return "iOS";
 };
+
+String OSIPhone::get_model_name() const {
+
+	String model = ios->get_model();
+	if (model != "")
+		return model;
+
+	return OS_Unix::get_model_name();
+}
 
 Size2 OSIPhone::get_window_size() const {
 
@@ -577,6 +585,11 @@ void OSIPhone::native_video_focus_out() {
 void OSIPhone::native_video_stop() {
 	if (native_video_is_playing())
 		_stop_video();
+}
+
+void OSIPhone::vibrate_handheld(int p_duration_ms) {
+	// iOS does not support duration for vibration
+	_vibrate();
 }
 
 bool OSIPhone::_check_internal_feature_support(const String &p_feature) {

@@ -1,3 +1,33 @@
+/*************************************************************************/
+/*  editor_feature_profile.cpp                                           */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
+/*************************************************************************/
+/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
+
 #include "editor_feature_profile.h"
 #include "core/io/json.h"
 #include "core/os/dir_access.h"
@@ -12,7 +42,7 @@ const char *EditorFeatureProfile::feature_names[FEATURE_MAX] = {
 	TTRC("Scene Tree Editing"),
 	TTRC("Import Dock"),
 	TTRC("Node Dock"),
-	TTRC("Filesystem Dock")
+	TTRC("FileSystem and Import Docks")
 };
 
 const char *EditorFeatureProfile::feature_identifiers[FEATURE_MAX] = {
@@ -135,7 +165,7 @@ Error EditorFeatureProfile::save_to_file(const String &p_path) {
 	json["disabled_features"] = dis_features;
 
 	FileAccessRef f = FileAccess::open(p_path, FileAccess::WRITE);
-	ERR_FAIL_COND_V(!f, ERR_CANT_OPEN);
+	ERR_FAIL_COND_V_MSG(!f, ERR_CANT_CREATE, "Cannot create file '" + p_path + "'.");
 
 	String text = JSON::print(json, "\t");
 	f->store_string(text);
@@ -224,8 +254,8 @@ void EditorFeatureProfile::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_disable_class_editor", "class_name", "disable"), &EditorFeatureProfile::set_disable_class_editor);
 	ClassDB::bind_method(D_METHOD("is_class_editor_disabled", "class_name"), &EditorFeatureProfile::is_class_editor_disabled);
 
-	ClassDB::bind_method(D_METHOD("set_disable_class_property", "class_name", "property"), &EditorFeatureProfile::set_disable_class_property);
-	ClassDB::bind_method(D_METHOD("is_class_property_disabled", "class_name"), &EditorFeatureProfile::is_class_property_disabled);
+	ClassDB::bind_method(D_METHOD("set_disable_class_property", "class_name", "property", "disable"), &EditorFeatureProfile::set_disable_class_property);
+	ClassDB::bind_method(D_METHOD("is_class_property_disabled", "class_name", "property"), &EditorFeatureProfile::is_class_property_disabled);
 
 	ClassDB::bind_method(D_METHOD("set_disable_feature", "feature", "disable"), &EditorFeatureProfile::set_disable_feature);
 	ClassDB::bind_method(D_METHOD("is_feature_disabled", "feature"), &EditorFeatureProfile::is_feature_disabled);
@@ -296,7 +326,8 @@ void EditorFeatureProfileManager::_update_profile_list(const String &p_select_pr
 
 	Vector<String> profiles;
 	DirAccessRef d = DirAccess::open(EditorSettings::get_singleton()->get_feature_profiles_dir());
-	ERR_FAIL_COND(!d);
+	ERR_FAIL_COND_MSG(!d, "Cannot open directory '" + EditorSettings::get_singleton()->get_feature_profiles_dir() + "'.");
+
 	d->list_dir_begin();
 	while (true) {
 		String f = d->get_next();
@@ -348,18 +379,21 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 
 	switch (p_action) {
 		case PROFILE_CLEAR: {
+
 			EditorSettings::get_singleton()->set("_default_feature_profile", "");
 			EditorSettings::get_singleton()->save();
 			current_profile = "";
 			current.unref();
+
 			_update_profile_list();
+			_emit_current_profile_changed();
 		} break;
 		case PROFILE_SET: {
 
 			String selected = _get_selected_profile();
 			ERR_FAIL_COND(selected == String());
 			if (selected == current_profile) {
-				return; //nothing to do here
+				return; // Nothing to do here.
 			}
 			EditorSettings::get_singleton()->set("_default_feature_profile", selected);
 			EditorSettings::get_singleton()->save();
@@ -367,7 +401,7 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 			current = edited;
 
 			_update_profile_list();
-
+			_emit_current_profile_changed();
 		} break;
 		case PROFILE_IMPORT: {
 
@@ -385,6 +419,7 @@ void EditorFeatureProfileManager::_profile_action(int p_action) {
 			new_profile_name->grab_focus();
 		} break;
 		case PROFILE_ERASE: {
+
 			String selected = _get_selected_profile();
 			ERR_FAIL_COND(selected == String());
 
@@ -399,7 +434,8 @@ void EditorFeatureProfileManager::_erase_selected_profile() {
 	String selected = _get_selected_profile();
 	ERR_FAIL_COND(selected == String());
 	DirAccessRef da = DirAccess::open(EditorSettings::get_singleton()->get_feature_profiles_dir());
-	ERR_FAIL_COND(!da);
+	ERR_FAIL_COND_MSG(!da, "Cannot open directory '" + EditorSettings::get_singleton()->get_feature_profiles_dir() + "'.");
+
 	da->remove(selected + ".profile");
 	if (selected == current_profile) {
 		_profile_action(PROFILE_CLEAR);
@@ -638,7 +674,7 @@ void EditorFeatureProfileManager::_update_selected_profile() {
 		//reload edited, if different from current
 		edited.instance();
 		Error err = edited->load_from_file(EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(profile + ".profile"));
-		ERR_FAIL_COND(err != OK);
+		ERR_FAIL_COND_MSG(err != OK, "Error when loading EditorSettings from file '" + EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(profile + ".profile") + "'.");
 	}
 
 	updating_features = true;
@@ -691,7 +727,7 @@ void EditorFeatureProfileManager::_import_profiles(const Vector<String> &p_paths
 		String dst_file = EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(basefile);
 
 		if (FileAccess::exists(dst_file)) {
-			EditorNode::get_singleton()->show_warning(vformat(TTR("Profile '%s' already exists. Remote it first before importing, import aborted."), basefile.get_basename()));
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Profile '%s' already exists. Remove it first before importing, import aborted."), basefile.get_basename()));
 			return;
 		}
 	}
@@ -779,7 +815,7 @@ EditorFeatureProfileManager::EditorFeatureProfileManager() {
 	profile_actions[PROFILE_CLEAR]->set_disabled(true);
 	profile_actions[PROFILE_CLEAR]->connect("pressed", this, "_profile_action", varray(PROFILE_CLEAR));
 
-	main_vbc->add_margin_child(TTR("Current Profile"), name_hbc);
+	main_vbc->add_margin_child(TTR("Current Profile:"), name_hbc);
 
 	HBoxContainer *profiles_hbc = memnew(HBoxContainer);
 	profile_list = memnew(OptionButton);
@@ -814,7 +850,7 @@ EditorFeatureProfileManager::EditorFeatureProfileManager() {
 	profile_actions[PROFILE_EXPORT]->set_disabled(true);
 	profile_actions[PROFILE_EXPORT]->connect("pressed", this, "_profile_action", varray(PROFILE_EXPORT));
 
-	main_vbc->add_margin_child(TTR("Available Profiles"), profiles_hbc);
+	main_vbc->add_margin_child(TTR("Available Profiles:"), profiles_hbc);
 
 	h_split = memnew(HSplitContainer);
 	h_split->set_v_size_flags(SIZE_EXPAND_FILL);
@@ -825,9 +861,8 @@ EditorFeatureProfileManager::EditorFeatureProfileManager() {
 	class_list_vbc->set_h_size_flags(SIZE_EXPAND_FILL);
 
 	class_list = memnew(Tree);
-	class_list_vbc->add_margin_child(TTR("Enabled Classes"), class_list, true);
+	class_list_vbc->add_margin_child(TTR("Enabled Classes:"), class_list, true);
 	class_list->set_hide_root(true);
-	class_list->set_hide_folding(true);
 	class_list->set_edit_checkbox_cell_only_when_checkbox_is_pressed(true);
 	class_list->connect("cell_selected", this, "_class_list_item_selected");
 	class_list->connect("item_edited", this, "_class_list_item_edited", varray(), CONNECT_DEFERRED);
@@ -861,7 +896,7 @@ EditorFeatureProfileManager::EditorFeatureProfileManager() {
 	import_profiles = memnew(EditorFileDialog);
 	add_child(import_profiles);
 	import_profiles->set_mode(EditorFileDialog::MODE_OPEN_FILES);
-	import_profiles->add_filter("*.profile; Godot Feature Profile");
+	import_profiles->add_filter("*.profile; " + TTR("Godot Feature Profile"));
 	import_profiles->connect("files_selected", this, "_import_profiles");
 	import_profiles->set_title(TTR("Import Profile(s)"));
 	import_profiles->set_access(EditorFileDialog::ACCESS_FILESYSTEM);
@@ -869,7 +904,7 @@ EditorFeatureProfileManager::EditorFeatureProfileManager() {
 	export_profile = memnew(EditorFileDialog);
 	add_child(export_profile);
 	export_profile->set_mode(EditorFileDialog::MODE_SAVE_FILE);
-	export_profile->add_filter("*.profile; Godot Feature Profile");
+	export_profile->add_filter("*.profile; " + TTR("Godot Feature Profile"));
 	export_profile->connect("file_selected", this, "_export_profile");
 	export_profile->set_title(TTR("Export Profile"));
 	export_profile->set_access(EditorFileDialog::ACCESS_FILESYSTEM);

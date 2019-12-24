@@ -44,7 +44,7 @@ void CollisionPolygon::_build_polygon() {
 	if (polygon.size() == 0)
 		return;
 
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon(polygon);
+	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(polygon);
 	if (decomp.size() == 0)
 		return;
 
@@ -151,6 +151,8 @@ float CollisionPolygon::get_depth() const {
 
 void CollisionPolygon::set_disabled(bool p_disabled) {
 	disabled = p_disabled;
+	update_gizmo();
+
 	if (parent) {
 		parent->shape_owner_set_disabled(owner_id, p_disabled);
 	}

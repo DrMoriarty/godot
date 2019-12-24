@@ -126,16 +126,16 @@ void BulletPhysicsDirectBodyState::add_torque(const Vector3 &p_torque) {
 	body->apply_torque(p_torque);
 }
 
-void BulletPhysicsDirectBodyState::apply_central_impulse(const Vector3 &p_j) {
-	body->apply_central_impulse(p_j);
+void BulletPhysicsDirectBodyState::apply_central_impulse(const Vector3 &p_impulse) {
+	body->apply_central_impulse(p_impulse);
 }
 
-void BulletPhysicsDirectBodyState::apply_impulse(const Vector3 &p_pos, const Vector3 &p_j) {
-	body->apply_impulse(p_pos, p_j);
+void BulletPhysicsDirectBodyState::apply_impulse(const Vector3 &p_pos, const Vector3 &p_impulse) {
+	body->apply_impulse(p_pos, p_impulse);
 }
 
-void BulletPhysicsDirectBodyState::apply_torque_impulse(const Vector3 &p_j) {
-	body->apply_torque_impulse(p_j);
+void BulletPhysicsDirectBodyState::apply_torque_impulse(const Vector3 &p_impulse) {
+	body->apply_torque_impulse(p_impulse);
 }
 
 void BulletPhysicsDirectBodyState::set_sleep_state(bool p_enable) {
@@ -411,6 +411,8 @@ void RigidBodyBullet::on_collision_filters_change() {
 	if (space) {
 		space->reload_collision_filters(this);
 	}
+
+	set_activation_state(true);
 }
 
 void RigidBodyBullet::on_collision_checker_start() {
@@ -471,7 +473,7 @@ void RigidBodyBullet::assert_no_constraints() {
 
 void RigidBodyBullet::set_activation_state(bool p_active) {
 	if (p_active) {
-		btBody->setActivationState(ACTIVE_TAG);
+		btBody->activate();
 	} else {
 		btBody->setActivationState(WANTS_DEACTIVATION);
 	}
@@ -728,12 +730,12 @@ bool RigidBodyBullet::is_axis_locked(PhysicsServer::BodyAxis p_axis) const {
 
 void RigidBodyBullet::reload_axis_lock() {
 
-	btBody->setLinearFactor(btVector3(!is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_X), !is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_Y), !is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_Z)));
+	btBody->setLinearFactor(btVector3(float(!is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_X)), float(!is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_Y)), float(!is_axis_locked(PhysicsServer::BODY_AXIS_LINEAR_Z))));
 	if (PhysicsServer::BODY_MODE_CHARACTER == mode) {
 		/// When character angular is always locked
 		btBody->setAngularFactor(btVector3(0., 0., 0.));
 	} else {
-		btBody->setAngularFactor(btVector3(!is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_X), !is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_Y), !is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_Z)));
+		btBody->setAngularFactor(btVector3(float(!is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_X)), float(!is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_Y)), float(!is_axis_locked(PhysicsServer::BODY_AXIS_ANGULAR_Z))));
 	}
 }
 
@@ -866,7 +868,7 @@ void RigidBodyBullet::on_enter_area(AreaBullet *p_area) {
 
 	if (p_area->is_spOv_gravityPoint()) {
 		++countGravityPointSpaces;
-		assert(0 < countGravityPointSpaces);
+		ERR_FAIL_COND(countGravityPointSpaces <= 0);
 	}
 }
 
@@ -888,7 +890,7 @@ void RigidBodyBullet::on_exit_area(AreaBullet *p_area) {
 	if (wasTheAreaFound) {
 		if (p_area->is_spOv_gravityPoint()) {
 			--countGravityPointSpaces;
-			assert(0 <= countGravityPointSpaces);
+			ERR_FAIL_COND(countGravityPointSpaces < 0);
 		}
 
 		--areaWhereIamCount;
@@ -918,7 +920,7 @@ void RigidBodyBullet::reload_space_override_modificator() {
 
 		currentArea = areasWhereIam[i];
 
-		if (PhysicsServer::AREA_SPACE_OVERRIDE_DISABLED == currentArea->get_spOv_mode()) {
+		if (!currentArea || PhysicsServer::AREA_SPACE_OVERRIDE_DISABLED == currentArea->get_spOv_mode()) {
 			continue;
 		}
 

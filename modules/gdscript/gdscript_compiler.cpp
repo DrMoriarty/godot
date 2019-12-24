@@ -1073,7 +1073,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 						int set_index;
 						bool named = false;
 
-						if (static_cast<const GDScriptParser::OperatorNode *>(op)->op == GDScriptParser::OperatorNode::OP_INDEX_NAMED) {
+						if (op->op == GDScriptParser::OperatorNode::OP_INDEX_NAMED) {
 
 							set_index = codegen.get_name_map_pos(static_cast<const GDScriptParser::IdentifierNode *>(op->arguments[1])->name);
 							named = true;
@@ -1144,7 +1144,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 
 						GDScriptDataType assign_type = _gdtype_from_datatype(on->arguments[0]->get_datatype());
 
-						if (assign_type.has_type && !on->arguments[1]->get_datatype().has_type) {
+						if (assign_type.has_type && !on->datatype.has_type) {
 							// Typed assignment
 							switch (assign_type.kind) {
 								case GDScriptDataType::BUILTIN: {
@@ -1241,8 +1241,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 				} break;
 				default: {
 
-					ERR_EXPLAIN("Bug in bytecode compiler, unexpected operator #" + itos(on->op) + " in parse tree while parsing expression.");
-					ERR_FAIL_V(0); //unreachable code
+					ERR_FAIL_V_MSG(0, "Bug in bytecode compiler, unexpected operator #" + itos(on->op) + " in parse tree while parsing expression."); //unreachable code
 
 				} break;
 			}
@@ -1255,12 +1254,9 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 		//TYPE_TYPE,
 		default: {
 
-			ERR_EXPLAIN("Bug in bytecode compiler, unexpected node in parse tree while parsing expression.");
-			ERR_FAIL_V(-1); //unreachable code
+			ERR_FAIL_V_MSG(-1, "Bug in bytecode compiler, unexpected node in parse tree while parsing expression."); //unreachable code
 		} break;
 	}
-
-	ERR_FAIL_V(-1); //unreachable code
 }
 
 Error GDScriptCompiler::_parse_block(CodeGen &codegen, const GDScriptParser::BlockNode *p_block, int p_stack_level, int p_break_addr, int p_continue_addr) {
@@ -1524,8 +1520,16 @@ Error GDScriptCompiler::_parse_block(CodeGen &codegen, const GDScriptParser::Blo
 				if (ret2 < 0)
 					return ERR_PARSE_ERROR;
 
+				int message_ret = 0;
+				if (as->message) {
+					message_ret = _parse_expression(codegen, as->message, p_stack_level + 1, false);
+					if (message_ret < 0)
+						return ERR_PARSE_ERROR;
+				}
+
 				codegen.opcodes.push_back(GDScriptFunction::OPCODE_ASSERT);
 				codegen.opcodes.push_back(ret2);
+				codegen.opcodes.push_back(message_ret);
 #endif
 			} break;
 			case GDScriptParser::Node::TYPE_BREAKPOINT: {
@@ -1977,12 +1981,12 @@ Error GDScriptCompiler::_parse_class_level(GDScript *p_script, const GDScriptPar
 
 	for (int i = 0; i < p_class->subclasses.size(); i++) {
 		StringName name = p_class->subclasses[i]->name;
-
-		GDScript *subclass = p_script->subclasses[name].ptr();
+		Ref<GDScript> &subclass = p_script->subclasses[name];
+		GDScript *subclass_ptr = subclass.ptr();
 
 		// Subclass might still be parsing, just skip it
-		if (!parsed_classes.has(subclass) && !parsing_classes.has(subclass)) {
-			Error err = _parse_class_level(subclass, p_class->subclasses[i], p_keep_state);
+		if (!parsed_classes.has(subclass_ptr) && !parsing_classes.has(subclass_ptr)) {
+			Error err = _parse_class_level(subclass_ptr, p_class->subclasses[i], p_keep_state);
 			if (err)
 				return err;
 		}
@@ -2068,7 +2072,7 @@ Error GDScriptCompiler::_parse_class_blocks(GDScript *p_script, const GDScriptPa
 					}
 					instance->owner->set_script_instance(instance);
 
-					/* STEP 2, INITIALIZE AND CONSRTUCT */
+					/* STEP 2, INITIALIZE AND CONSTRUCT */
 
 					Variant::CallError ce;
 					p_script->initializer->call(instance, NULL, 0, ce);

@@ -137,6 +137,8 @@ ShaderTypes::ShaderTypes() {
 
 	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["FRAGCOORD"] = constt(ShaderLanguage::TYPE_VEC4);
 	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["NORMAL"] = constt(ShaderLanguage::TYPE_VEC3);
+	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["UV"] = constt(ShaderLanguage::TYPE_VEC2);
+	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["UV2"] = constt(ShaderLanguage::TYPE_VEC2);
 	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["VIEW"] = constt(ShaderLanguage::TYPE_VEC3);
 	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["LIGHT"] = constt(ShaderLanguage::TYPE_VEC3);
 	shader_modes[VS::SHADER_SPATIAL].functions["light"].built_ins["LIGHT_COLOR"] = constt(ShaderLanguage::TYPE_VEC3);
@@ -233,6 +235,7 @@ ShaderTypes::ShaderTypes() {
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["TEXTURE_PIXEL_SIZE"] = constt(ShaderLanguage::TYPE_VEC2);
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["SCREEN_UV"] = constt(ShaderLanguage::TYPE_VEC2);
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["LIGHT_VEC"] = ShaderLanguage::TYPE_VEC2;
+	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["SHADOW_VEC"] = ShaderLanguage::TYPE_VEC2;
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["LIGHT_HEIGHT"] = ShaderLanguage::TYPE_FLOAT;
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["LIGHT_COLOR"] = ShaderLanguage::TYPE_VEC4;
 	shader_modes[VS::SHADER_CANVAS_ITEM].functions["light"].built_ins["LIGHT_UV"] = constt(ShaderLanguage::TYPE_VEC2);

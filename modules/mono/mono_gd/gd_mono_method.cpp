@@ -30,8 +30,10 @@
 
 #include "gd_mono_method.h"
 
+#include "gd_mono_cache.h"
 #include "gd_mono_class.h"
 #include "gd_mono_marshal.h"
+#include "gd_mono_utils.h"
 
 #include <mono/metadata/attrdefs.h>
 
@@ -99,17 +101,13 @@ IMonoClassMember::Visibility GDMonoMethod::get_visibility() {
 	}
 }
 
-void *GDMonoMethod::get_thunk() {
-	return mono_method_get_unmanaged_thunk(mono_method);
-}
-
 MonoObject *GDMonoMethod::invoke(MonoObject *p_object, const Variant **p_params, MonoException **r_exc) {
 	if (get_return_type().type_encoding != MONO_TYPE_VOID || get_parameters_count() > 0) {
 		MonoArray *params = mono_array_new(mono_domain_get(), CACHED_CLASS_RAW(MonoObject), get_parameters_count());
 
 		for (int i = 0; i < params_count; i++) {
 			MonoObject *boxed_param = GDMonoMarshal::variant_to_mono_object(p_params[i], param_types[i]);
-			mono_array_set(params, MonoObject *, i, boxed_param);
+			mono_array_setref(params, i, boxed_param);
 		}
 
 		MonoException *exc = NULL;

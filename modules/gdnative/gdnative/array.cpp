@@ -305,13 +305,13 @@ void GDAPI godot_array_sort_custom(godot_array *p_self, godot_object *p_obj, con
 
 godot_int GDAPI godot_array_bsearch(godot_array *p_self, const godot_variant *p_value, const godot_bool p_before) {
 	Array *self = (Array *)p_self;
-	return self->bsearch((const Variant *)p_value, p_before);
+	return self->bsearch(*(const Variant *)p_value, p_before);
 }
 
 godot_int GDAPI godot_array_bsearch_custom(godot_array *p_self, const godot_variant *p_value, godot_object *p_obj, const godot_string *p_func, const godot_bool p_before) {
 	Array *self = (Array *)p_self;
 	const String *func = (const String *)p_func;
-	return self->bsearch_custom((const Variant *)p_value, (Object *)p_obj, *func, p_before);
+	return self->bsearch_custom(*(const Variant *)p_value, (Object *)p_obj, *func, p_before);
 }
 
 void GDAPI godot_array_destroy(godot_array *p_self) {
@@ -324,6 +324,15 @@ godot_array GDAPI godot_array_duplicate(const godot_array *p_self, const godot_b
 	Array *val = (Array *)&res;
 	memnew_placement(val, Array);
 	*val = self->duplicate(p_deep);
+	return res;
+}
+
+godot_array GDAPI godot_array_slice(const godot_array *p_self, const godot_int p_begin, const godot_int p_end, const godot_int p_step, const godot_bool p_deep) {
+	const Array *self = (const Array *)p_self;
+	godot_array res;
+	Array *val = (Array *)&res;
+	memnew_placement(val, Array);
+	*val = self->slice(p_begin, p_end, p_step, p_deep);
 	return res;
 }
 

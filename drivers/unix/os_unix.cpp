@@ -72,8 +72,7 @@ static double _clock_scale = 0;
 static void _setup_clock() {
 	mach_timebase_info_data_t info;
 	kern_return_t ret = mach_timebase_info(&info);
-	ERR_EXPLAIN("OS CLOCK IS NOT WORKING!");
-	ERR_FAIL_COND(ret != 0);
+	ERR_FAIL_COND_MSG(ret != 0, "OS CLOCK IS NOT WORKING!");
 	_clock_scale = ((double)info.numer / (double)info.denom) / 1000.0;
 	_clock_start = mach_absolute_time() * _clock_scale;
 }
@@ -85,8 +84,7 @@ static void _setup_clock() {
 #endif
 static void _setup_clock() {
 	struct timespec tv_now = { 0, 0 };
-	ERR_EXPLAIN("OS CLOCK IS NOT WORKING!");
-	ERR_FAIL_COND(clock_gettime(GODOT_CLOCK, &tv_now) != 0);
+	ERR_FAIL_COND_MSG(clock_gettime(GODOT_CLOCK, &tv_now) != 0, "OS CLOCK IS NOT WORKING!");
 	_clock_start = ((uint64_t)tv_now.tv_nsec / 1000L) + (uint64_t)tv_now.tv_sec * 1000000L;
 }
 #endif
@@ -128,7 +126,9 @@ void OS_Unix::initialize_core() {
 	RWLockDummy::make_default();
 #else
 	ThreadPosix::make_default();
+#if !defined(OSX_ENABLED) && !defined(IPHONE_ENABLED)
 	SemaphorePosix::make_default();
+#endif
 	MutexPosix::make_default();
 	RWLockPosix::make_default();
 #endif
@@ -189,7 +189,7 @@ uint64_t OS_Unix::get_system_time_secs() const {
 uint64_t OS_Unix::get_system_time_msecs() const {
 	struct timeval tv_now;
 	gettimeofday(&tv_now, NULL);
-	return uint64_t(tv_now.tv_sec * 1000 + tv_now.tv_usec / 1000);
+	return uint64_t(tv_now.tv_sec) * 1000 + uint64_t(tv_now.tv_usec) / 1000;
 }
 
 OS::Date OS_Unix::get_date(bool utc) const {
@@ -256,7 +256,7 @@ OS::TimeZoneInfo OS_Unix::get_time_zone_info() const {
 
 void OS_Unix::delay_usec(uint32_t p_usec) const {
 
-	struct timespec rem = { static_cast<time_t>(p_usec / 1000000), static_cast<long>((p_usec % 1000000) * 1000) };
+	struct timespec rem = { static_cast<time_t>(p_usec / 1000000), (static_cast<long>(p_usec) % 1000000) * 1000 };
 	while (nanosleep(&rem, &rem) == EINTR) {
 	}
 }
@@ -300,7 +300,7 @@ Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bo
 		}
 		FILE *f = popen(argss.utf8().get_data(), "r");
 
-		ERR_FAIL_COND_V(!f, ERR_CANT_OPEN);
+		ERR_FAIL_COND_V_MSG(!f, ERR_CANT_OPEN, "Cannot pipe stream from process running with following arguments '" + argss + "'.");
 
 		char buf[65535];
 
@@ -316,7 +316,7 @@ Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bo
 		}
 		int rv = pclose(f);
 		if (r_exitcode)
-			*r_exitcode = rv;
+			*r_exitcode = WEXITSTATUS(rv);
 
 		return OK;
 	}
@@ -420,10 +420,7 @@ Error OS_Unix::open_dynamic_library(const String p_path, void *&p_library_handle
 	}
 
 	p_library_handle = dlopen(path.utf8().get_data(), RTLD_NOW);
-	if (!p_library_handle) {
-		ERR_EXPLAIN("Can't open dynamic library: " + p_path + ". Error: " + dlerror());
-		ERR_FAIL_V(ERR_CANT_OPEN);
-	}
+	ERR_FAIL_COND_V_MSG(!p_library_handle, ERR_CANT_OPEN, "Can't open dynamic library: " + p_path + ". Error: " + dlerror());
 	return OK;
 }
 
@@ -442,12 +439,9 @@ Error OS_Unix::get_dynamic_library_symbol_handle(void *p_library_handle, const S
 
 	error = dlerror();
 	if (error != NULL) {
-		if (!p_optional) {
-			ERR_EXPLAIN("Can't resolve symbol " + p_name + ". Error: " + error);
-			ERR_FAIL_V(ERR_CANT_RESOLVE);
-		} else {
-			return ERR_CANT_RESOLVE;
-		}
+		ERR_FAIL_COND_V_MSG(!p_optional, ERR_CANT_RESOLVE, "Can't resolve symbol " + p_name + ". Error: " + error + ".");
+
+		return ERR_CANT_RESOLVE;
 	}
 	return OK;
 }

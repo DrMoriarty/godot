@@ -38,13 +38,10 @@
 #include "scene/gui/label.h"
 #include "scene/gui/line_edit.h"
 #include "scene/gui/tree.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 class CreateDialog : public ConfirmationDialog {
 
-	GDCLASS(CreateDialog, ConfirmationDialog)
+	GDCLASS(CreateDialog, ConfirmationDialog);
 
 	Vector<String> favorite_list;
 	Tree *favorites;
@@ -54,6 +51,7 @@ class CreateDialog : public ConfirmationDialog {
 	LineEdit *search_box;
 	Tree *search_options;
 	HashMap<String, TreeItem *> search_options_types;
+	HashMap<String, RES> search_loaded_scripts;
 	bool is_replace_mode;
 	String base_type;
 	String preferred_search_result_type;
@@ -90,6 +88,7 @@ class CreateDialog : public ConfirmationDialog {
 	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
 
 	bool _is_class_disabled_by_feature_profile(const StringName &p_class);
+	bool _is_type_prefered(const String &type);
 
 protected:
 	void _notification(int p_what);

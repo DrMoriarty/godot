@@ -37,9 +37,6 @@
 #include "scene/gui/panel.h"
 #include "scene/gui/popup.h"
 #include "scene/gui/texture_button.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 class WindowDialog : public Popup {
 
@@ -56,10 +53,15 @@ class WindowDialog : public Popup {
 
 	TextureButton *close_button;
 	String title;
+	String xl_title;
 	int drag_type;
 	Point2 drag_offset;
 	Point2 drag_offset_far;
 	bool resizable;
+
+#ifdef TOOLS_ENABLED
+	bool was_editor_dimmed;
+#endif
 
 	void _gui_input(const Ref<InputEvent> &p_event);
 	void _closed();
@@ -108,7 +110,6 @@ class AcceptDialog : public WindowDialog {
 	HBoxContainer *hbc;
 	Label *label;
 	Button *ok;
-	//Button *cancel; no more cancel (there is X on that titlebar)
 	bool hide_on_ok;
 
 	void _custom_action(const String &p_action);
@@ -144,6 +145,9 @@ public:
 
 	void set_text(String p_text);
 	String get_text() const;
+
+	void set_autowrap(bool p_autowrap);
+	bool has_autowrap();
 
 	AcceptDialog();
 	~AcceptDialog();

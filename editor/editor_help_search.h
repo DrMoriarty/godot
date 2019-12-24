@@ -59,6 +59,7 @@ class EditorHelpSearch : public ConfirmationDialog {
 	OptionButton *filter_combo;
 	Tree *results_tree;
 	bool old_search;
+	String old_term;
 
 	class Runner;
 	Ref<Runner> search;
@@ -124,6 +125,8 @@ class EditorHelpSearch::Runner : public Reference {
 	TreeItem *root_item;
 	Map<String, TreeItem *> class_items;
 	TreeItem *matched_item;
+
+	bool _is_class_disabled_by_feature_profile(const StringName &p_class);
 
 	bool _slice();
 	bool _phase_match_classes_init();

@@ -9,8 +9,9 @@
 	<methods>
 	</methods>
 	<members>
-		<member name="constant" type="Color" setter="set_constant" getter="get_constant">
+		<member name="constant" type="Color" setter="set_constant" getter="get_constant" default="Color( 1, 1, 1, 1 )">
 		</member>
+		<member name="default_input_values" type="Array" setter="_set_default_input_values" getter="_get_default_input_values" override="true" default="[  ]" />
 	</members>
 	<constants>
 	</constants>

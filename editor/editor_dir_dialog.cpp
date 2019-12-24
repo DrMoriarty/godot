@@ -95,7 +95,9 @@ void EditorDirDialog::_notification(int p_what) {
 	}
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
-		EditorFileSystem::get_singleton()->disconnect("filesystem_changed", this, "reload");
+		if (EditorFileSystem::get_singleton()->is_connected("filesystem_changed", this, "reload")) {
+			EditorFileSystem::get_singleton()->disconnect("filesystem_changed", this, "reload");
+		}
 	}
 
 	if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
@@ -151,7 +153,7 @@ void EditorDirDialog::_make_dir_confirm() {
 	String dir = ti->get_metadata(0);
 
 	DirAccessRef d = DirAccess::open(dir);
-	ERR_FAIL_COND(!d);
+	ERR_FAIL_COND_MSG(!d, "Cannot open directory '" + dir + "'.");
 	Error err = d->make_dir(makedirname->get_text());
 
 	if (err != OK) {
@@ -186,7 +188,7 @@ EditorDirDialog::EditorDirDialog() {
 
 	tree->connect("item_activated", this, "_ok");
 
-	makedir = add_button(TTR("Create Folder"), OS::get_singleton()->get_swap_ok_cancel() ? true : false, "makedir");
+	makedir = add_button(TTR("Create Folder"), OS::get_singleton()->get_swap_ok_cancel(), "makedir");
 	makedir->connect("pressed", this, "_make_dir");
 
 	makedialog = memnew(ConfirmationDialog);

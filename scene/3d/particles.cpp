@@ -47,17 +47,23 @@ PoolVector<Face3> Particles::get_faces(uint32_t p_usage_flags) const {
 void Particles::set_emitting(bool p_emitting) {
 
 	VS::get_singleton()->particles_set_emitting(particles, p_emitting);
+
+	if (p_emitting && one_shot) {
+		set_process_internal(true);
+	} else if (!p_emitting) {
+		set_process_internal(false);
+	}
 }
 
 void Particles::set_amount(int p_amount) {
 
-	ERR_FAIL_COND(p_amount < 1);
+	ERR_FAIL_COND_MSG(p_amount < 1, "Amount of particles cannot be smaller than 1.");
 	amount = p_amount;
 	VS::get_singleton()->particles_set_amount(particles, amount);
 }
 void Particles::set_lifetime(float p_lifetime) {
 
-	ERR_FAIL_COND(p_lifetime <= 0);
+	ERR_FAIL_COND_MSG(p_lifetime <= 0, "Particles lifetime must be greater than 0.");
 	lifetime = p_lifetime;
 	VS::get_singleton()->particles_set_lifetime(particles, lifetime);
 }
@@ -66,8 +72,16 @@ void Particles::set_one_shot(bool p_one_shot) {
 
 	one_shot = p_one_shot;
 	VS::get_singleton()->particles_set_one_shot(particles, one_shot);
-	if (!one_shot && is_emitting())
-		VisualServer::get_singleton()->particles_restart(particles);
+
+	if (is_emitting()) {
+
+		set_process_internal(true);
+		if (!one_shot)
+			VisualServer::get_singleton()->particles_restart(particles);
+	}
+
+	if (!one_shot)
+		set_process_internal(false);
 }
 
 void Particles::set_pre_process_time(float p_time) {
@@ -243,7 +257,7 @@ String Particles::get_configuration_warning() const {
 				SpatialMaterial *spat = Object::cast_to<SpatialMaterial>(draw_passes[i]->surface_get_material(j).ptr());
 				anim_material_found = anim_material_found || (spat && spat->get_billboard_mode() == SpatialMaterial::BILLBOARD_PARTICLES);
 			}
-			if (meshes_found && anim_material_found) break;
+			if (anim_material_found) break;
 		}
 	}
 
@@ -278,6 +292,7 @@ String Particles::get_configuration_warning() const {
 void Particles::restart() {
 
 	VisualServer::get_singleton()->particles_restart(particles);
+	VisualServer::get_singleton()->particles_set_emitting(particles, true);
 }
 
 AABB Particles::capture_aabb() const {
@@ -304,6 +319,23 @@ void Particles::_notification(int p_what) {
 		} else {
 
 			VS::get_singleton()->particles_set_speed_scale(particles, 0);
+		}
+	}
+
+	// Use internal process when emitting and one_shot are on so that when
+	// the shot ends the editor can properly update
+	if (p_what == NOTIFICATION_INTERNAL_PROCESS) {
+
+		if (one_shot && !is_emitting()) {
+			_change_notify();
+			set_process_internal(false);
+		}
+	}
+
+	if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
+		// make sure particles are updated before rendering occurs if they were active before
+		if (is_visible_in_tree() && !VS::get_singleton()->particles_is_inactive(particles)) {
+			VS::get_singleton()->particles_request_process(particles);
 		}
 	}
 }
@@ -386,6 +418,7 @@ Particles::Particles() {
 
 	particles = VS::get_singleton()->particles_create();
 	set_base(particles);
+	one_shot = false; // Needed so that set_emitting doesn't access uninitialized values
 	set_emitting(true);
 	set_one_shot(false);
 	set_amount(8);

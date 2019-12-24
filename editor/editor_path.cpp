@@ -74,7 +74,12 @@ void EditorPath::_about_to_show() {
 	objects.clear();
 	get_popup()->clear();
 	get_popup()->set_size(Size2(get_size().width, 1));
+
 	_add_children_to_popup(obj);
+	if (get_popup()->get_item_count() == 0) {
+		get_popup()->add_item(TTR("No sub-resources found."));
+		get_popup()->set_item_disabled(0, true);
+	}
 }
 
 void EditorPath::update_path() {
@@ -125,6 +130,15 @@ void EditorPath::_id_pressed(int p_idx) {
 		return;
 
 	EditorNode::get_singleton()->push_item(obj);
+}
+
+void EditorPath::_notification(int p_what) {
+
+	switch (p_what) {
+		case NOTIFICATION_THEME_CHANGED: {
+			update_path();
+		} break;
+	}
 }
 
 void EditorPath::_bind_methods() {

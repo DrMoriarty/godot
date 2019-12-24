@@ -51,7 +51,7 @@ subject to the following restrictions:
 
 static void plane_space(const Vector3 &n, Vector3 &p, Vector3 &q) {
 
-	if (Math::abs(n.z) > 0.707106781186547524400844362) {
+	if (Math::abs(n.z) > Math_SQRT12) {
 		// choose p in y-z plane
 		real_t a = n[1] * n[1] + n[2] * n[2];
 		real_t k = 1.0 / Math::sqrt(a);
@@ -198,7 +198,6 @@ bool HingeJointSW::setup(real_t p_step) {
 
 	plane_space(m_rbAFrame.basis.get_axis(2), jointAxis0local, jointAxis1local);
 
-	A->get_transform().basis.xform(m_rbAFrame.basis.get_axis(2));
 	Vector3 jointAxis0 = A->get_transform().basis.xform(jointAxis0local);
 	Vector3 jointAxis1 = A->get_transform().basis.xform(jointAxis1local);
 	Vector3 hingeAxisWorld = A->get_transform().basis.xform(m_rbAFrame.basis.get_axis(2));

@@ -46,17 +46,13 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tree.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
-
 class PropertyValueEvaluator;
 class CreateDialog;
 class PropertySelector;
 
 class EditorResourceConversionPlugin : public Reference {
 
-	GDCLASS(EditorResourceConversionPlugin, Reference)
+	GDCLASS(EditorResourceConversionPlugin, Reference);
 
 protected:
 	static void _bind_methods();
@@ -81,7 +77,8 @@ class CustomPropertyEditor : public Popup {
 		OBJ_MENU_COPY = 4,
 		OBJ_MENU_PASTE = 5,
 		OBJ_MENU_NEW_SCRIPT = 6,
-		OBJ_MENU_SHOW_IN_FILE_SYSTEM = 7,
+		OBJ_MENU_EXTEND_SCRIPT = 7,
+		OBJ_MENU_SHOW_IN_FILE_SYSTEM = 8,
 		TYPE_BASE_ID = 100,
 		CONVERT_BASE_ID = 1000
 	};

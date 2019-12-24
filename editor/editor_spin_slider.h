@@ -36,7 +36,7 @@
 #include "scene/gui/texture_rect.h"
 
 class EditorSpinSlider : public Range {
-	GDCLASS(EditorSpinSlider, Range)
+	GDCLASS(EditorSpinSlider, Range);
 
 	String label;
 	int updown_offset;
@@ -48,6 +48,7 @@ class EditorSpinSlider : public Range {
 
 	bool mouse_over_spin;
 	bool mouse_over_grabber;
+	bool mousewheel_over_grabber;
 
 	bool grabbing_grabber;
 	int grabbing_from;
@@ -101,6 +102,9 @@ public:
 	bool is_flat() const;
 
 	void set_custom_label_color(bool p_use_custom_label_color, Color p_custom_label_color);
+
+	void setup_and_show() { _focus_entered(); }
+	LineEdit *get_line_edit() { return value_input; }
 
 	virtual Size2 get_minimum_size() const;
 	EditorSpinSlider();

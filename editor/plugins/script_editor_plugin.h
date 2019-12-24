@@ -38,6 +38,7 @@
 #include "editor/editor_plugin.h"
 #include "editor/script_create_dialog.h"
 #include "scene/gui/item_list.h"
+#include "scene/gui/line_edit.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/split_container.h"
 #include "scene/gui/tab_container.h"
@@ -49,7 +50,7 @@
 
 class ScriptEditorQuickOpen : public ConfirmationDialog {
 
-	GDCLASS(ScriptEditorQuickOpen, ConfirmationDialog)
+	GDCLASS(ScriptEditorQuickOpen, ConfirmationDialog);
 
 	LineEdit *search_box;
 	Tree *search_options;
@@ -76,7 +77,7 @@ class ScriptEditorDebugger;
 
 class ScriptEditorBase : public VBoxContainer {
 
-	GDCLASS(ScriptEditorBase, VBoxContainer)
+	GDCLASS(ScriptEditorBase, VBoxContainer);
 
 protected:
 	static void _bind_methods();
@@ -99,6 +100,7 @@ public:
 	virtual void set_executing_line(int p_line) = 0;
 	virtual void clear_executing_line() = 0;
 	virtual void trim_trailing_whitespace() = 0;
+	virtual void insert_final_newline() = 0;
 	virtual void convert_indent_to_spaces() = 0;
 	virtual void convert_indent_to_tabs() = 0;
 	virtual void ensure_focus() = 0;
@@ -115,6 +117,8 @@ public:
 	virtual void set_tooltip_request_func(String p_method, Object *p_obj) = 0;
 	virtual Control *get_edit_menu() = 0;
 	virtual void clear_edit_menu() = 0;
+
+	virtual void validate() = 0;
 
 	ScriptEditorBase() {}
 };
@@ -135,6 +139,7 @@ class ScriptEditor : public PanelContainer {
 		FILE_NEW,
 		FILE_NEW_TEXTFILE,
 		FILE_OPEN,
+		FILE_REOPEN_CLOSED,
 		FILE_OPEN_RECENT,
 		FILE_SAVE,
 		FILE_SAVE_AS,
@@ -163,6 +168,7 @@ class ScriptEditor : public PanelContainer {
 		REQUEST_DOCS,
 		HELP_SEARCH_FIND,
 		HELP_SEARCH_FIND_NEXT,
+		HELP_SEARCH_FIND_PREVIOUS,
 		WINDOW_MOVE_UP,
 		WINDOW_MOVE_DOWN,
 		WINDOW_NEXT,
@@ -210,6 +216,9 @@ class ScriptEditor : public PanelContainer {
 	ItemList *script_list;
 	HSplitContainer *script_split;
 	ItemList *members_overview;
+	LineEdit *filter_scripts;
+	LineEdit *filter_methods;
+	VBoxContainer *scripts_vbox;
 	VBoxContainer *overview_vbox;
 	HBoxContainer *buttons_hbox;
 	Label *filename;
@@ -258,11 +267,12 @@ class ScriptEditor : public PanelContainer {
 	Vector<ScriptHistory> history;
 	int history_pos;
 
-	Vector<String> previous_scripts;
+	List<String> previous_scripts;
 
 	void _tab_changed(int p_which);
 	void _menu_option(int p_option);
 	void _theme_option(int p_option);
+	void _show_save_theme_as_dialog();
 
 	Tree *disk_changed_list;
 	ConfirmationDialog *disk_changed;
@@ -333,10 +343,13 @@ class ScriptEditor : public PanelContainer {
 	void _save_layout();
 	void _editor_settings_changed();
 	void _autosave_scripts();
+	void _update_autosave_timer();
 
 	void _update_members_overview_visibility();
 	void _update_members_overview();
 	void _toggle_members_overview_alpha_sort(bool p_alphabetic_sort);
+	void _filter_scripts_text_changed(const String &p_newtext);
+	void _filter_methods_text_changed(const String &p_newtext);
 	void _update_script_names();
 	void _update_script_connections();
 	bool _sort_list_on_update;
@@ -406,6 +419,8 @@ protected:
 public:
 	static ScriptEditor *get_singleton() { return script_editor; }
 
+	bool toggle_scripts_panel();
+	bool is_scripts_panel_toggled();
 	void ensure_focus_current();
 	void apply_scripts() const;
 	void open_script_create_dialog(const String &p_base_name, const String &p_base_path);

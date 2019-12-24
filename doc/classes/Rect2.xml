@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="Rect2" category="Built-In Types" version="3.2">
 	<brief_description>
-		2D Axis-aligned bounding box.
+		2D axis-aligned bounding box.
 	</brief_description>
 	<description>
 		Rect2 consists of a position, a size, and several utility functions. It is typically used for fast overlap tests.
@@ -137,24 +137,33 @@
 				Returns [code]true[/code] if the [Rect2] overlaps with another.
 			</description>
 		</method>
+		<method name="is_equal_approx">
+			<return type="bool">
+			</return>
+			<argument index="0" name="rect" type="Rect2">
+			</argument>
+			<description>
+				Returns [code]true[/code] if this [Rect2] and [code]rect[/code] are approximately equal, by calling [code]is_equal_approx[/code] on each component.
+			</description>
+		</method>
 		<method name="merge">
 			<return type="Rect2">
 			</return>
 			<argument index="0" name="b" type="Rect2">
 			</argument>
 			<description>
-				Returns a larger Rect2 that contains this Rect2 and [code]b[/code].
+				Returns a larger [Rect2] that contains this [Rect2] and [code]b[/code].
 			</description>
 		</method>
 	</methods>
 	<members>
-		<member name="end" type="Vector2" setter="" getter="">
+		<member name="end" type="Vector2" setter="" getter="" default="Vector2( 0, 0 )">
 			Ending corner.
 		</member>
-		<member name="position" type="Vector2" setter="" getter="">
+		<member name="position" type="Vector2" setter="" getter="" default="Vector2( 0, 0 )">
 			Position (starting corner).
 		</member>
-		<member name="size" type="Vector2" setter="" getter="">
+		<member name="size" type="Vector2" setter="" getter="" default="Vector2( 0, 0 )">
 			Size from position to end.
 		</member>
 	</members>

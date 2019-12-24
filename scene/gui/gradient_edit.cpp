@@ -29,10 +29,17 @@
 /*************************************************************************/
 
 #include "gradient_edit.h"
-#include "core/os/keyboard.h"
-#include "editor/editor_scale.h"
 
+#include "core/os/keyboard.h"
+
+#ifdef TOOLS_ENABLED
+#include "editor/editor_scale.h"
 #define SPACING (3 * EDSCALE)
+#define POINT_WIDTH (8 * EDSCALE)
+#else
+#define SPACING 3
+#define POINT_WIDTH 8
+#endif
 
 GradientEdit::GradientEdit() {
 	grabbed = -1;
@@ -234,9 +241,13 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
 		float newofs = CLAMP(x / float(total_w), 0, 1);
 
-		//Snap to nearest point if holding shift
-		if (mm->get_shift()) {
-			float snap_threshold = 0.03;
+		// Snap to "round" coordinates if holding Ctrl.
+		// Be more precise if holding Shift as well
+		if (mm->get_control()) {
+			newofs = Math::stepify(newofs, mm->get_shift() ? 0.025 : 0.1);
+		} else if (mm->get_shift()) {
+			// Snap to nearest point if holding just Shift
+			const float snap_threshold = 0.03;
 			float smallest_ofs = snap_threshold;
 			bool found = false;
 			int nearest_point = 0;
@@ -266,12 +277,13 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
 			if (points[i].offset == newofs && i != grabbed) {
 				valid = false;
+				break;
 			}
 		}
 
-		if (!valid)
+		if (!valid || grabbed == -1) {
 			return;
-
+		}
 		points.write[grabbed].offset = newofs;
 
 		points.sort();

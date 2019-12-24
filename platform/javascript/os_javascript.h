@@ -51,6 +51,7 @@ class OS_JavaScript : public OS_Unix {
 	Ref<InputEventKey> deferred_key_event;
 	CursorShape cursor_shape;
 	String cursors[CURSOR_MAX];
+	Map<CursorShape, Vector<Variant> > cursors_cache;
 	Point2 touches[32];
 
 	Point2i last_click_pos;
@@ -132,6 +133,9 @@ public:
 
 	virtual int get_audio_driver_count() const;
 	virtual const char *get_audio_driver_name(int p_driver) const;
+
+	virtual void set_clipboard(const String &p_text);
+	virtual String get_clipboard() const;
 
 	virtual MainLoop *get_main_loop() const;
 	void run_async();

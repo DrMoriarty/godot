@@ -47,7 +47,7 @@ public:
 
 	_FORCE_INLINE_ uint64_t get_seed() { return randbase.get_seed(); }
 
-	_FORCE_INLINE_ void randomize() { return randbase.randomize(); }
+	_FORCE_INLINE_ void randomize() { randbase.randomize(); }
 
 	_FORCE_INLINE_ uint32_t randi() { return randbase.rand(); }
 
@@ -59,7 +59,10 @@ public:
 
 	_FORCE_INLINE_ int randi_range(int from, int to) {
 		unsigned int ret = randbase.rand();
-		return ret % (to - from + 1) + from;
+		if (to < from)
+			return ret % (from - to + 1) + to;
+		else
+			return ret % (to - from + 1) + from;
 	}
 
 	RandomNumberGenerator();

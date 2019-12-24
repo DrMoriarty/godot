@@ -170,7 +170,11 @@ void EditorHelpSearch::popup_dialog(const String &p_term) {
 	if (p_term == "") {
 		search_box->clear();
 	} else {
-		old_search = true;
+		if (old_term == p_term)
+			old_search = true;
+		else
+			old_term = p_term;
+
 		search_box->set_text(p_term);
 		search_box->select_all();
 	}
@@ -250,6 +254,29 @@ EditorHelpSearch::EditorHelpSearch() {
 	vbox->add_child(results_tree, true);
 }
 
+bool EditorHelpSearch::Runner::_is_class_disabled_by_feature_profile(const StringName &p_class) {
+
+	Ref<EditorFeatureProfile> profile = EditorFeatureProfileManager::get_singleton()->get_current_profile();
+	if (profile.is_null()) {
+		return false;
+	}
+
+	StringName class_name = p_class;
+	while (class_name != StringName()) {
+
+		if (!ClassDB::class_exists(class_name)) {
+			return false;
+		}
+
+		if (profile->is_class_disabled(class_name)) {
+			return true;
+		}
+		class_name = ClassDB::get_parent_class(class_name);
+	}
+
+	return false;
+}
+
 bool EditorHelpSearch::Runner::_slice() {
 
 	bool phase_done = false;
@@ -299,43 +326,50 @@ bool EditorHelpSearch::Runner::_phase_match_classes_init() {
 bool EditorHelpSearch::Runner::_phase_match_classes() {
 
 	DocData::ClassDoc &class_doc = iterator_doc->value();
+	if (!_is_class_disabled_by_feature_profile(class_doc.name)) {
 
-	matches[class_doc.name] = ClassMatch();
-	ClassMatch &match = matches[class_doc.name];
+		matches[class_doc.name] = ClassMatch();
+		ClassMatch &match = matches[class_doc.name];
 
-	match.doc = &class_doc;
+		match.doc = &class_doc;
 
-	// Match class name.
-	if (search_flags & SEARCH_CLASSES)
-		match.name = term == "" || _match_string(term, class_doc.name);
+		// Match class name.
+		if (search_flags & SEARCH_CLASSES)
+			match.name = term == "" || _match_string(term, class_doc.name);
 
-	// Match members if the term is long enough.
-	if (term.length() > 1) {
-		if (search_flags & SEARCH_METHODS)
-			for (int i = 0; i < class_doc.methods.size(); i++) {
-				String method_name = search_flags & SEARCH_CASE_SENSITIVE ? class_doc.methods[i].name : class_doc.methods[i].name.to_lower();
-				if (method_name.find(term) > -1 ||
-						(term.begins_with(".") && method_name.begins_with(term.right(1))) ||
-						(term.ends_with("(") && method_name.ends_with(term.left(term.length() - 1).strip_edges())) ||
-						(term.begins_with(".") && term.ends_with("(") && method_name == term.substr(1, term.length() - 2).strip_edges()))
-					match.methods.push_back(const_cast<DocData::MethodDoc *>(&class_doc.methods[i]));
-			}
-		if (search_flags & SEARCH_SIGNALS)
-			for (int i = 0; i < class_doc.signals.size(); i++)
-				if (_match_string(term, class_doc.signals[i].name))
-					match.signals.push_back(const_cast<DocData::MethodDoc *>(&class_doc.signals[i]));
-		if (search_flags & SEARCH_CONSTANTS)
-			for (int i = 0; i < class_doc.constants.size(); i++)
-				if (_match_string(term, class_doc.constants[i].name))
-					match.constants.push_back(const_cast<DocData::ConstantDoc *>(&class_doc.constants[i]));
-		if (search_flags & SEARCH_PROPERTIES)
-			for (int i = 0; i < class_doc.properties.size(); i++)
-				if (_match_string(term, class_doc.properties[i].name))
-					match.properties.push_back(const_cast<DocData::PropertyDoc *>(&class_doc.properties[i]));
-		if (search_flags & SEARCH_THEME_ITEMS)
-			for (int i = 0; i < class_doc.theme_properties.size(); i++)
-				if (_match_string(term, class_doc.theme_properties[i].name))
-					match.theme_properties.push_back(const_cast<DocData::PropertyDoc *>(&class_doc.theme_properties[i]));
+		// Match members if the term is long enough.
+		if (term.length() > 1) {
+			if (search_flags & SEARCH_METHODS)
+				for (int i = 0; i < class_doc.methods.size(); i++) {
+					String method_name = (search_flags & SEARCH_CASE_SENSITIVE) ? class_doc.methods[i].name : class_doc.methods[i].name.to_lower();
+					String aux_term = (search_flags & SEARCH_CASE_SENSITIVE) ? term : term.to_lower();
+
+					if (aux_term.begins_with("."))
+						aux_term = aux_term.right(1);
+
+					if (aux_term.ends_with("("))
+						aux_term = aux_term.left(aux_term.length() - 1).strip_edges();
+
+					if (aux_term.is_subsequence_of(method_name))
+						match.methods.push_back(const_cast<DocData::MethodDoc *>(&class_doc.methods[i]));
+				}
+			if (search_flags & SEARCH_SIGNALS)
+				for (int i = 0; i < class_doc.signals.size(); i++)
+					if (_match_string(term, class_doc.signals[i].name))
+						match.signals.push_back(const_cast<DocData::MethodDoc *>(&class_doc.signals[i]));
+			if (search_flags & SEARCH_CONSTANTS)
+				for (int i = 0; i < class_doc.constants.size(); i++)
+					if (_match_string(term, class_doc.constants[i].name))
+						match.constants.push_back(const_cast<DocData::ConstantDoc *>(&class_doc.constants[i]));
+			if (search_flags & SEARCH_PROPERTIES)
+				for (int i = 0; i < class_doc.properties.size(); i++)
+					if (_match_string(term, class_doc.properties[i].name) || _match_string(term, class_doc.properties[i].getter) || _match_string(term, class_doc.properties[i].setter))
+						match.properties.push_back(const_cast<DocData::PropertyDoc *>(&class_doc.properties[i]));
+			if (search_flags & SEARCH_THEME_ITEMS)
+				for (int i = 0; i < class_doc.theme_properties.size(); i++)
+					if (_match_string(term, class_doc.theme_properties[i].name))
+						match.theme_properties.push_back(const_cast<DocData::PropertyDoc *>(&class_doc.theme_properties[i]));
+		}
 	}
 
 	iterator_doc = iterator_doc->next();
@@ -380,7 +414,7 @@ bool EditorHelpSearch::Runner::_phase_member_items() {
 
 	ClassMatch &match = iterator_match->value();
 
-	TreeItem *parent = search_flags & SEARCH_SHOW_HIERARCHY ? class_items[match.doc->name] : root_item;
+	TreeItem *parent = (search_flags & SEARCH_SHOW_HIERARCHY) ? class_items[match.doc->name] : root_item;
 	for (int i = 0; i < match.methods.size(); i++)
 		_create_method_item(parent, match.doc, match.methods[i]);
 	for (int i = 0; i < match.signals.size(); i++)
@@ -406,9 +440,9 @@ bool EditorHelpSearch::Runner::_phase_select_match() {
 bool EditorHelpSearch::Runner::_match_string(const String &p_term, const String &p_string) const {
 
 	if (search_flags & SEARCH_CASE_SENSITIVE)
-		return p_string.find(p_term) > -1;
+		return p_term.is_subsequence_of(p_string);
 	else
-		return p_string.findn(p_term) > -1;
+		return p_term.is_subsequence_ofi(p_string);
 }
 
 void EditorHelpSearch::Runner::_match_item(TreeItem *p_item, const String &p_text) {

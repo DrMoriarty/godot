@@ -411,6 +411,7 @@ void ItemList::set_max_columns(int p_amount) {
 	ERR_FAIL_COND(p_amount < 0);
 	max_columns = p_amount;
 	update();
+	shape_changed = true;
 }
 int ItemList::get_max_columns() const {
 
@@ -430,6 +431,7 @@ ItemList::SelectMode ItemList::get_select_mode() const {
 
 void ItemList::set_icon_mode(IconMode p_mode) {
 
+	ERR_FAIL_INDEX((int)p_mode, 2);
 	icon_mode = p_mode;
 	update();
 	shape_changed = true;
@@ -749,9 +751,21 @@ void ItemList::_gui_input(const Ref<InputEvent> &p_event) {
 					search_string = "";
 				}
 
-				search_string += String::chr(k->get_unicode());
-				for (int i = 0; i < items.size(); i++) {
-					if (items[i].text.begins_with(search_string)) {
+				if (String::chr(k->get_unicode()) != search_string)
+					search_string += String::chr(k->get_unicode());
+
+				for (int i = current + 1; i <= items.size(); i++) {
+					if (i == items.size()) {
+						if (current == 0 || current == -1)
+							break;
+						else
+							i = 0;
+					}
+
+					if (i == current)
+						break;
+
+					if (items[i].text.findn(search_string) == 0) {
 						set_current(i);
 						ensure_current_is_visible();
 						if (select_mode == SELECT_SINGLE) {
@@ -913,7 +927,7 @@ void ItemList::_notification(int p_what) {
 				current_columns = max_columns;
 
 			while (true) {
-				//repeat util all fits
+				//repeat until all fits
 				bool all_fit = true;
 				Vector2 ofs;
 				int col = 0;
@@ -955,7 +969,7 @@ void ItemList::_notification(int p_what) {
 				}
 
 				if (all_fit) {
-					float page = size.height - bg->get_minimum_size().height;
+					float page = MAX(0, size.height - bg->get_minimum_size().height);
 					float max = MAX(page, ofs.y + max_h);
 					if (auto_height)
 						auto_height_value = ofs.y + max_h + bg->get_minimum_size().height;
@@ -1248,7 +1262,7 @@ int ItemList::get_item_at_position(const Point2 &p_pos, bool p_exact) const {
 
 		Rect2 rc = items[i].rect_cache;
 		if (i % current_columns == current_columns - 1) {
-			rc.size.width = get_size().width; //not right but works
+			rc.size.width = get_size().width - rc.position.x; //make sure you can still select the last item when clicking past the column
 		}
 
 		if (rc.has_point(pos)) {

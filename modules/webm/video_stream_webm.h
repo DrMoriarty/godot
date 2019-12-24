@@ -41,7 +41,7 @@ class OpusVorbisDecoder;
 
 class VideoStreamPlaybackWebm : public VideoStreamPlayback {
 
-	GDCLASS(VideoStreamPlaybackWebm, VideoStreamPlayback)
+	GDCLASS(VideoStreamPlaybackWebm, VideoStreamPlayback);
 
 	String file_name;
 	int audio_track;
@@ -90,7 +90,7 @@ public:
 
 	virtual void set_audio_track(int p_idx);
 
-	virtual Ref<Texture> get_texture();
+	virtual Ref<Texture> get_texture() const;
 	virtual void update(float p_delta);
 
 	virtual void set_mix_callback(AudioMixCallback p_callback, void *p_userdata);
@@ -127,7 +127,6 @@ public:
 };
 
 class ResourceFormatLoaderWebm : public ResourceFormatLoader {
-	GDCLASS(ResourceFormatLoaderWebm, ResourceFormatLoader)
 public:
 	virtual RES load(const String &p_path, const String &p_original_path = "", Error *r_error = NULL);
 	virtual void get_recognized_extensions(List<String> *p_extensions) const;

@@ -109,11 +109,11 @@ public:
 	};
 
 	enum PowerState {
-		POWERSTATE_UNKNOWN, /**< cannot determine power status */
-		POWERSTATE_ON_BATTERY, /**< Not plugged in, running on the battery */
-		POWERSTATE_NO_BATTERY, /**< Plugged in, no battery available */
-		POWERSTATE_CHARGING, /**< Plugged in, charging battery */
-		POWERSTATE_CHARGED /**< Plugged in, battery charged */
+		POWERSTATE_UNKNOWN, // Cannot determine power status.
+		POWERSTATE_ON_BATTERY, // Not plugged in, running on the battery.
+		POWERSTATE_NO_BATTERY, // Plugged in, no battery available.
+		POWERSTATE_CHARGING, // Plugged in, charging battery.
+		POWERSTATE_CHARGED // Plugged in, battery charged.
 	};
 
 	enum Weekday {
@@ -127,8 +127,8 @@ public:
 	};
 
 	enum Month {
-		/// Start at 1 to follow Windows SYSTEMTIME structure
-		/// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724950(v=vs.85).aspx
+		// Start at 1 to follow Windows SYSTEMTIME structure
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724950(v=vs.85).aspx
 		MONTH_JANUARY = 1,
 		MONTH_FEBRUARY,
 		MONTH_MARCH,
@@ -142,6 +142,11 @@ public:
 		MONTH_NOVEMBER,
 		MONTH_DECEMBER
 	};
+
+	void global_menu_add_item(const String &p_menu, const String &p_label, const Variant &p_signal, const Variant &p_meta);
+	void global_menu_add_separator(const String &p_menu);
+	void global_menu_remove_item(const String &p_menu, int p_idx);
+	void global_menu_clear(const String &p_menu);
 
 	Point2 get_mouse_position() const;
 	void set_window_title(const String &p_title);
@@ -175,9 +180,13 @@ public:
 	virtual int get_screen_dpi(int p_screen = -1) const;
 	virtual Point2 get_window_position() const;
 	virtual void set_window_position(const Point2 &p_position);
+	virtual Size2 get_max_window_size() const;
+	virtual Size2 get_min_window_size() const;
 	virtual Size2 get_window_size() const;
 	virtual Size2 get_real_window_size() const;
 	virtual Rect2 get_window_safe_area() const;
+	virtual void set_max_window_size(const Size2 &p_size);
+	virtual void set_min_window_size(const Size2 &p_size);
 	virtual void set_window_size(const Size2 &p_size);
 	virtual void set_window_fullscreen(bool p_enabled);
 	virtual bool is_window_fullscreen() const;
@@ -212,6 +221,9 @@ public:
 
 	void set_low_processor_usage_mode(bool p_enabled);
 	bool is_in_low_processor_usage_mode() const;
+
+	void set_low_processor_usage_mode_sleep_usec(int p_usec);
+	int get_low_processor_usage_mode_sleep_usec() const;
 
 	String get_executable_path() const;
 	int execute(const String &p_path, const Vector<String> &p_arguments, bool p_blocking, Array p_output = Array(), bool p_read_stderr = false);
@@ -254,24 +266,6 @@ public:
 	String get_scancode_string(uint32_t p_code) const;
 	bool is_scancode_unicode(uint32_t p_unicode) const;
 	int find_scancode_from_string(const String &p_code) const;
-
-	/*
-	struct Date {
-
-		int year;
-		Month month;
-		int day;
-		Weekday weekday;
-		bool dst;
-	};
-
-	struct Time {
-
-		int hour;
-		int min;
-		int sec;
-	};
-*/
 
 	void set_use_file_access_save_and_swap(bool p_enable);
 
@@ -351,6 +345,9 @@ public:
 	void set_use_vsync(bool p_enable);
 	bool is_vsync_enabled() const;
 
+	void set_vsync_via_compositor(bool p_enable);
+	bool is_vsync_via_compositor_enabled() const;
+
 	PowerState get_power_state();
 	int get_power_seconds_left();
 	int get_power_percent_left();
@@ -358,6 +355,8 @@ public:
 	bool has_feature(const String &p_feature) const;
 
 	bool request_permission(const String &p_name);
+	bool request_permissions();
+	Vector<String> get_granted_permissions() const;
 
 	static _OS *get_singleton() { return singleton; }
 
@@ -400,10 +399,12 @@ public:
 	PoolVector<Vector3> segment_intersects_sphere(const Vector3 &p_from, const Vector3 &p_to, const Vector3 &p_sphere_pos, real_t p_sphere_radius);
 	PoolVector<Vector3> segment_intersects_cylinder(const Vector3 &p_from, const Vector3 &p_to, float p_height, float p_radius);
 	PoolVector<Vector3> segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const Vector<Plane> &p_planes);
+	bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	real_t segment_intersects_circle(const Vector2 &p_from, const Vector2 &p_to, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	int get_uv84_normal_bit(const Vector3 &p_vector);
 
 	bool is_polygon_clockwise(const Vector<Vector2> &p_polygon);
+	bool is_point_in_polygon(const Point2 &p_point, const Vector<Vector2> &p_polygon);
 	Vector<int> triangulate_polygon(const Vector<Vector2> &p_polygon);
 	Vector<int> triangulate_delaunay_2d(const Vector<Vector2> &p_points);
 	Vector<Point2> convex_hull_2d(const Vector<Point2> &p_points);
@@ -415,17 +416,17 @@ public:
 		OPERATION_INTERSECTION,
 		OPERATION_XOR
 	};
-	// 2D polygon boolean operations
-	Array merge_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // union (add)
-	Array clip_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // difference (subtract)
-	Array intersect_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // common area (multiply)
-	Array exclude_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // all but common area (xor)
+	// 2D polygon boolean operations.
+	Array merge_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Union (add).
+	Array clip_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Difference (subtract).
+	Array intersect_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Common area (multiply).
+	Array exclude_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // All but common area (xor).
 
-	// 2D polyline vs polygon operations
-	Array clip_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // cut
-	Array intersect_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // chop
+	// 2D polyline vs polygon operations.
+	Array clip_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // Cut.
+	Array intersect_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // Chop.
 
-	// 2D offset polygons/polylines
+	// 2D offset polygons/polylines.
 	enum PolyJoinType {
 		JOIN_SQUARE,
 		JOIN_ROUND,
@@ -440,8 +441,6 @@ public:
 	};
 	Array offset_polygon_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE);
 	Array offset_polyline_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE, PolyEndType p_end_type = END_SQUARE);
-
-	Vector<Point2> transform_points_2d(const Vector<Point2> &p_points, const Transform2D &p_mat);
 
 	Dictionary make_atlas(const Vector<Size2> &p_rects);
 
@@ -481,24 +480,24 @@ public:
 	Error open_encrypted_pass(const String &p_path, ModeFlags p_mode_flags, const String &p_pass);
 	Error open_compressed(const String &p_path, ModeFlags p_mode_flags, CompressionMode p_compress_mode = COMPRESSION_FASTLZ);
 
-	Error open(const String &p_path, ModeFlags p_mode_flags); ///< open a file
-	void close(); ///< close a file
-	bool is_open() const; ///< true when file is open
+	Error open(const String &p_path, ModeFlags p_mode_flags); // open a file.
+	void close(); // Close a file.
+	bool is_open() const; // True when file is open.
 
-	String get_path() const; /// returns the path for the current open file
-	String get_path_absolute() const; /// returns the absolute path for the current open file
+	String get_path() const; // Returns the path for the current open file.
+	String get_path_absolute() const; // Returns the absolute path for the current open file.
 
-	void seek(int64_t p_position); ///< seek to a given position
-	void seek_end(int64_t p_position = 0); ///< seek from the end of file
-	int64_t get_position() const; ///< get position in the file
-	int64_t get_len() const; ///< get size of the file
+	void seek(int64_t p_position); // Seek to a given position.
+	void seek_end(int64_t p_position = 0); // Seek from the end of file.
+	int64_t get_position() const; // Get position in the file.
+	int64_t get_len() const; // Get size of the file.
 
-	bool eof_reached() const; ///< reading passed EOF
+	bool eof_reached() const; // Reading passed EOF.
 
-	uint8_t get_8() const; ///< get a byte
-	uint16_t get_16() const; ///< get 16 bits uint
-	uint32_t get_32() const; ///< get 32 bits uint
-	uint64_t get_64() const; ///< get 64 bits uint
+	uint8_t get_8() const; // Get a byte.
+	uint16_t get_16() const; // Get 16 bits uint.
+	uint32_t get_32() const; // Get 32 bits uint.
+	uint64_t get_64() const; // Get 64 bits uint.
 
 	float get_float() const;
 	double get_double() const;
@@ -506,27 +505,27 @@ public:
 
 	Variant get_var(bool p_allow_objects = false) const;
 
-	PoolVector<uint8_t> get_buffer(int p_length) const; ///< get an array of bytes
+	PoolVector<uint8_t> get_buffer(int p_length) const; // Get an array of bytes.
 	String get_line() const;
 	Vector<String> get_csv_line(const String &p_delim = ",") const;
 	String get_as_text() const;
 	String get_md5(const String &p_path) const;
 	String get_sha256(const String &p_path) const;
 
-	/**< use this for files WRITTEN in _big_ endian machines (ie, amiga/mac)
+	/* Use this for files WRITTEN in _big_ endian machines (ie, amiga/mac).
 	 * It's not about the current CPU type but file formats.
-	 * this flags get reset to false (little endian) on each open
+	 * This flags get reset to false (little endian) on each open.
 	 */
 
 	void set_endian_swap(bool p_swap);
 	bool get_endian_swap();
 
-	Error get_error() const; ///< get last error
+	Error get_error() const; // Get last error.
 
-	void store_8(uint8_t p_dest); ///< store a byte
-	void store_16(uint16_t p_dest); ///< store 16 bits uint
-	void store_32(uint32_t p_dest); ///< store 32 bits uint
-	void store_64(uint64_t p_dest); ///< store 64 bits uint
+	void store_8(uint8_t p_dest); // Store a byte.
+	void store_16(uint16_t p_dest); // Store 16 bits uint.
+	void store_32(uint32_t p_dest); // Store 32 bits uint.
+	void store_64(uint64_t p_dest); // Store 64 bits uint.
 
 	void store_float(float p_dest);
 	void store_double(double p_dest);
@@ -539,11 +538,11 @@ public:
 	virtual void store_pascal_string(const String &p_string);
 	virtual String get_pascal_string();
 
-	void store_buffer(const PoolVector<uint8_t> &p_buffer); ///< store an array of bytes
+	void store_buffer(const PoolVector<uint8_t> &p_buffer); // Store an array of bytes.
 
 	void store_var(const Variant &p_var, bool p_full_objects = false);
 
-	bool file_exists(const String &p_name) const; ///< return true if a file exists
+	bool file_exists(const String &p_name) const; // Return true if a file exists.
 
 	uint64_t get_modified_time(const String &p_file) const;
 
@@ -565,18 +564,18 @@ protected:
 public:
 	Error open(const String &p_path);
 
-	Error list_dir_begin(bool p_skip_navigational = false, bool p_skip_hidden = false); ///< This starts dir listing
+	Error list_dir_begin(bool p_skip_navigational = false, bool p_skip_hidden = false); // This starts dir listing.
 	String get_next();
 	bool current_is_dir() const;
 
-	void list_dir_end(); ///<
+	void list_dir_end();
 
 	int get_drive_count();
 	String get_drive(int p_drive);
 	int get_current_drive();
 
-	Error change_dir(String p_dir); ///< can be relative or absolute, return false on success
-	String get_current_dir(); ///< return current dir location
+	Error change_dir(String p_dir); // Can be relative or absolute, return false on success.
+	String get_current_dir(); // Return current dir location.
 
 	Error make_dir(String p_dir);
 	Error make_dir_recursive(String p_dir);
@@ -690,7 +689,7 @@ VARIANT_ENUM_CAST(_Thread::Priority);
 
 class _ClassDB : public Object {
 
-	GDCLASS(_ClassDB, Object)
+	GDCLASS(_ClassDB, Object);
 
 protected:
 	static void _bind_methods();
@@ -741,6 +740,7 @@ public:
 
 	void set_physics_jitter_fix(float p_threshold);
 	float get_physics_jitter_fix() const;
+	float get_physics_interpolation_fraction() const;
 
 	void set_target_fps(int p_fps);
 	int get_target_fps() const;
@@ -775,7 +775,7 @@ public:
 class _JSON;
 
 class JSONParseResult : public Reference {
-	GDCLASS(JSONParseResult, Reference)
+	GDCLASS(JSONParseResult, Reference);
 
 	friend class _JSON;
 
@@ -800,10 +800,13 @@ public:
 
 	void set_result(const Variant &p_result);
 	Variant get_result() const;
+
+	JSONParseResult() :
+			error_line(-1) {}
 };
 
 class _JSON : public Object {
-	GDCLASS(_JSON, Object)
+	GDCLASS(_JSON, Object);
 
 protected:
 	static void _bind_methods();

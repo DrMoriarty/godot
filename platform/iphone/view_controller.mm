@@ -32,6 +32,8 @@
 
 #include "os_iphone.h"
 
+#include "core/project_settings.h"
+
 extern "C" {
 
 int add_path(int, char **);
@@ -83,6 +85,18 @@ int add_cmdline(int p_argc, char **p_args) {
 	printf("*********** did receive memory warning!\n");
 };
 
+- (void)viewDidLoad {
+	[super viewDidLoad];
+
+	if (@available(iOS 11.0, *)) {
+		[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
+	}
+}
+
+- (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
+	return UIRectEdgeAll;
+}
+
 - (BOOL)shouldAutorotate {
 	switch (OS::get_singleton()->get_screen_orientation()) {
 		case OS::SCREEN_SENSOR:
@@ -115,6 +129,14 @@ int add_cmdline(int p_argc, char **p_args) {
 
 - (BOOL)prefersStatusBarHidden {
 	return YES;
+}
+
+- (BOOL)prefersHomeIndicatorAutoHidden {
+	if (GLOBAL_GET("display/window/ios/hide_home_indicator")) {
+		return YES;
+	} else {
+		return NO;
+	}
 }
 
 #ifdef GAME_CENTER_ENABLED

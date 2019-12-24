@@ -8,6 +8,7 @@ using real_t = System.Single;
 
 namespace Godot
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct Rect2 : IEquatable<Rect2>
     {
@@ -156,13 +157,13 @@ namespace Godot
 
         public bool Intersects(Rect2 b)
         {
-            if (_position.x > b._position.x + b._size.x)
+            if (_position.x >= b._position.x + b._size.x)
                 return false;
-            if (_position.x + _size.x < b._position.x)
+            if (_position.x + _size.x <= b._position.x)
                 return false;
-            if (_position.y > b._position.y + b._size.y)
+            if (_position.y >= b._position.y + b._size.y)
                 return false;
-            if (_position.y + _size.y < b._position.y)
+            if (_position.y + _size.y <= b._position.y)
                 return false;
 
             return true;
@@ -228,6 +229,11 @@ namespace Godot
         public bool Equals(Rect2 other)
         {
             return _position.Equals(other._position) && _size.Equals(other._size);
+        }
+
+        public bool IsEqualApprox(Rect2 other)
+        {
+            return _position.IsEqualApprox(other._position) && _size.IsEqualApprox(other.Size);
         }
 
         public override int GetHashCode()

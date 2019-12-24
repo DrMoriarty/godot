@@ -316,7 +316,7 @@ String AnimationNode::get_caption() const {
 
 void AnimationNode::add_input(const String &p_name) {
 	//root nodes can't add inputs
-	ERR_FAIL_COND(Object::cast_to<AnimationRootNode>(this) != NULL)
+	ERR_FAIL_COND(Object::cast_to<AnimationRootNode>(this) != NULL);
 	Input input;
 	ERR_FAIL_COND(p_name.find(".") != -1 || p_name.find("/") != -1);
 	input.name = p_name;
@@ -622,7 +622,7 @@ bool AnimationTree::_update_caches(AnimationPlayer *player) {
 
 							Skeleton *sk = Object::cast_to<Skeleton>(spatial);
 							int bone_idx = sk->find_bone(path.get_subname(0));
-							if (bone_idx != -1 && !sk->is_bone_ignore_animation(bone_idx)) {
+							if (bone_idx != -1) {
 
 								track_xform->skeleton = sk;
 								track_xform->bone_idx = bone_idx;
@@ -1342,15 +1342,15 @@ String AnimationTree::get_configuration_warning() const {
 
 	if (!root.is_valid()) {
 		if (warning != String()) {
-			warning += "\n";
+			warning += "\n\n";
 		}
-		warning += TTR("A root AnimationNode for the graph is not set.");
+		warning += TTR("No root AnimationNode for the graph is set.");
 	}
 
 	if (!has_node(animation_player)) {
 
 		if (warning != String()) {
-			warning += "\n";
+			warning += "\n\n";
 		}
 
 		warning += TTR("Path to an AnimationPlayer node containing animations is not set.");
@@ -1361,7 +1361,7 @@ String AnimationTree::get_configuration_warning() const {
 
 	if (!player) {
 		if (warning != String()) {
-			warning += "\n";
+			warning += "\n\n";
 		}
 
 		warning += TTR("Path set for AnimationPlayer does not lead to an AnimationPlayer node.");
@@ -1370,10 +1370,10 @@ String AnimationTree::get_configuration_warning() const {
 
 	if (!player->has_node(player->get_root())) {
 		if (warning != String()) {
-			warning += "\n";
+			warning += "\n\n";
 		}
 
-		warning += TTR("AnimationPlayer root is not a valid node.");
+		warning += TTR("The AnimationPlayer root node is not a valid node.");
 		return warning;
 	}
 
@@ -1412,6 +1412,7 @@ void AnimationTree::_update_properties_for_node(const String &p_base_path, Ref<A
 		Vector<Activity> activity;
 		for (int i = 0; i < node->get_input_count(); i++) {
 			Activity a;
+			a.activity = 0;
 			a.last_pass = 0;
 			activity.push_back(a);
 		}

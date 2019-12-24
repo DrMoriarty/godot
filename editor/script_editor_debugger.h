@@ -35,6 +35,7 @@
 #include "core/io/tcp_server.h"
 #include "editor/editor_inspector.h"
 #include "editor/property_editor.h"
+#include "scene/3d/camera.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 
@@ -50,13 +51,25 @@ class TreeItem;
 class HSplitContainer;
 class ItemList;
 class EditorProfiler;
+class EditorNetworkProfiler;
 
 class ScriptEditorDebuggerInspectedObject;
 
-class ScriptEditorDebugger : public Control {
+class ScriptEditorDebugger : public MarginContainer {
 
-	GDCLASS(ScriptEditorDebugger, Control);
+	GDCLASS(ScriptEditorDebugger, MarginContainer);
 
+public:
+	enum CameraOverride {
+		OVERRIDE_NONE,
+		OVERRIDE_2D,
+		OVERRIDE_3D_1, // 3D Viewport 1
+		OVERRIDE_3D_2, // 3D Viewport 2
+		OVERRIDE_3D_3, // 3D Viewport 3
+		OVERRIDE_3D_4 // 3D Viewport 4
+	};
+
+private:
 	enum MessageType {
 		MESSAGE_ERROR,
 		MESSAGE_WARNING,
@@ -109,12 +122,15 @@ class ScriptEditorDebugger : public Control {
 
 	bool hide_on_stop;
 	bool enable_external_editor;
+
+	bool skip_breakpoints_value = false;
 	Ref<Script> stack_script;
 
 	TabContainer *tabs;
 
 	Label *reason;
 
+	Button *skip_breakpoints;
 	Button *copy;
 	Button *step;
 	Button *next;
@@ -131,6 +147,7 @@ class ScriptEditorDebugger : public Control {
 
 	Tree *perf_monitors;
 	Control *perf_draw;
+	Label *info_message;
 
 	Tree *vmem_tree;
 	Button *vmem_refresh;
@@ -152,12 +169,15 @@ class ScriptEditorDebugger : public Control {
 	Map<String, int> res_path_cache;
 
 	EditorProfiler *profiler;
+	EditorNetworkProfiler *network_profiler;
 
 	EditorNode *editor;
 
 	bool breaked;
 
 	bool live_debug;
+
+	CameraOverride camera_override;
 
 	void _performance_draw();
 	void _performance_select();
@@ -173,6 +193,7 @@ class ScriptEditorDebugger : public Control {
 	void _set_reason_text(const String &p_reason, MessageType p_type);
 	void _scene_tree_property_select_object(ObjectID p_object);
 	void _scene_tree_property_value_edited(const String &p_prop, const Variant &p_value);
+	int _update_scene_tree(TreeItem *parent, const Array &nodes, int current_index);
 
 	void _video_mem_request();
 
@@ -194,6 +215,8 @@ class ScriptEditorDebugger : public Control {
 
 	void _profiler_activate(bool p_enable);
 	void _profiler_seeked();
+
+	void _network_profiler_activate(bool p_enable);
 
 	void _paused();
 
@@ -218,6 +241,7 @@ public:
 	void unpause();
 	void stop();
 
+	void debug_skip_breakpoints();
 	void debug_copy();
 
 	void debug_next();
@@ -240,6 +264,9 @@ public:
 	void live_debug_duplicate_node(const NodePath &p_at, const String &p_new_name);
 	void live_debug_reparent_node(const NodePath &p_at, const NodePath &p_new_place, const String &p_new_name, int p_at_pos);
 
+	CameraOverride get_camera_override() const;
+	void set_camera_override(CameraOverride p_override);
+
 	void set_breakpoint(const String &p_path, int p_line, bool p_enabled);
 
 	void update_live_edit_root();
@@ -254,6 +281,8 @@ public:
 	void set_tool_button(Button *p_tb) { debugger_button = p_tb; }
 
 	void reload_scripts();
+
+	bool is_skip_breakpoints();
 
 	virtual Size2 get_minimum_size() const;
 	ScriptEditorDebugger(EditorNode *p_editor = NULL);

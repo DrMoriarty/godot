@@ -46,7 +46,7 @@ class StyleBox;
 
 class CanvasItemMaterial : public Material {
 
-	GDCLASS(CanvasItemMaterial, Material)
+	GDCLASS(CanvasItemMaterial, Material);
 
 public:
 	enum BlendMode {
@@ -143,7 +143,7 @@ public:
 	void set_particles_anim_v_frames(int p_frames);
 	int get_particles_anim_v_frames() const;
 
-	void set_particles_anim_loop(bool p_frames);
+	void set_particles_anim_loop(bool p_loop);
 	bool get_particles_anim_loop() const;
 
 	static void init_shaders();
@@ -281,6 +281,8 @@ public:
 	virtual void _edit_set_pivot(const Point2 &p_pivot){};
 	virtual Point2 _edit_get_pivot() const { return Point2(); };
 
+	virtual Transform2D _edit_get_transform() const;
+
 	/* VISIBILITY */
 
 	void set_visible(bool p_visible);
@@ -305,9 +307,10 @@ public:
 	void draw_line(const Point2 &p_from, const Point2 &p_to, const Color &p_color, float p_width = 1.0, bool p_antialiased = false);
 	void draw_polyline(const Vector<Point2> &p_points, const Color &p_color, float p_width = 1.0, bool p_antialiased = false);
 	void draw_polyline_colors(const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width = 1.0, bool p_antialiased = false);
+	void draw_arc(const Vector2 &p_center, float p_radius, float p_start_angle, float p_end_angle, int p_point_count, const Color &p_color, float p_width = 1.0, bool p_antialiased = false);
 	void draw_multiline(const Vector<Point2> &p_points, const Color &p_color, float p_width = 1.0, bool p_antialiased = false);
 	void draw_multiline_colors(const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width = 1.0, bool p_antialiased = false);
-	void draw_rect(const Rect2 &p_rect, const Color &p_color, bool p_filled = true);
+	void draw_rect(const Rect2 &p_rect, const Color &p_color, bool p_filled = true, float p_width = 1.0, bool p_antialiased = false);
 	void draw_circle(const Point2 &p_pos, float p_radius, const Color &p_color);
 	void draw_texture(const Ref<Texture> &p_texture, const Point2 &p_pos, const Color &p_modulate = Color(1, 1, 1, 1), const Ref<Texture> &p_normal_map = Ref<Texture>());
 	void draw_texture_rect(const Ref<Texture> &p_texture, const Rect2 &p_rect, bool p_tile = false, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, const Ref<Texture> &p_normal_map = Ref<Texture>());

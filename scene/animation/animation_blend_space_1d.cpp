@@ -157,6 +157,7 @@ Ref<AnimationRootNode> AnimationNodeBlendSpace1D::get_blend_point_node(int p_poi
 void AnimationNodeBlendSpace1D::remove_blend_point(int p_point) {
 	ERR_FAIL_INDEX(p_point, blend_points_used);
 
+	ERR_FAIL_COND(blend_points[p_point].node.is_null());
 	blend_points[p_point].node->disconnect("tree_changed", this, "_tree_changed");
 
 	for (int i = p_point; i < blend_points_used - 1; i++) {
@@ -266,7 +267,7 @@ float AnimationNodeBlendSpace1D::process(float p_time, bool p_seek) {
 
 	// fill in weights
 
-	if (point_lower == -1) {
+	if (point_lower == -1 && point_higher != -1) {
 		// we are on the left side, no other point to the left
 		// we just play the next point.
 

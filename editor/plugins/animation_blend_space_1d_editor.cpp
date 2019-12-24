@@ -702,13 +702,13 @@ AnimationNodeBlendSpace1DEditor::AnimationNodeBlendSpace1DEditor() {
 		bottom_hb->set_h_size_flags(SIZE_EXPAND_FILL);
 
 		min_value = memnew(SpinBox);
-		min_value->set_max(0);
 		min_value->set_min(-10000);
+		min_value->set_max(0);
 		min_value->set_step(0.01);
 
 		max_value = memnew(SpinBox);
-		max_value->set_max(10000);
 		max_value->set_min(0.01);
+		max_value->set_max(10000);
 		max_value->set_step(0.01);
 
 		label_value = memnew(LineEdit);
@@ -735,7 +735,7 @@ AnimationNodeBlendSpace1DEditor::AnimationNodeBlendSpace1DEditor() {
 	error_panel->add_child(error_label);
 	error_label->set_text("hmmm");
 
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 
 	menu = memnew(PopupMenu);
 	add_child(menu);
@@ -751,7 +751,7 @@ AnimationNodeBlendSpace1DEditor::AnimationNodeBlendSpace1DEditor() {
 	open_file->set_title(TTR("Open Animation Node"));
 	open_file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
 	open_file->connect("file_selected", this, "_file_opened");
-	undo_redo = EditorNode::get_singleton()->get_undo_redo();
+	undo_redo = EditorNode::get_undo_redo();
 
 	selected_point = -1;
 	dragging_selected = false;

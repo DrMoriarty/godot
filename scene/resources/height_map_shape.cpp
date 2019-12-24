@@ -31,7 +31,7 @@
 #include "height_map_shape.h"
 #include "servers/physics_server.h"
 
-Vector<Vector3> HeightMapShape::_gen_debug_mesh_lines() {
+Vector<Vector3> HeightMapShape::get_debug_mesh_lines() {
 	Vector<Vector3> points;
 
 	if ((map_width != 0) && (map_depth != 0)) {
@@ -85,6 +85,7 @@ void HeightMapShape::_update_shape() {
 	d["min_height"] = min_height;
 	d["max_height"] = max_height;
 	PhysicsServer::get_singleton()->shape_set_data(get_shape(), d);
+	Shape::_update_shape();
 }
 
 void HeightMapShape::set_map_width(int p_new) {

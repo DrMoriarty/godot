@@ -31,6 +31,8 @@
 #ifndef OS_OSX_H
 #define OS_OSX_H
 
+#define BitMap _QDBitMap // Suppress deprecated QuickDraw definition.
+
 #include "core/os/input.h"
 #include "crash_handler_osx.h"
 #include "drivers/coreaudio/audio_driver_coreaudio.h"
@@ -49,10 +51,8 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include <CoreVideo/CoreVideo.h>
 
+#undef BitMap
 #undef CursorShape
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 
 class OS_OSX : public OS_Unix {
 public:
@@ -60,6 +60,7 @@ public:
 		unsigned int osx_state;
 		bool pressed;
 		bool echo;
+		bool raw;
 		uint32_t scancode;
 		uint32_t unicode;
 	};
@@ -109,12 +110,10 @@ public:
 	NSOpenGLContext *context;
 
 	bool layered_window;
-	bool waiting_for_vsync;
-	NSCondition *vsync_condition;
-	CVDisplayLinkRef displayLink;
 
 	CursorShape cursor_shape;
 	NSCursor *cursors[CURSOR_MAX];
+	Map<CursorShape, Vector<Variant> > cursors_cache;
 	MouseMode mouse_mode;
 
 	String title;
@@ -132,6 +131,9 @@ public:
 	bool im_active;
 	String im_text;
 	Point2 im_selection;
+
+	Size2 min_size;
+	Size2 max_size;
 
 	PowerOSX *power_manager;
 
@@ -152,6 +154,26 @@ public:
 	int video_driver_index;
 	virtual int get_current_video_driver() const;
 
+	struct GlobalMenuItem {
+		String label;
+		Variant signal;
+		Variant meta;
+
+		GlobalMenuItem() {
+			//NOP
+		}
+
+		GlobalMenuItem(const String &p_label, const Variant &p_signal, const Variant &p_meta) {
+			label = p_label;
+			signal = p_signal;
+			meta = p_meta;
+		}
+	};
+
+	Map<String, Vector<GlobalMenuItem> > global_menus;
+
+	void _update_global_menu();
+
 protected:
 	virtual void initialize_core();
 	virtual Error initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver);
@@ -162,6 +184,11 @@ protected:
 
 public:
 	static OS_OSX *singleton;
+
+	void global_menu_add_item(const String &p_menu, const String &p_label, const Variant &p_signal, const Variant &p_meta);
+	void global_menu_add_separator(const String &p_menu);
+	void global_menu_remove_item(const String &p_menu, int p_idx);
+	void global_menu_clear(const String &p_menu);
 
 	void wm_minimized(bool p_minimized);
 
@@ -181,6 +208,7 @@ public:
 	virtual void warp_mouse_position(const Point2 &p_to);
 	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
+	void update_real_mouse_position();
 	virtual void set_window_title(const String &p_title);
 
 	virtual Size2 get_window_size() const;
@@ -231,6 +259,10 @@ public:
 
 	virtual Point2 get_window_position() const;
 	virtual void set_window_position(const Point2 &p_position);
+	virtual Size2 get_max_window_size() const;
+	virtual Size2 get_min_window_size() const;
+	virtual void set_min_window_size(const Size2 p_size);
+	virtual void set_max_window_size(const Size2 p_size);
 	virtual void set_window_size(const Size2 p_size);
 	virtual void set_window_fullscreen(bool p_enabled);
 	virtual bool is_window_fullscreen() const;

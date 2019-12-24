@@ -32,9 +32,7 @@
 #define ANIMATION_H
 
 #include "core/resource.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class Animation : public Resource {
 
 	GDCLASS(Animation, Resource);
@@ -305,6 +303,7 @@ public:
 	void track_insert_key(int p_track, float p_time, const Variant &p_key, float p_transition = 1);
 	void track_set_key_transition(int p_track, int p_key_idx, float p_transition);
 	void track_set_key_value(int p_track, int p_key_idx, const Variant &p_value);
+	void track_set_key_time(int p_track, int p_key_idx, float p_time);
 	int track_find_key(int p_track, float p_time, bool p_exact = false) const;
 	void track_remove_key(int p_track, int p_idx);
 	void track_remove_key_at_position(int p_track, float p_pos);
@@ -313,7 +312,7 @@ public:
 	float track_get_key_time(int p_track, int p_key_idx) const;
 	float track_get_key_transition(int p_track, int p_key_idx) const;
 
-	int transform_track_insert_key(int p_track, float p_time, const Vector3 p_loc, const Quat &p_rot = Quat(), const Vector3 &p_scale = Vector3());
+	int transform_track_insert_key(int p_track, float p_time, const Vector3 &p_loc, const Quat &p_rot = Quat(), const Vector3 &p_scale = Vector3());
 	Error transform_track_get_key(int p_track, int p_key, Vector3 *r_loc, Quat *r_rot, Vector3 *r_scale) const;
 	void track_set_interpolation_type(int p_track, InterpolationType p_interp);
 	InterpolationType track_get_interpolation_type(int p_track) const;

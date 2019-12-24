@@ -34,9 +34,7 @@
 #include "core/resource.h"
 #include "scene/resources/texture.h"
 #include "servers/visual_server.h"
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
+
 class CanvasItem;
 
 class StyleBox : public Resource {
@@ -58,6 +56,7 @@ public:
 	float get_margin(Margin p_margin) const;
 	virtual Size2 get_center_size() const;
 
+	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const;
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const = 0;
 
 	CanvasItem *get_current_item_drawn() const;
@@ -135,6 +134,7 @@ public:
 	void set_modulate(const Color &p_modulate);
 	Color get_modulate() const;
 
+	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const;
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const;
 
 	StyleBoxTexture();
@@ -229,6 +229,7 @@ public:
 
 	virtual Size2 get_center_size() const;
 
+	virtual Rect2 get_draw_rect(const Rect2 &p_rect) const;
 	virtual void draw(RID p_canvas_item, const Rect2 &p_rect) const;
 
 	StyleBoxFlat();

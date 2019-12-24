@@ -121,6 +121,7 @@ public:
 	_FORCE_INLINE_ const GDMonoAssembly *get_assembly() const { return assembly; }
 
 	GDMonoClass *get_parent_class();
+	GDMonoClass *get_nesting_class();
 
 #ifdef TOOLS_ENABLED
 	Vector<MonoClassField *> get_enum_fields();
@@ -142,8 +143,6 @@ public:
 	GDMonoMethod *get_method(MonoMethod *p_raw_method, const StringName &p_name);
 	GDMonoMethod *get_method(MonoMethod *p_raw_method, const StringName &p_name, int p_params_count);
 	GDMonoMethod *get_method_with_desc(const String &p_description, bool p_include_namespace);
-
-	void *get_method_thunk(const StringName &p_name, int p_params_count = 0);
 
 	GDMonoField *get_field(const StringName &p_name);
 	const Vector<GDMonoField *> &get_all_fields();
