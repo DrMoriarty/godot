@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,6 +38,7 @@
 #include "core/project_settings.h"
 #include "core/version.h"
 #include "editor/editor_export.h"
+#include "editor/editor_log.h"
 #include "editor/editor_node.h"
 #include "editor/editor_settings.h"
 #include "platform/android/logo.gen.h"
@@ -679,7 +680,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		bool screen_support_large = p_preset->get("screen/support_large");
 		bool screen_support_xlarge = p_preset->get("screen/support_xlarge");
 
-		int xr_mode_index = p_preset->get("graphics/xr_mode");
+		int xr_mode_index = p_preset->get("xr_features/xr_mode");
 
 		Vector<String> perms;
 
@@ -858,135 +859,174 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 					uint32_t name = decode_uint32(&p_manifest[iofs + 12]);
 					String tname = string_table[name];
 
-					int dof_index = p_preset->get("graphics/degrees_of_freedom"); // 0: none, 1: 3dof and 6dof, 2: 6dof
+					if (tname == "uses-feature") {
+						Vector<String> feature_names;
+						Vector<bool> feature_required_list;
+						Vector<int> feature_versions;
 
-					if (tname == "uses-feature" && dof_index > 0) {
-						if (xr_mode_index == 0) {
-							WARN_PRINT("VR DOF feature setting is only valid for oculus HMDs with an XR mode set to VR");
-						}
-						ofs += 24; // skip over end tag
+						if (xr_mode_index == 1 /* XRMode.OVR */) {
+							// Check for degrees of freedom
+							int dof_index = p_preset->get("xr_features/degrees_of_freedom"); // 0: none, 1: 3dof and 6dof, 2: 6dof
 
-						// save manifest ending so we can restore it
-						Vector<uint8_t> manifest_end;
-						uint32_t manifest_cur_size = p_manifest.size();
+							if (dof_index > 0) {
+								feature_names.push_back("android.hardware.vr.headtracking");
+								feature_required_list.push_back(dof_index == 2);
+								feature_versions.push_back(1);
+							}
 
-						manifest_end.resize(p_manifest.size() - ofs);
-						memcpy(manifest_end.ptrw(), &p_manifest[ofs], manifest_end.size());
+							// Check for hand tracking
+							int hand_tracking_index = p_preset->get("xr_features/hand_tracking"); // 0: none, 1: optional, 2: required
+							if (hand_tracking_index > 0) {
+								feature_names.push_back("oculus.software.handtracking");
+								feature_required_list.push_back(hand_tracking_index == 2);
+								feature_versions.push_back(-1); // no version attribute should be added.
 
-						int32_t attr_name_string = string_table.find("name");
-						ERR_FAIL_COND_MSG(attr_name_string == -1, "Template does not have 'name' attribute.");
-
-						int32_t ns_android_string = string_table.find("http://schemas.android.com/apk/res/android");
-						if (ns_android_string == -1) {
-							string_table.push_back("http://schemas.android.com/apk/res/android");
-							ns_android_string = string_table.size() - 1;
-						}
-
-						int32_t attr_uses_permission_string = string_table.find("uses-feature");
-						if (attr_uses_permission_string == -1) {
-							string_table.push_back("uses-feature");
-							attr_uses_permission_string = string_table.size() - 1;
+								if (perms.find("oculus.permission.handtracking") == -1) {
+									perms.push_back("oculus.permission.handtracking");
+								}
+							}
 						}
 
-						int32_t attr_required_string = string_table.find("required");
-						if (attr_required_string == -1) {
-							string_table.push_back("required");
-							attr_required_string = string_table.size() - 1;
+						if (feature_names.size() > 0) {
+							ofs += 24; // skip over end tag
+
+							// save manifest ending so we can restore it
+							Vector<uint8_t> manifest_end;
+							uint32_t manifest_cur_size = p_manifest.size();
+
+							manifest_end.resize(p_manifest.size() - ofs);
+							memcpy(manifest_end.ptrw(), &p_manifest[ofs], manifest_end.size());
+
+							int32_t attr_name_string = string_table.find("name");
+							ERR_FAIL_COND_MSG(attr_name_string == -1, "Template does not have 'name' attribute.");
+
+							int32_t ns_android_string = string_table.find("http://schemas.android.com/apk/res/android");
+							if (ns_android_string == -1) {
+								string_table.push_back("http://schemas.android.com/apk/res/android");
+								ns_android_string = string_table.size() - 1;
+							}
+
+							int32_t attr_uses_feature_string = string_table.find("uses-feature");
+							if (attr_uses_feature_string == -1) {
+								string_table.push_back("uses-feature");
+								attr_uses_feature_string = string_table.size() - 1;
+							}
+
+							int32_t attr_required_string = string_table.find("required");
+							if (attr_required_string == -1) {
+								string_table.push_back("required");
+								attr_required_string = string_table.size() - 1;
+							}
+
+							for (int i = 0; i < feature_names.size(); i++) {
+								String feature_name = feature_names[i];
+								bool feature_required = feature_required_list[i];
+								int feature_version = feature_versions[i];
+								bool has_version_attribute = feature_version != -1;
+
+								print_line("Adding feature " + feature_name);
+
+								int32_t feature_string = string_table.find(feature_name);
+								if (feature_string == -1) {
+									string_table.push_back(feature_name);
+									feature_string = string_table.size() - 1;
+								}
+
+								String required_value_string = feature_required ? "true" : "false";
+								int32_t required_value = string_table.find(required_value_string);
+								if (required_value == -1) {
+									string_table.push_back(required_value_string);
+									required_value = string_table.size() - 1;
+								}
+
+								int32_t attr_version_string = -1;
+								int32_t version_value = -1;
+								int tag_size;
+								int attr_count;
+								if (has_version_attribute) {
+									attr_version_string = string_table.find("version");
+									if (attr_version_string == -1) {
+										string_table.push_back("version");
+										attr_version_string = string_table.size() - 1;
+									}
+
+									version_value = string_table.find(itos(feature_version));
+									if (version_value == -1) {
+										string_table.push_back(itos(feature_version));
+										version_value = string_table.size() - 1;
+									}
+
+									tag_size = 96; // node and three attrs + end node
+									attr_count = 3;
+								} else {
+									tag_size = 76; // node and two attrs + end node
+									attr_count = 2;
+								}
+								manifest_cur_size += tag_size + 24;
+								p_manifest.resize(manifest_cur_size);
+
+								// start tag
+								encode_uint16(0x102, &p_manifest.write[ofs]); // type
+								encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
+								encode_uint32(tag_size, &p_manifest.write[ofs + 4]); // size
+								encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
+								encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
+								encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
+								encode_uint32(attr_uses_feature_string, &p_manifest.write[ofs + 20]); // name
+								encode_uint16(20, &p_manifest.write[ofs + 24]); // attr_start
+								encode_uint16(20, &p_manifest.write[ofs + 26]); // attr_size
+								encode_uint16(attr_count, &p_manifest.write[ofs + 28]); // num_attrs
+								encode_uint16(0, &p_manifest.write[ofs + 30]); // id_index
+								encode_uint16(0, &p_manifest.write[ofs + 32]); // class_index
+								encode_uint16(0, &p_manifest.write[ofs + 34]); // style_index
+
+								// android:name attribute
+								encode_uint32(ns_android_string, &p_manifest.write[ofs + 36]); // ns
+								encode_uint32(attr_name_string, &p_manifest.write[ofs + 40]); // 'name'
+								encode_uint32(feature_string, &p_manifest.write[ofs + 44]); // raw_value
+								encode_uint16(8, &p_manifest.write[ofs + 48]); // typedvalue_size
+								p_manifest.write[ofs + 50] = 0; // typedvalue_always0
+								p_manifest.write[ofs + 51] = 0x03; // typedvalue_type (string)
+								encode_uint32(feature_string, &p_manifest.write[ofs + 52]); // typedvalue reference
+
+								// android:required attribute
+								encode_uint32(ns_android_string, &p_manifest.write[ofs + 56]); // ns
+								encode_uint32(attr_required_string, &p_manifest.write[ofs + 60]); // 'name'
+								encode_uint32(required_value, &p_manifest.write[ofs + 64]); // raw_value
+								encode_uint16(8, &p_manifest.write[ofs + 68]); // typedvalue_size
+								p_manifest.write[ofs + 70] = 0; // typedvalue_always0
+								p_manifest.write[ofs + 71] = 0x03; // typedvalue_type (string)
+								encode_uint32(required_value, &p_manifest.write[ofs + 72]); // typedvalue reference
+
+								ofs += 76;
+
+								if (has_version_attribute) {
+									// android:version attribute
+									encode_uint32(ns_android_string, &p_manifest.write[ofs]); // ns
+									encode_uint32(attr_version_string, &p_manifest.write[ofs + 4]); // 'name'
+									encode_uint32(version_value, &p_manifest.write[ofs + 8]); // raw_value
+									encode_uint16(8, &p_manifest.write[ofs + 12]); // typedvalue_size
+									p_manifest.write[ofs + 14] = 0; // typedvalue_always0
+									p_manifest.write[ofs + 15] = 0x03; // typedvalue_type (string)
+									encode_uint32(version_value, &p_manifest.write[ofs + 16]); // typedvalue reference
+
+									ofs += 20;
+								}
+
+								// end tag
+								encode_uint16(0x103, &p_manifest.write[ofs]); // type
+								encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
+								encode_uint32(24, &p_manifest.write[ofs + 4]); // size
+								encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
+								encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
+								encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
+								encode_uint32(attr_uses_feature_string, &p_manifest.write[ofs + 20]); // name
+
+								ofs += 24;
+							}
+							memcpy(&p_manifest.write[ofs], manifest_end.ptr(), manifest_end.size());
+							ofs -= 24; // go back over back end
 						}
-
-						int32_t attr_version_string = string_table.find("version");
-						if (attr_version_string == -1) {
-							string_table.push_back("version");
-							attr_version_string = string_table.size() - 1;
-						}
-
-						String required_value_string;
-						if (dof_index == 1) {
-							required_value_string = "false";
-						} else if (dof_index == 2) {
-							required_value_string = "true";
-						} else {
-							ERR_FAIL_MSG("Unknown DoF index: " + itos(dof_index) + ".");
-						}
-						int32_t required_value = string_table.find(required_value_string);
-						if (required_value == -1) {
-							string_table.push_back(required_value_string);
-							required_value = string_table.size() - 1;
-						}
-
-						int32_t version_value = string_table.find("1");
-						if (version_value == -1) {
-							string_table.push_back("1");
-							version_value = string_table.size() - 1;
-						}
-
-						int32_t feature_string = string_table.find("android.hardware.vr.headtracking");
-						if (feature_string == -1) {
-							string_table.push_back("android.hardware.vr.headtracking");
-							feature_string = string_table.size() - 1;
-						}
-
-						{
-							manifest_cur_size += 96 + 20; // node and three attrs + end node
-							p_manifest.resize(manifest_cur_size);
-
-							// start tag
-							encode_uint16(0x102, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(96, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
-							encode_uint16(20, &p_manifest.write[ofs + 24]); // attr_start
-							encode_uint16(20, &p_manifest.write[ofs + 26]); // attr_size
-							encode_uint16(3, &p_manifest.write[ofs + 28]); // num_attrs
-							encode_uint16(0, &p_manifest.write[ofs + 30]); // id_index
-							encode_uint16(0, &p_manifest.write[ofs + 32]); // class_index
-							encode_uint16(0, &p_manifest.write[ofs + 34]); // style_index
-
-							// android:name attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 36]); // ns
-							encode_uint32(attr_name_string, &p_manifest.write[ofs + 40]); // 'name'
-							encode_uint32(feature_string, &p_manifest.write[ofs + 44]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 48]); // typedvalue_size
-							p_manifest.write[ofs + 50] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 51] = 0x03; // typedvalue_type (string)
-							encode_uint32(feature_string, &p_manifest.write[ofs + 52]); // typedvalue reference
-
-							// android:required attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 56]); // ns
-							encode_uint32(attr_required_string, &p_manifest.write[ofs + 60]); // 'name'
-							encode_uint32(required_value, &p_manifest.write[ofs + 64]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 68]); // typedvalue_size
-							p_manifest.write[ofs + 70] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 71] = 0x03; // typedvalue_type (string)
-							encode_uint32(required_value, &p_manifest.write[ofs + 72]); // typedvalue reference
-
-							// android:version attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 76]); // ns
-							encode_uint32(attr_version_string, &p_manifest.write[ofs + 80]); // 'name'
-							encode_uint32(version_value, &p_manifest.write[ofs + 84]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 88]); // typedvalue_size
-							p_manifest.write[ofs + 90] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 91] = 0x03; // typedvalue_type (string)
-							encode_uint32(version_value, &p_manifest.write[ofs + 92]); // typedvalue reference
-
-							ofs += 96;
-
-							// end tag
-							encode_uint16(0x103, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(24, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
-
-							ofs += 24;
-						}
-						memcpy(&p_manifest.write[ofs], manifest_end.ptr(), manifest_end.size());
-						ofs -= 24; // go back over back end
 					}
 					if (tname == "manifest") {
 
@@ -1294,13 +1334,14 @@ public:
 
 	virtual void get_export_options(List<ExportOption> *r_options) {
 
-		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "graphics/xr_mode", PROPERTY_HINT_ENUM, "Regular,Oculus Mobile VR"), 0));
-		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "graphics/degrees_of_freedom", PROPERTY_HINT_ENUM, "None,3DOF and 6DOF,6DOF"), 0));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "graphics/32_bits_framebuffer"), true));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "xr_features/xr_mode", PROPERTY_HINT_ENUM, "Regular,Oculus Mobile VR"), 0));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "xr_features/degrees_of_freedom", PROPERTY_HINT_ENUM, "None,3DOF and 6DOF,6DOF"), 0));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "xr_features/hand_tracking", PROPERTY_HINT_ENUM, "None,Optional,Required"), 0));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "one_click_deploy/clear_previous_install"), false));
-		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_package/debug", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
-		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_package/release", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
-		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "custom_package/use_custom_build"), false));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/debug", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "custom_template/release", PROPERTY_HINT_GLOBAL_FILE, "*.apk"), ""));
+		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "custom_template/use_custom_build"), false));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "command_line/extra_args"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "version/code", PROPERTY_HINT_RANGE, "1,4096,1,or_greater"), 1));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "version/name"), "1.0"));
@@ -1576,29 +1617,34 @@ public:
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 
 		String err;
+		bool valid = false;
 
-		if (!bool(p_preset->get("custom_package/use_custom_build"))) {
+		// Look for export templates (first official, and if defined custom templates).
 
-			r_missing_templates = find_export_template("android_debug.apk") == String() || find_export_template("android_release.apk") == String();
+		if (!bool(p_preset->get("custom_template/use_custom_build"))) {
+			bool dvalid = exists_export_template("android_debug.apk", &err);
+			bool rvalid = exists_export_template("android_release.apk", &err);
 
-			if (p_preset->get("custom_package/debug") != "") {
-				if (FileAccess::exists(p_preset->get("custom_package/debug"))) {
-					r_missing_templates = false;
-				} else {
+			if (p_preset->get("custom_template/debug") != "") {
+				dvalid = FileAccess::exists(p_preset->get("custom_template/debug"));
+				if (!dvalid) {
 					err += TTR("Custom debug template not found.") + "\n";
 				}
 			}
-
-			if (p_preset->get("custom_package/release") != "") {
-				if (FileAccess::exists(p_preset->get("custom_package/release"))) {
-					r_missing_templates = false;
-				} else {
+			if (p_preset->get("custom_template/release") != "") {
+				rvalid = FileAccess::exists(p_preset->get("custom_template/release"));
+				if (!rvalid) {
 					err += TTR("Custom release template not found.") + "\n";
 				}
 			}
-		}
 
-		bool valid = !r_missing_templates;
+			valid = dvalid || rvalid;
+		} else {
+			valid = exists_export_template("android_source.zip", &err);
+		}
+		r_missing_templates = !valid;
+
+		// Validate the rest of the configuration.
 
 		String adb = EditorSettings::get_singleton()->get("export/android/adb");
 
@@ -1627,7 +1673,7 @@ public:
 			}
 		}
 
-		if (bool(p_preset->get("custom_package/use_custom_build"))) {
+		if (bool(p_preset->get("custom_template/use_custom_build"))) {
 			String sdk_path = EditorSettings::get_singleton()->get("export/android/custom_build_sdk_path");
 			if (sdk_path == "") {
 				err += TTR("Custom build requires a valid Android SDK path in Editor Settings.") + "\n";
@@ -1948,7 +1994,7 @@ public:
 
 		EditorProgress ep("export", "Exporting for Android", 105, true);
 
-		if (bool(p_preset->get("custom_package/use_custom_build"))) { //custom build
+		if (bool(p_preset->get("custom_template/use_custom_build"))) { //custom build
 			//re-generate build.gradle and AndroidManifest.xml
 
 			{ //test that installed build version is alright
@@ -1983,10 +2029,13 @@ public:
 
 			build_command = build_path.plus_file(build_command);
 
+			String package_name = get_package_name(p_preset->get("package/unique_name"));
+
 			List<String> cmdline;
 			cmdline.push_back("build");
-			cmdline.push_back("-p");
-			cmdline.push_back(build_path);
+			cmdline.push_back("-Pexport_package_name=" + package_name); // argument to specify the package name.
+			cmdline.push_back("-p"); // argument to specify the start directory.
+			cmdline.push_back(build_path); // start directory.
 			/*{ used for debug
 				int ec;
 				String pipe;
@@ -2013,9 +2062,9 @@ public:
 		} else {
 
 			if (p_debug)
-				src_apk = p_preset->get("custom_package/debug");
+				src_apk = p_preset->get("custom_template/debug");
 			else
-				src_apk = p_preset->get("custom_package/release");
+				src_apk = p_preset->get("custom_template/release");
 
 			src_apk = src_apk.strip_edges();
 			if (src_apk == "") {
@@ -2255,7 +2304,7 @@ public:
 			}
 		}
 
-		int xr_mode_index = p_preset->get("graphics/xr_mode");
+		int xr_mode_index = p_preset->get("xr_features/xr_mode");
 		if (xr_mode_index == 1 /* XRMode.OVR */) {
 			cl.push_back("--xr_mode_ovr");
 		} else {

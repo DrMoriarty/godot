@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -47,6 +47,7 @@
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #endif
 
+#ifdef TOOLS_ENABLED
 Dictionary Control::_edit_get_state() const {
 
 	Dictionary s;
@@ -155,6 +156,11 @@ bool Control::_edit_use_pivot() const {
 	return true;
 }
 
+Size2 Control::_edit_get_minimum_size() const {
+	return get_combined_minimum_size();
+}
+#endif
+
 void Control::set_custom_minimum_size(const Size2 &p_custom) {
 
 	if (p_custom == data.custom_minimum_size)
@@ -191,11 +197,6 @@ Size2 Control::get_combined_minimum_size() const {
 		const_cast<Control *>(this)->_update_minimum_size_cache();
 	}
 	return data.minimum_size_cache;
-}
-
-Size2 Control::_edit_get_minimum_size() const {
-
-	return get_combined_minimum_size();
 }
 
 Transform2D Control::_get_internal_transform() const {
@@ -2286,7 +2287,7 @@ void Control::set_theme(const Ref<Theme> &p_theme) {
 	}
 
 	if (data.theme.is_valid()) {
-		data.theme->connect("changed", this, "_theme_changed");
+		data.theme->connect("changed", this, "_theme_changed", varray(), CONNECT_DEFERRED);
 	}
 }
 

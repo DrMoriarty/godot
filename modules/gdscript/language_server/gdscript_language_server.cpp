@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,13 +31,14 @@
 #include "gdscript_language_server.h"
 #include "core/os/file_access.h"
 #include "core/os/os.h"
+#include "editor/editor_log.h"
 #include "editor/editor_node.h"
 
 GDScriptLanguageServer::GDScriptLanguageServer() {
 	thread = NULL;
 	thread_exit = false;
 	_EDITOR_DEF("network/language_server/remote_port", 6008);
-	_EDITOR_DEF("network/language_server/enable_smart_resolve", false);
+	_EDITOR_DEF("network/language_server/enable_smart_resolve", true);
 	_EDITOR_DEF("network/language_server/show_native_symbols_in_editor", false);
 }
 
