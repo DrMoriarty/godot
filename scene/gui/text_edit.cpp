@@ -2265,7 +2265,6 @@ void TextEdit::_get_minimap_mouse_row(const Point2i &p_mouse, int &r_row) const 
 	}
 
 	r_row = row;
->>>>>>> upstream/master
 }
 
 void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
