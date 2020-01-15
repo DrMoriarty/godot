@@ -55,6 +55,7 @@ class Body2DSW : public CollisionObject2DSW {
 	real_t inertia;
 	real_t bounce;
 	real_t friction;
+    real_t absorbent;
 
 	real_t _inv_mass;
 	real_t _inv_inertia;
@@ -270,6 +271,7 @@ public:
 	_FORCE_INLINE_ real_t get_friction() const { return friction; }
 	_FORCE_INLINE_ Vector2 get_gravity() const { return gravity; }
 	_FORCE_INLINE_ real_t get_bounce() const { return bounce; }
+	_FORCE_INLINE_ real_t get_absorbent() const { return absorbent; }
 	_FORCE_INLINE_ real_t get_linear_damp() const { return linear_damp; }
 	_FORCE_INLINE_ real_t get_angular_damp() const { return angular_damp; }
 

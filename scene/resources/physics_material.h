@@ -43,7 +43,7 @@ class PhysicsMaterial : public Resource {
 	real_t friction;
 	bool rough;
 	real_t bounce;
-	bool absorbent;
+	real_t absorbent;
 
 protected:
 	static void _bind_methods();
@@ -62,11 +62,11 @@ public:
 	void set_bounce(real_t p_val);
 	_FORCE_INLINE_ real_t get_bounce() const { return bounce; }
 
-	void set_absorbent(bool p_val);
-	_FORCE_INLINE_ bool is_absorbent() const { return absorbent; }
+	void set_absorbent(real_t p_val);
+	_FORCE_INLINE_ real_t get_absorbent() const { return absorbent; }
 
 	_FORCE_INLINE_ real_t computed_bounce() const {
-		return absorbent ? -bounce : bounce;
+		return bounce;
 	}
 
 	PhysicsMaterial();
