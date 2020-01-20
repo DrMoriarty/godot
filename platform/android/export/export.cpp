@@ -612,7 +612,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 				0,
 				NULL,
 				compression_method,
-				Z_DEFAULT_COMPRESSION);
+				Z_BEST_COMPRESSION);
 
 		zipWriteInFileInZip(ed->apk, p_data.ptr(), p_data.size());
 		zipCloseFileInZip(ed->apk);
@@ -655,9 +655,9 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		String dst_path = p_path.replace_first("res://", "assets/");
 
 		store_in_apk(ed, dst_path, p_data, _should_compress_asset(p_path, p_data) ? Z_DEFLATED : 0);
-		if (ed->ep->step("File: " + p_path, 3 + p_file * 100 / p_total)) {
-			return ERR_SKIP;
-		}
+		//if (ed->ep->step("File: " + p_path, 3 + p_file * 100 / p_total)) {
+		//	return ERR_SKIP;
+		//}
 		return OK;
 	}
 
