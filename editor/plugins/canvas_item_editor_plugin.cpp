@@ -1492,7 +1492,9 @@ bool CanvasItemEditor::_gui_input_rotate(const Ref<InputEvent> &p_event) {
 			for (List<CanvasItem *>::Element *E = drag_selection.front(); E; E = E->next()) {
 				CanvasItem *canvas_item = E->get();
 				drag_to = transform.affine_inverse().xform(m->get_position());
-				canvas_item->_edit_set_rotation(snap_angle(canvas_item->_edit_get_rotation() + (drag_from - drag_rotation_center).angle_to(drag_to - drag_rotation_center), canvas_item->_edit_get_rotation()));
+				//Rotate the opposite way if the canvas item's compounded scale has an uneven number of negative elements
+				bool opposite = (canvas_item->get_global_transform().get_scale().sign().dot(canvas_item->get_transform().get_scale().sign()) == 0);
+				canvas_item->_edit_set_rotation(snap_angle(canvas_item->_edit_get_rotation() + (opposite ? -1 : 1) * (drag_from - drag_rotation_center).angle_to(drag_to - drag_rotation_center), canvas_item->_edit_get_rotation()));
 				viewport->update();
 			}
 			return true;
@@ -4234,7 +4236,7 @@ void CanvasItemEditor::_button_zoom_minus() {
 }
 
 void CanvasItemEditor::_button_zoom_reset() {
-	_zoom_on_position(1.0 * EDSCALE, viewport_scrollable->get_size() / 2.0);
+	_zoom_on_position(1.0 * MAX(1, EDSCALE), viewport_scrollable->get_size() / 2.0);
 }
 
 void CanvasItemEditor::_button_zoom_plus() {
@@ -5036,7 +5038,7 @@ void CanvasItemEditor::set_state(const Dictionary &p_state) {
 	if (state.has("zoom")) {
 		// Compensate the editor scale, so that the editor scale can be changed
 		// and the zoom level will still be the same (relative to the editor scale).
-		zoom = float(p_state["zoom"]) * EDSCALE;
+		zoom = float(p_state["zoom"]) * MAX(1, EDSCALE);
 		_update_zoom_label();
 	}
 

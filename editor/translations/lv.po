@@ -1959,36 +1959,7 @@ msgstr ""
 
 #: editor/editor_help.cpp
 #, fuzzy
-msgid "Brief Description"
-msgstr "Apraksts:"
-
-#: editor/editor_help.cpp
-msgid "Properties"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Methods"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Theme Properties"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Enumerations"
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "enum  "
-msgstr ""
-
-#: editor/editor_help.cpp
-msgid "Constants"
-msgstr ""
-
-#: editor/editor_help.cpp
-#, fuzzy
-msgid "Class Description"
+msgid "Description"
 msgstr "Apraksts:"
 
 #: editor/editor_help.cpp
@@ -2003,9 +1974,42 @@ msgid ""
 msgstr ""
 
 #: editor/editor_help.cpp
+msgid "Properties"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "override:"
+msgstr ""
+
+#: editor/editor_help.cpp
+#, fuzzy
+msgid "default:"
+msgstr "Ielādēt Noklusējumu"
+
+#: editor/editor_help.cpp
+msgid "Methods"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Theme Properties"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Enumerations"
+msgstr ""
+
+#: editor/editor_help.cpp
+msgid "Constants"
+msgstr ""
+
+#: editor/editor_help.cpp
 #, fuzzy
 msgid "Property Descriptions"
 msgstr "Apraksts:"
+
+#: editor/editor_help.cpp
+msgid "(value)"
+msgstr ""
 
 #: editor/editor_help.cpp
 msgid ""
@@ -7243,6 +7247,10 @@ msgid "Cinematic Preview"
 msgstr ""
 
 #: editor/plugins/spatial_editor_plugin.cpp
+msgid "Not available when using the GLES2 renderer."
+msgstr ""
+
+#: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Left"
 msgstr ""
 
@@ -12356,6 +12364,14 @@ msgstr ""
 #: servers/visual/shader_language.cpp
 msgid "Constants cannot be modified."
 msgstr ""
+
+#, fuzzy
+#~ msgid "Brief Description"
+#~ msgstr "Apraksts:"
+
+#, fuzzy
+#~ msgid "Class Description"
+#~ msgstr "Apraksts:"
 
 #, fuzzy
 #~ msgid "Class Description:"
