@@ -79,7 +79,7 @@ Vector<StringName> VisualShaderNode::get_editable_properties() const {
 	return Vector<StringName>();
 }
 
-Array VisualShaderNode::_get_default_input_values() const {
+Array VisualShaderNode::get_default_input_values() const {
 
 	Array ret;
 	for (Map<int, Variant>::Element *E = default_input_values.front(); E; E = E->next()) {
@@ -88,7 +88,7 @@ Array VisualShaderNode::_get_default_input_values() const {
 	}
 	return ret;
 }
-void VisualShaderNode::_set_default_input_values(const Array &p_values) {
+void VisualShaderNode::set_default_input_values(const Array &p_values) {
 
 	if (p_values.size() % 2 == 0) {
 		for (int i = 0; i < p_values.size(); i += 2) {
@@ -115,11 +115,11 @@ void VisualShaderNode::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_input_port_default_value", "port", "value"), &VisualShaderNode::set_input_port_default_value);
 	ClassDB::bind_method(D_METHOD("get_input_port_default_value", "port"), &VisualShaderNode::get_input_port_default_value);
 
-	ClassDB::bind_method(D_METHOD("_set_default_input_values", "values"), &VisualShaderNode::_set_default_input_values);
-	ClassDB::bind_method(D_METHOD("_get_default_input_values"), &VisualShaderNode::_get_default_input_values);
+	ClassDB::bind_method(D_METHOD("set_default_input_values", "values"), &VisualShaderNode::set_default_input_values);
+	ClassDB::bind_method(D_METHOD("get_default_input_values"), &VisualShaderNode::get_default_input_values);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "output_port_for_preview"), "set_output_port_for_preview", "get_output_port_for_preview");
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "default_input_values", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "_set_default_input_values", "_get_default_input_values");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "default_input_values", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "set_default_input_values", "get_default_input_values");
 	ADD_SIGNAL(MethodInfo("editor_refresh_request"));
 
 	BIND_ENUM_CONSTANT(PORT_TYPE_SCALAR);
@@ -378,6 +378,9 @@ void VisualShader::remove_node(Type p_type, int p_id) {
 		List<Connection>::Element *N = E->next();
 		if (E->get().from_node == p_id || E->get().to_node == p_id) {
 			g->connections.erase(E);
+			if (E->get().from_node == p_id) {
+				g->nodes[E->get().to_node].prev_connected_nodes.erase(p_id);
+			}
 		}
 		E = N;
 	}
@@ -397,6 +400,25 @@ bool VisualShader::is_node_connection(Type p_type, int p_from_node, int p_from_p
 	}
 
 	return false;
+}
+
+bool VisualShader::is_nodes_connected_relatively(const Graph *p_graph, int p_node, int p_target) const {
+	bool result = false;
+
+	const VisualShader::Node &node = p_graph->nodes[p_node];
+
+	for (const List<int>::Element *E = node.prev_connected_nodes.front(); E; E = E->next()) {
+
+		if (E->get() == p_target) {
+			return true;
+		}
+
+		result = is_nodes_connected_relatively(p_graph, E->get(), p_target);
+		if (result) {
+			break;
+		}
+	}
+	return result;
 }
 
 bool VisualShader::can_connect_nodes(Type p_type, int p_from_node, int p_from_port, int p_to_node, int p_to_port) const {
@@ -433,6 +455,9 @@ bool VisualShader::can_connect_nodes(Type p_type, int p_from_node, int p_from_po
 		}
 	}
 
+	if (is_nodes_connected_relatively(g, p_from_node, p_to_node))
+		return false;
+
 	return true;
 }
 
@@ -449,6 +474,8 @@ void VisualShader::connect_nodes_forced(Type p_type, int p_from_node, int p_from
 	c.to_node = p_to_node;
 	c.to_port = p_to_port;
 	g->connections.push_back(c);
+	g->nodes[p_to_node].prev_connected_nodes.push_back(p_from_node);
+
 	_queue_update();
 }
 
@@ -479,6 +506,7 @@ Error VisualShader::connect_nodes(Type p_type, int p_from_node, int p_from_port,
 	c.to_node = p_to_node;
 	c.to_port = p_to_port;
 	g->connections.push_back(c);
+	g->nodes[p_to_node].prev_connected_nodes.push_back(p_from_node);
 
 	_queue_update();
 	return OK;
@@ -492,6 +520,7 @@ void VisualShader::disconnect_nodes(Type p_type, int p_from_node, int p_from_por
 
 		if (E->get().from_node == p_from_node && E->get().from_port == p_from_port && E->get().to_node == p_to_node && E->get().to_port == p_to_port) {
 			g->connections.erase(E);
+			g->nodes[p_to_node].prev_connected_nodes.erase(p_from_node);
 			_queue_update();
 			return;
 		}
@@ -1326,6 +1355,7 @@ void VisualShader::_input_type_changed(Type p_type, int p_id) {
 		List<Connection>::Element *N = E->next();
 		if (E->get().from_node == p_id) {
 			g->connections.erase(E);
+			g->nodes[E->get().to_node].prev_connected_nodes.erase(p_id);
 		}
 		E = N;
 	}
@@ -2472,13 +2502,7 @@ void VisualShaderNodeGroupBase::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_free_input_port_id"), &VisualShaderNodeGroupBase::get_free_input_port_id);
 	ClassDB::bind_method(D_METHOD("get_free_output_port_id"), &VisualShaderNodeGroupBase::get_free_output_port_id);
 
-	ClassDB::bind_method(D_METHOD("set_control", "control", "index"), &VisualShaderNodeGroupBase::set_control);
-	ClassDB::bind_method(D_METHOD("get_control", "index"), &VisualShaderNodeGroupBase::get_control);
-
-	ClassDB::bind_method(D_METHOD("set_editable", "enabled"), &VisualShaderNodeGroupBase::set_editable);
-	ClassDB::bind_method(D_METHOD("is_editable"), &VisualShaderNodeGroupBase::is_editable);
-
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2, "size"), "set_size", "get_size");
 }
 
 String VisualShaderNodeGroupBase::generate_code(Shader::Mode p_mode, VisualShader::Type p_type, int p_id, const String *p_input_vars, const String *p_output_vars, bool p_for_preview) const {
@@ -2500,10 +2524,6 @@ String VisualShaderNodeExpression::get_caption() const {
 
 void VisualShaderNodeExpression::set_expression(const String &p_expression) {
 	expression = p_expression;
-}
-
-void VisualShaderNodeExpression::build() {
-	emit_changed();
 }
 
 String VisualShaderNodeExpression::get_expression() const {
@@ -2611,8 +2631,6 @@ void VisualShaderNodeExpression::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_expression", "expression"), &VisualShaderNodeExpression::set_expression);
 	ClassDB::bind_method(D_METHOD("get_expression"), &VisualShaderNodeExpression::get_expression);
-
-	ClassDB::bind_method(D_METHOD("build"), &VisualShaderNodeExpression::build);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "expression"), "set_expression", "get_expression");
 }

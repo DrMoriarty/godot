@@ -1750,8 +1750,18 @@ bool CanvasItemEditor::_gui_input_resize(const Ref<InputEvent> &p_event) {
 
 			Transform2D xform = canvas_item->get_global_transform_with_canvas().affine_inverse();
 
-			Point2 drag_to_snapped_begin = snap_point(xform.affine_inverse().xform(current_begin) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
-			Point2 drag_to_snapped_end = snap_point(xform.affine_inverse().xform(current_end) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
+			Point2 drag_to_snapped_begin;
+			Point2 drag_to_snapped_end;
+
+			// last call decides which snapping lines are drawn
+			if (drag_type == DRAG_LEFT || drag_type == DRAG_TOP || drag_type == DRAG_TOP_LEFT) {
+				drag_to_snapped_end = snap_point(xform.affine_inverse().xform(current_end) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
+				drag_to_snapped_begin = snap_point(xform.affine_inverse().xform(current_begin) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
+			} else {
+				drag_to_snapped_begin = snap_point(xform.affine_inverse().xform(current_begin) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
+				drag_to_snapped_end = snap_point(xform.affine_inverse().xform(current_end) + (drag_to - drag_from), SNAP_NODE_ANCHORS | SNAP_NODE_PARENT | SNAP_OTHER_NODES | SNAP_GRID | SNAP_PIXEL, 0, canvas_item);
+			}
+
 			Point2 drag_begin = xform.xform(drag_to_snapped_begin);
 			Point2 drag_end = xform.xform(drag_to_snapped_end);
 
@@ -2589,14 +2599,14 @@ void CanvasItemEditor::_draw_guides() {
 	Color text_color = get_color("font_color", "Editor");
 	text_color.a = 0.5;
 	if (drag_type == DRAG_DOUBLE_GUIDE || drag_type == DRAG_V_GUIDE) {
-		String str = vformat("%d px", xform.affine_inverse().xform(dragged_guide_pos).x);
+		String str = vformat("%d px", Math::round(xform.affine_inverse().xform(dragged_guide_pos).x));
 		Ref<Font> font = get_font("font", "Label");
 		Size2 text_size = font->get_string_size(str);
 		viewport->draw_string(font, Point2(dragged_guide_pos.x + 10, RULER_WIDTH + text_size.y / 2 + 10), str, text_color);
 		viewport->draw_line(Point2(dragged_guide_pos.x, 0), Point2(dragged_guide_pos.x, viewport->get_size().y), guide_color, Math::round(EDSCALE));
 	}
 	if (drag_type == DRAG_DOUBLE_GUIDE || drag_type == DRAG_H_GUIDE) {
-		String str = vformat("%d px", xform.affine_inverse().xform(dragged_guide_pos).y);
+		String str = vformat("%d px", Math::round(xform.affine_inverse().xform(dragged_guide_pos).y));
 		Ref<Font> font = get_font("font", "Label");
 		Size2 text_size = font->get_string_size(str);
 		viewport->draw_string(font, Point2(RULER_WIDTH + 10, dragged_guide_pos.y + text_size.y / 2 + 10), str, text_color);
@@ -3840,6 +3850,7 @@ void CanvasItemEditor::_notification(int p_what) {
 		key_scale_button->set_icon(get_icon("KeyScale", "EditorIcons"));
 		key_insert_button->set_icon(get_icon("Key", "EditorIcons"));
 		key_auto_insert_button->set_icon(get_icon("AutoKey", "EditorIcons"));
+		animation_menu->set_icon(get_icon("GuiTabMenu", "EditorIcons"));
 
 		zoom_minus->set_icon(get_icon("ZoomLess", "EditorIcons"));
 		zoom_plus->set_icon(get_icon("ZoomMore", "EditorIcons"));
@@ -5657,7 +5668,7 @@ CanvasItemEditor::CanvasItemEditor(EditorNode *p_editor) {
 	animation_hb->add_child(key_auto_insert_button);
 
 	animation_menu = memnew(MenuButton);
-	animation_menu->set_text(TTR("Animation"));
+	animation_menu->set_tooltip(TTR("Animation Key and Pose Options"));
 	animation_hb->add_child(animation_menu);
 	animation_menu->get_popup()->connect("id_pressed", this, "_popup_callback");
 	animation_menu->set_switch_on_hover(true);
