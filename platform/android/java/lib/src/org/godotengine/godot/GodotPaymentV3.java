@@ -172,7 +172,7 @@ public class GodotPaymentV3 extends Godot.SingletonBase {
 
 	// true if connected, false otherwise
 	public boolean isConnected() {
-		return mPaymentManager.isConnected();
+		return mPaymentManager != null && mPaymentManager.isConnected();
 	}
 
 	// consume item automatically after purchase. default is true.
