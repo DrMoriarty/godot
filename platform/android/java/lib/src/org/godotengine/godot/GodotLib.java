@@ -192,6 +192,22 @@ public class GodotLib {
 	public static native void method(String p_sname, String p_name, String p_ret, String[] p_params);
 
 	/**
+	 * Used to complete registration of the {@link org.godotengine.godot.Godot.SingletonBase} instance's methods.
+	 * @param p_sname Name of the instance
+	 * @param p_name Name of the signal to register
+	 * @param p_params Signal parameters types
+	 */
+	public static native void addSignal(String p_sname, String p_name, String[] p_params);
+
+	/**
+	 * Used to emit signal by {@link org.godotengine.godot.Godot.SingletonBase} instance.
+	 * @param p_sname Name of the instance
+	 * @param p_name Name of the signal to emit
+	 * @param p_params Signal arguments
+	 */
+	public static native void emitSignal(String p_sname, String p_name, Object[] p_args);
+
+	/**
 	 * Used to access Godot global properties.
 	 * @param p_key Property key
 	 * @return String value of the property

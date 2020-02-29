@@ -190,6 +190,14 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 			Godot.singletons[Godot.singleton_count++] = this;
 		}
 
+		protected void addSignal(String p_name, String s_name, String[] args) {
+			GodotLib.addSignal(p_name, s_name, args);
+		}
+
+		protected void emitSignal(String p_name, String s_name, Object[] args) {
+			GodotLib.emitSignal(p_name, s_name, args);
+		}
+
 		/**
 		 * Invoked once during the Godot Android initialization process after creation of the
 		 * {@link GodotView} view.

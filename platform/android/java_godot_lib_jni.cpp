@@ -420,8 +420,7 @@ public:
 		Map<StringName, MethodData>::Element *E = method_map.find(p_method);
 		if (!E) {
 
-			r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-			return Variant();
+			return Object::call(p_method, p_args, p_argcount, r_error);
 		}
 
 		int ac = E->get().argtypes.size();
@@ -574,6 +573,21 @@ public:
 		md.argtypes = p_args;
 		md.ret_type = p_ret_type;
 		method_map[p_name] = md;
+	}
+
+	void add_signal(const StringName &p_name, const Vector<Variant::Type> &p_args) {
+		if (p_args.size() == 0)
+			ADD_SIGNAL(MethodInfo(p_name));
+		else if (p_args.size() == 1)
+			ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1")));
+		else if (p_args.size() == 2)
+			ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2")));
+		else if (p_args.size() == 3)
+			ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3")));
+		else if (p_args.size() == 4)
+			ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3"), PropertyInfo(p_args[3], "arg4")));
+		else if (p_args.size() == 5)
+			ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3"), PropertyInfo(p_args[3], "arg4"), PropertyInfo(p_args[4], "arg5")));
 	}
 
 	JNISingleton() {
@@ -739,6 +753,7 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_setup(JNIEnv *env, jo
 	}
 
 	java_class_wrapper = memnew(JavaClassWrapper(godot_java->get_activity()));
+	ClassDB::register_class<JNISingleton>();
 	_initialize_java_modules();
 }
 
@@ -1229,7 +1244,7 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_audio(JNIEnv *env, jo
 JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_singleton(JNIEnv *env, jobject obj, jstring name, jobject p_object) {
 
 	String singname = jstring_to_string(name, env);
-	JNISingleton *s = memnew(JNISingleton);
+	JNISingleton *s = (JNISingleton *)ClassDB::instance("JNISingleton");
 	s->set_instance(env->NewGlobalRef(p_object));
 	jni_singletons[singname] = s;
 
@@ -1343,6 +1358,52 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_method(JNIEnv *env, j
 	}
 
 	s->add_method(mname, mid, types, get_jni_type(retval));
+}
+
+JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_addSignal(JNIEnv *env, jobject obj, jstring sname, jstring name, jobjectArray args) {
+
+	String singname = jstring_to_string(sname, env);
+
+	ERR_FAIL_COND(!jni_singletons.has(singname));
+
+	JNISingleton *s = jni_singletons.get(singname);
+
+	String mname = jstring_to_string(name, env);
+	Vector<Variant::Type> types;
+
+	int stringCount = env->GetArrayLength(args);
+
+	for (int i = 0; i < stringCount; i++) {
+
+		jstring string = (jstring)env->GetObjectArrayElement(args, i);
+		const String rawString = jstring_to_string(string, env);
+		types.push_back(get_jni_type(rawString));
+	}
+
+	s->add_signal(mname, types);
+}
+
+JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_emitSignal(JNIEnv *env, jobject obj, jstring sname, jstring name, jobjectArray params) {
+	String singname = jstring_to_string(sname, env);
+
+	ERR_FAIL_COND(!jni_singletons.has(singname));
+
+	JNISingleton *s = jni_singletons.get(singname);
+
+	String mname = jstring_to_string(name, env);
+
+	int count = env->GetArrayLength(params);
+	Variant args[VARIANT_ARG_MAX];
+
+	for (int i = 0; i < MIN(count, VARIANT_ARG_MAX); i++) {
+
+		jobject obj = env->GetObjectArrayElement(params, i);
+		if (obj)
+			args[i] = _jobject_to_variant(env, obj);
+		env->DeleteLocalRef(obj);
+	};
+
+	s->emit_signal(mname, args[0], args[1], args[2], args[3], args[4]);
 }
 
 JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_callobject(JNIEnv *env, jobject p_obj, jint ID, jstring method, jobjectArray params) {
