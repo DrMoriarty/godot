@@ -37,7 +37,39 @@
 extern "C" {
 JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSingleton(JNIEnv *env, jclass clazz, jstring name, jobject obj);
 JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterMethod(JNIEnv *env, jclass clazz, jstring sname, jstring name, jstring ret, jobjectArray args);
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSignal(JNIEnv *env, jclass clazz, jstring sname, jstring name, jobjectArray args);
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeEmitSignal(JNIEnv *env, jclass clazz, jstring sname, jstring name, jobjectArray params);
 JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterGDNativeLibraries(JNIEnv *env, jobject obj, jobjectArray gdnlib_paths);
 }
+
+#include "core/engine.h"
+
+class JNISingleton : public Object {
+
+	GDCLASS(JNISingleton, Object);
+
+	struct MethodData {
+
+		jmethodID method;
+		Variant::Type ret_type;
+		Vector<Variant::Type> argtypes;
+	};
+
+	jobject instance;
+	Map<StringName, MethodData> method_map;
+
+public:
+	virtual Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error);
+
+	jobject get_instance() const;
+	void set_instance(jobject p_instance);
+
+	void add_method(const StringName &p_name, jmethodID p_method, const Vector<Variant::Type> &p_args, Variant::Type p_ret_type);
+
+    void add_signal(const StringName &p_name, const Vector<Variant::Type> &p_args);
+
+	JNISingleton();
+};
+
 
 #endif // GODOT_PLUGIN_JNI_H

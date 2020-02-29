@@ -36,190 +36,191 @@
 #include <platform/android/jni_utils.h>
 #include <platform/android/string_android.h>
 
-class JNISingleton : public Object {
+Variant JNISingleton::call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 
-	GDCLASS(JNISingleton, Object);
+    ERR_FAIL_COND_V(!instance, Variant());
 
-	struct MethodData {
+    r_error.error = Variant::CallError::CALL_OK;
 
-		jmethodID method;
-		Variant::Type ret_type;
-		Vector<Variant::Type> argtypes;
-	};
+    Map<StringName, MethodData>::Element *E = method_map.find(p_method);
+    if (!E) {
 
-	jobject instance;
-	Map<StringName, MethodData> method_map;
+        r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
+        return Variant();
+    }
 
-public:
-	virtual Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
+    int ac = E->get().argtypes.size();
+    if (ac < p_argcount) {
 
-		ERR_FAIL_COND_V(!instance, Variant());
+        r_error.error = Variant::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
+        r_error.argument = ac;
+        return Variant();
+    }
 
-		r_error.error = Variant::CallError::CALL_OK;
+    if (ac > p_argcount) {
 
-		Map<StringName, MethodData>::Element *E = method_map.find(p_method);
-		if (!E) {
+        r_error.error = Variant::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS;
+        r_error.argument = ac;
+        return Variant();
+    }
 
-			r_error.error = Variant::CallError::CALL_ERROR_INVALID_METHOD;
-			return Variant();
-		}
+    for (int i = 0; i < p_argcount; i++) {
 
-		int ac = E->get().argtypes.size();
-		if (ac < p_argcount) {
+        if (!Variant::can_convert(p_args[i]->get_type(), E->get().argtypes[i])) {
 
-			r_error.error = Variant::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
-			r_error.argument = ac;
-			return Variant();
-		}
+            r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;
+            r_error.argument = i;
+            r_error.expected = E->get().argtypes[i];
+        }
+    }
 
-		if (ac > p_argcount) {
+    jvalue *v = NULL;
 
-			r_error.error = Variant::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS;
-			r_error.argument = ac;
-			return Variant();
-		}
+    if (p_argcount) {
 
-		for (int i = 0; i < p_argcount; i++) {
+        v = (jvalue *)alloca(sizeof(jvalue) * p_argcount);
+    }
 
-			if (!Variant::can_convert(p_args[i]->get_type(), E->get().argtypes[i])) {
+    JNIEnv *env = ThreadAndroid::get_env();
 
-				r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;
-				r_error.argument = i;
-				r_error.expected = E->get().argtypes[i];
-			}
-		}
+    int res = env->PushLocalFrame(16);
 
-		jvalue *v = NULL;
+    ERR_FAIL_COND_V(res != 0, Variant());
 
-		if (p_argcount) {
+    List<jobject> to_erase;
+    for (int i = 0; i < p_argcount; i++) {
 
-			v = (jvalue *)alloca(sizeof(jvalue) * p_argcount);
-		}
+        jvalret vr = _variant_to_jvalue(env, E->get().argtypes[i], p_args[i]);
+        v[i] = vr.val;
+        if (vr.obj)
+            to_erase.push_back(vr.obj);
+    }
 
-		JNIEnv *env = ThreadAndroid::get_env();
+    Variant ret;
 
-		int res = env->PushLocalFrame(16);
+    switch (E->get().ret_type) {
 
-		ERR_FAIL_COND_V(res != 0, Variant());
+    case Variant::NIL: {
 
-		List<jobject> to_erase;
-		for (int i = 0; i < p_argcount; i++) {
+        env->CallVoidMethodA(instance, E->get().method, v);
+    } break;
+    case Variant::BOOL: {
 
-			jvalret vr = _variant_to_jvalue(env, E->get().argtypes[i], p_args[i]);
-			v[i] = vr.val;
-			if (vr.obj)
-				to_erase.push_back(vr.obj);
-		}
+        ret = env->CallBooleanMethodA(instance, E->get().method, v) == JNI_TRUE;
+    } break;
+    case Variant::INT: {
 
-		Variant ret;
+        ret = env->CallIntMethodA(instance, E->get().method, v);
+    } break;
+    case Variant::REAL: {
 
-		switch (E->get().ret_type) {
+        ret = env->CallFloatMethodA(instance, E->get().method, v);
+    } break;
+    case Variant::STRING: {
 
-			case Variant::NIL: {
+        jobject o = env->CallObjectMethodA(instance, E->get().method, v);
+        ret = jstring_to_string((jstring)o, env);
+        env->DeleteLocalRef(o);
+    } break;
+    case Variant::POOL_STRING_ARRAY: {
 
-				env->CallVoidMethodA(instance, E->get().method, v);
-			} break;
-			case Variant::BOOL: {
+        jobjectArray arr = (jobjectArray)env->CallObjectMethodA(instance, E->get().method, v);
 
-				ret = env->CallBooleanMethodA(instance, E->get().method, v) == JNI_TRUE;
-			} break;
-			case Variant::INT: {
+        ret = _jobject_to_variant(env, arr);
 
-				ret = env->CallIntMethodA(instance, E->get().method, v);
-			} break;
-			case Variant::REAL: {
+        env->DeleteLocalRef(arr);
+    } break;
+    case Variant::POOL_INT_ARRAY: {
 
-				ret = env->CallFloatMethodA(instance, E->get().method, v);
-			} break;
-			case Variant::STRING: {
+        jintArray arr = (jintArray)env->CallObjectMethodA(instance, E->get().method, v);
 
-				jobject o = env->CallObjectMethodA(instance, E->get().method, v);
-				ret = jstring_to_string((jstring)o, env);
-				env->DeleteLocalRef(o);
-			} break;
-			case Variant::POOL_STRING_ARRAY: {
+        int fCount = env->GetArrayLength(arr);
+        PoolVector<int> sarr;
+        sarr.resize(fCount);
 
-				jobjectArray arr = (jobjectArray)env->CallObjectMethodA(instance, E->get().method, v);
+        PoolVector<int>::Write w = sarr.write();
+        env->GetIntArrayRegion(arr, 0, fCount, w.ptr());
+        w.release();
+        ret = sarr;
+        env->DeleteLocalRef(arr);
+    } break;
+    case Variant::POOL_REAL_ARRAY: {
 
-				ret = _jobject_to_variant(env, arr);
+        jfloatArray arr = (jfloatArray)env->CallObjectMethodA(instance, E->get().method, v);
 
-				env->DeleteLocalRef(arr);
-			} break;
-			case Variant::POOL_INT_ARRAY: {
+        int fCount = env->GetArrayLength(arr);
+        PoolVector<float> sarr;
+        sarr.resize(fCount);
 
-				jintArray arr = (jintArray)env->CallObjectMethodA(instance, E->get().method, v);
+        PoolVector<float>::Write w = sarr.write();
+        env->GetFloatArrayRegion(arr, 0, fCount, w.ptr());
+        w.release();
+        ret = sarr;
+        env->DeleteLocalRef(arr);
+    } break;
 
-				int fCount = env->GetArrayLength(arr);
-				PoolVector<int> sarr;
-				sarr.resize(fCount);
+    case Variant::DICTIONARY: {
 
-				PoolVector<int>::Write w = sarr.write();
-				env->GetIntArrayRegion(arr, 0, fCount, w.ptr());
-				w.release();
-				ret = sarr;
-				env->DeleteLocalRef(arr);
-			} break;
-			case Variant::POOL_REAL_ARRAY: {
+        jobject obj = env->CallObjectMethodA(instance, E->get().method, v);
+        ret = _jobject_to_variant(env, obj);
+        env->DeleteLocalRef(obj);
 
-				jfloatArray arr = (jfloatArray)env->CallObjectMethodA(instance, E->get().method, v);
+    } break;
+    default: {
 
-				int fCount = env->GetArrayLength(arr);
-				PoolVector<float> sarr;
-				sarr.resize(fCount);
+        env->PopLocalFrame(NULL);
+        ERR_FAIL_V(Variant());
+    } break;
+    }
 
-				PoolVector<float>::Write w = sarr.write();
-				env->GetFloatArrayRegion(arr, 0, fCount, w.ptr());
-				w.release();
-				ret = sarr;
-				env->DeleteLocalRef(arr);
-			} break;
+    while (to_erase.size()) {
+        env->DeleteLocalRef(to_erase.front()->get());
+        to_erase.pop_front();
+    }
 
-			case Variant::DICTIONARY: {
+    env->PopLocalFrame(NULL);
 
-				jobject obj = env->CallObjectMethodA(instance, E->get().method, v);
-				ret = _jobject_to_variant(env, obj);
-				env->DeleteLocalRef(obj);
+    return ret;
+}
 
-			} break;
-			default: {
+jobject JNISingleton::get_instance() const {
 
-				env->PopLocalFrame(NULL);
-				ERR_FAIL_V(Variant());
-			} break;
-		}
+    return instance;
+}
+void JNISingleton::set_instance(jobject p_instance) {
 
-		while (to_erase.size()) {
-			env->DeleteLocalRef(to_erase.front()->get());
-			to_erase.pop_front();
-		}
+    instance = p_instance;
+}
 
-		env->PopLocalFrame(NULL);
+void JNISingleton::add_method(const StringName &p_name, jmethodID p_method, const Vector<Variant::Type> &p_args, Variant::Type p_ret_type) {
 
-		return ret;
-	}
+    MethodData md;
+    md.method = p_method;
+    md.argtypes = p_args;
+    md.ret_type = p_ret_type;
+    method_map[p_name] = md;
+}
 
-	jobject get_instance() const {
+void JNISingleton::add_signal(const StringName &p_name, const Vector<Variant::Type> &p_args) {
+    if (p_args.size() == 0)
+        ADD_SIGNAL(MethodInfo(p_name));
+    else if (p_args.size() == 1)
+        ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1")));
+    else if (p_args.size() == 2)
+        ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2")));
+    else if (p_args.size() == 3)
+        ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3")));
+    else if (p_args.size() == 4)
+        ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3"), PropertyInfo(p_args[
+                                                                                                                                                             3], "arg4")));
+    else if (p_args.size() == 5)
+        ADD_SIGNAL(MethodInfo(p_name, PropertyInfo(p_args[0], "arg1"), PropertyInfo(p_args[1], "arg2"), PropertyInfo(p_args[2], "arg3"), PropertyInfo(p_args[
+                                                                                                                                                             3], "arg4"), PropertyInfo(p_args[4], "arg5")));
+}
 
-		return instance;
-	}
-	void set_instance(jobject p_instance) {
-
-		instance = p_instance;
-	}
-
-	void add_method(const StringName &p_name, jmethodID p_method, const Vector<Variant::Type> &p_args, Variant::Type p_ret_type) {
-
-		MethodData md;
-		md.method = p_method;
-		md.argtypes = p_args;
-		md.ret_type = p_ret_type;
-		method_map[p_name] = md;
-	}
-
-	JNISingleton() {
-		instance = NULL;
-	}
-};
+JNISingleton::JNISingleton() {
+    instance = NULL;
+}
 
 static HashMap<String, JNISingleton *> jni_singletons;
 
@@ -228,7 +229,7 @@ extern "C" {
 JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSingleton(JNIEnv *env, jclass clazz, jstring name, jobject obj) {
 
 	String singname = jstring_to_string(name, env);
-	JNISingleton *s = memnew(JNISingleton);
+	JNISingleton *s = (JNISingleton *)ClassDB::instance("JNISingleton");
 	s->set_instance(env->NewGlobalRef(obj));
 	jni_singletons[singname] = s;
 
@@ -269,6 +270,51 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegis
 	}
 
 	s->add_method(mname, mid, types, get_jni_type(retval));
+}
+
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterSignal(JNIEnv *env, jclass clazz, jstring sname, jstring name, jobjectArray args) {
+	String singname = jstring_to_string(sname, env);
+
+	ERR_FAIL_COND(!jni_singletons.has(singname));
+
+	JNISingleton *s = jni_singletons.get(singname);
+
+	String mname = jstring_to_string(name, env);
+	Vector<Variant::Type> types;
+
+	int stringCount = env->GetArrayLength(args);
+
+	for (int i = 0; i < stringCount; i++) {
+
+		jstring string = (jstring)env->GetObjectArrayElement(args, i);
+		const String rawString = jstring_to_string(string, env);
+		types.push_back(get_jni_type(rawString));
+	}
+
+	s->add_signal(mname, types);
+}
+
+JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeEmitSignal(JNIEnv *env, jclass clazz, jstring sname, jstring name, jobjectArray params) {
+	String singname = jstring_to_string(sname, env);
+
+	ERR_FAIL_COND(!jni_singletons.has(singname));
+
+	JNISingleton *s = jni_singletons.get(singname);
+
+	String mname = jstring_to_string(name, env);
+
+	int count = env->GetArrayLength(params);
+	Variant args[VARIANT_ARG_MAX];
+
+	for (int i = 0; i < MIN(count, VARIANT_ARG_MAX); i++) {
+
+		jobject obj = env->GetObjectArrayElement(params, i);
+		if (obj)
+			args[i] = _jobject_to_variant(env, obj);
+		env->DeleteLocalRef(obj);
+	};
+
+	s->emit_signal(mname, args[0], args[1], args[2], args[3], args[4]);
 }
 
 JNIEXPORT void JNICALL Java_org_godotengine_godot_plugin_GodotPlugin_nativeRegisterGDNativeLibraries(JNIEnv *env, jobject obj, jobjectArray gdnlib_paths) {
