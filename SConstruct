@@ -138,6 +138,7 @@ opts.Add(BoolVariable('no_editor_splash', "Don't use the custom splash screen fo
 opts.Add('system_certs_path', "Use this path as SSL certificates default for editor (for package maintainers)", '')
 
 # Thirdparty libraries
+#opts.Add(BoolVariable('builtin_assimp', "Use the built-in Assimp library", True))
 opts.Add(BoolVariable('builtin_bullet', "Use the built-in Bullet library", True))
 opts.Add(BoolVariable('builtin_certs', "Bundle default SSL certificates to be used if you don't specify an override in the project settings", True))
 opts.Add(BoolVariable('builtin_enet', "Use the built-in ENet library", True))
@@ -291,6 +292,7 @@ if selected_platform in platform_list:
     if env["extra_suffix"] != '':
         env.extra_suffix += '.' + env["extra_suffix"]
 
+    # Environment flags
     CCFLAGS = env.get('CCFLAGS', '')
     env['CCFLAGS'] = ''
     env.Append(CCFLAGS=str(CCFLAGS).split())
@@ -307,17 +309,28 @@ if selected_platform in platform_list:
     env['LINKFLAGS'] = ''
     env.Append(LINKFLAGS=str(LINKFLAGS).split())
 
+    # Platform specific flags
     flag_list = platform_flags[selected_platform]
     for f in flag_list:
         if not (f[0] in ARGUMENTS):  # allow command line to override platform flags
             env[f[0]] = f[1]
 
-    # must happen after the flags, so when flags are used by configure, stuff happens (ie, ssl on x11)
+    # Must happen after the flags definition, so that they can be used by platform detect
     detect.configure(env)
 
-    # Enable C++11 support
+    # Set our C and C++ standard requirements.
+    # Prepending to make it possible to override
+    # This needs to come after `configure`, otherwise we don't have env.msvc.
     if not env.msvc:
-        env.Append(CXXFLAGS=['-std=c++11'])
+        # Specifying GNU extensions support explicitly, which are supported by
+        # both GCC and Clang. This mirrors GCC and Clang's current default
+        # compile flags if no -std is specified.
+        env.Prepend(CFLAGS=['-std=gnu11'])
+        env.Prepend(CXXFLAGS=['-std=gnu++14'])
+    else:
+        # MSVC doesn't have clear C standard support, /std only covers C++.
+        # We apply it to CCFLAGS (both C and C++ code) in case it impacts C features.
+        env.Prepend(CCFLAGS=['/std:c++14'])
 
     # Configure compiler warnings
     if env.msvc:
@@ -338,12 +351,13 @@ if selected_platform in platform_list:
         # Force to use Unicode encoding
         env.Append(MSVC_FLAGS=['/utf8'])
     else: # Rest of the world
+        version = methods.get_compiler_version(env) or [-1, -1]
+
         shadow_local_warning = []
         all_plus_warnings = ['-Wwrite-strings']
 
         if methods.using_gcc(env):
-            version = methods.get_compiler_version(env)
-            if version != None and version[0] >= '7':
+            if version[0] >= 7:
                 shadow_local_warning = ['-Wshadow-local']
 
         if (env["warnings"] == 'extra'):
@@ -357,8 +371,7 @@ if selected_platform in platform_list:
                     '-Wduplicated-branches', '-Wduplicated-cond',
                     '-Wstringop-overflow=4', '-Wlogical-op'])
                 env.Append(CXXFLAGS=['-Wnoexcept', '-Wplacement-new=1'])
-                version = methods.get_compiler_version(env)
-                if version != None and version[0] >= '9':
+                if version[0] >= 9:
                     env.Append(CCFLAGS=['-Wattribute-alias=2'])
         elif (env["warnings"] == 'all'):
             env.Append(CCFLAGS=['-Wall'] + shadow_local_warning)
