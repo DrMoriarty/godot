@@ -550,12 +550,13 @@ public abstract class Godot extends FragmentActivity implements SensorEventListe
 		mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
 		mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_GAME);
+		mPaymentsManager = PaymentsManager.createManager(this).initService();
+		pluginRegistry = GodotPluginRegistry.initializePluginRegistry(this);
 
 		GodotLib.initialize(this, getAssets(), use_apk_expansion);
 
 		result_callback = null;
 
-		mPaymentsManager = PaymentsManager.createManager(this).initService();
 
 		godot_initialized = true;
 	}
@@ -573,7 +574,6 @@ public abstract class Godot extends FragmentActivity implements SensorEventListe
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 		mClipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-		pluginRegistry = GodotPluginRegistry.initializePluginRegistry(this);
 
 		//check for apk expansion API
 		if (true) {

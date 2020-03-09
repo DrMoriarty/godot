@@ -32,6 +32,7 @@
 
 #include "core/engine.h"
 #include "java_class_wrapper.h"
+#include "../plugin/godot_plugin_jni.h"
 
 #if !defined(ANDROID_ENABLED)
 static JavaClassWrapper *java_class_wrapper = NULL;
@@ -45,6 +46,7 @@ void register_android_api() {
 
 	ClassDB::register_class<JavaClass>();
 	ClassDB::register_class<JavaClassWrapper>();
+    ClassDB::register_class<JNISingleton>();
 	Engine::get_singleton()->add_singleton(Engine::Singleton("JavaClassWrapper", JavaClassWrapper::get_singleton()));
 }
 
