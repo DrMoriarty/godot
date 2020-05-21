@@ -30,23 +30,26 @@
 
 package org.godotengine.godot.plugin;
 
+import org.godotengine.godot.BuildConfig;
+import org.godotengine.godot.Godot;
+
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-import org.godotengine.godot.BuildConfig;
-import org.godotengine.godot.Godot;
 
 /**
  * Base class for the Godot Android plugins.

@@ -1,4 +1,5 @@
 using Godot;
+using GodotTools.Core;
 using GodotTools.Export;
 using GodotTools.Utils;
 using System;
@@ -35,6 +36,8 @@ namespace GodotTools
         private WeakRef exportPluginWeak; // TODO Use WeakReference once we have proper serialization
 
         public BottomPanel BottomPanel { get; private set; }
+
+        public PlaySettings? CurrentPlaySettings { get; set; }
 
         public static string ProjectAssemblyName
         {
@@ -239,12 +242,12 @@ namespace GodotTools
         [UsedImplicitly]
         public Error OpenInExternalEditor(Script script, int line, int col)
         {
-            var editor = (ExternalEditorId)editorSettings.GetSetting("mono/editor/external_editor");
+            var editorId = (ExternalEditorId)editorSettings.GetSetting("mono/editor/external_editor");
 
-            switch (editor)
+            switch (editorId)
             {
                 case ExternalEditorId.None:
-                    // Tells the caller to fallback to the global external editor settings or the built-in editor
+                    // Not an error. Tells the caller to fallback to the global external editor settings or the built-in editor.
                     return Error.Unavailable;
                 case ExternalEditorId.VisualStudio:
                     throw new NotSupportedException();
@@ -260,10 +263,14 @@ namespace GodotTools
                 {
                     string scriptPath = ProjectSettings.GlobalizePath(script.ResourcePath);
 
-                    if (line >= 0)
-                        GodotIdeManager.SendOpenFile(scriptPath, line + 1, col);
-                    else
-                        GodotIdeManager.SendOpenFile(scriptPath);
+                    GodotIdeManager.LaunchIdeAsync().ContinueWith(launchTask =>
+                    {
+                        var editorPick = launchTask.Result;
+                        if (line >= 0)
+                            editorPick?.SendOpenFile(scriptPath, line + 1, col);
+                        else
+                            editorPick?.SendOpenFile(scriptPath);
+                    });
 
                     break;
                 }
@@ -311,7 +318,7 @@ namespace GodotTools
                     if (line >= 0)
                     {
                         args.Add("-g");
-                        args.Add($"{scriptPath}:{line + 1}:{col}");
+                        args.Add($"{scriptPath}:{line}:{col}");
                     }
                     else
                     {
@@ -450,13 +457,30 @@ namespace GodotTools
                 {
                     // Migrate solution from old configuration names to: Debug, ExportDebug and ExportRelease
                     DotNetSolution.MigrateFromOldConfigNames(GodotSharpDirs.ProjectSlnPath);
-                    // Migrate csproj from old configuration names to: Debug, ExportDebug and ExportRelease
-                    ProjectUtils.MigrateFromOldConfigNames(GodotSharpDirs.ProjectCsProjPath);
 
-                    // Apply the other fixes after configurations are migrated
+                    var msbuildProject = ProjectUtils.Open(GodotSharpDirs.ProjectCsProjPath)
+                                         ?? throw new Exception("Cannot open C# project");
+
+                    // NOTE: The order in which changes are made to the project is important
+
+                    // Migrate csproj from old configuration names to: Debug, ExportDebug and ExportRelease
+                    ProjectUtils.MigrateFromOldConfigNames(msbuildProject);
+
+                    // Apply the other fixes only after configurations have been migrated
 
                     // Make sure the existing project has Api assembly references configured correctly
-                    ProjectUtils.FixApiHintPath(GodotSharpDirs.ProjectCsProjPath);
+                    ProjectUtils.FixApiHintPath(msbuildProject);
+
+                    // Make sure the existing project references the Microsoft.NETFramework.ReferenceAssemblies nuget package
+                    ProjectUtils.EnsureHasNugetNetFrameworkRefAssemblies(msbuildProject);
+
+                    if (msbuildProject.HasUnsavedChanges)
+                    {
+                        // Save a copy of the project before replacing it
+                        FileUtils.SaveBackupCopy(GodotSharpDirs.ProjectCsProjPath);
+
+                        msbuildProject.Save();
+                    }
                 }
                 catch (Exception e)
                 {

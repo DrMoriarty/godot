@@ -158,6 +158,7 @@ class ViewportRotationControl : public Control {
 	SpatialEditorViewport *viewport = nullptr;
 	Vector<Color> axis_colors;
 	Vector<int> axis_menu_options;
+	Vector2i orbiting_mouse_start;
 	bool orbiting = false;
 	int focused_axis = -2;
 
@@ -223,6 +224,12 @@ public:
 		NAVIGATION_GODOT,
 		NAVIGATION_MAYA,
 		NAVIGATION_MODO,
+	};
+
+	enum FreelookNavigationScheme {
+		FREELOOK_DEFAULT,
+		FREELOOK_PARTIALLY_AXIS_LOCKED,
+		FREELOOK_FULLY_AXIS_LOCKED,
 	};
 
 private:
@@ -828,12 +835,11 @@ public:
 	static const int HIDDEN = 1;
 	static const int ON_TOP = 2;
 
-private:
+protected:
 	int current_state;
 	List<EditorSpatialGizmo *> current_gizmos;
 	HashMap<String, Vector<Ref<SpatialMaterial> > > materials;
 
-protected:
 	static void _bind_methods();
 	virtual bool has_gizmo(Spatial *p_spatial);
 	virtual Ref<EditorSpatialGizmo> create_gizmo(Spatial *p_spatial);

@@ -368,14 +368,14 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 
 			// constants
 
-			for (Map<StringName, SL::ShaderNode::Constant>::Element *E = snode->constants.front(); E; E = E->next()) {
+			for (int i = 0; i < snode->vconstants.size(); i++) {
 				String gcode;
 				gcode += "const ";
-				gcode += _prestr(E->get().precision);
-				gcode += _typestr(E->get().type);
-				gcode += " " + _mkid(E->key());
+				gcode += _prestr(snode->vconstants[i].precision);
+				gcode += _typestr(snode->vconstants[i].type);
+				gcode += " " + _mkid(String(snode->vconstants[i].name));
 				gcode += "=";
-				gcode += _dump_node_code(E->get().initializer, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+				gcode += _dump_node_code(snode->vconstants[i].initializer, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 				gcode += ";\n";
 				vertex_global += gcode;
 				fragment_global += gcode;
@@ -486,14 +486,21 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				*p_actions.write_flag_pointers[var_node->name] = true;
 			}
 
+			if (!p_assigning && p_actions.read_flag_pointers.has(var_node->name)) {
+				*p_actions.read_flag_pointers[var_node->name] = true;
+			}
+
 			if (p_default_actions.usage_defines.has(var_node->name) && !used_name_defines.has(var_node->name)) {
 				String define = p_default_actions.usage_defines[var_node->name];
+				String node_name = define.substr(1, define.length());
 
 				if (define.begins_with("@")) {
-					define = p_default_actions.usage_defines[define.substr(1, define.length())];
+					define = p_default_actions.usage_defines[node_name];
 				}
 
-				r_gen_code.custom_defines.push_back(define.utf8());
+				if (!used_name_defines.has(node_name)) {
+					r_gen_code.custom_defines.push_back(define.utf8());
+				}
 				used_name_defines.insert(var_node->name);
 			}
 
@@ -550,12 +557,15 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 
 			if (p_default_actions.usage_defines.has(arr_node->name) && !used_name_defines.has(arr_node->name)) {
 				String define = p_default_actions.usage_defines[arr_node->name];
+				String node_name = define.substr(1, define.length());
 
 				if (define.begins_with("@")) {
-					define = p_default_actions.usage_defines[define.substr(1, define.length())];
+					define = p_default_actions.usage_defines[node_name];
 				}
 
-				r_gen_code.custom_defines.push_back(define.utf8());
+				if (!used_name_defines.has(node_name)) {
+					r_gen_code.custom_defines.push_back(define.utf8());
+				}
 				used_name_defines.insert(arr_node->name);
 			}
 
@@ -726,12 +736,15 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 
 					if (p_default_actions.usage_defines.has(var_node->name) && !used_name_defines.has(var_node->name)) {
 						String define = p_default_actions.usage_defines[var_node->name];
+						String node_name = define.substr(1, define.length());
 
 						if (define.begins_with("@")) {
-							define = p_default_actions.usage_defines[define.substr(1, define.length())];
+							define = p_default_actions.usage_defines[node_name];
 						}
 
-						r_gen_code.custom_defines.push_back(define.utf8());
+						if (!used_name_defines.has(node_name)) {
+							r_gen_code.custom_defines.push_back(define.utf8());
+						}
 						used_name_defines.insert(var_node->name);
 					}
 
@@ -903,6 +916,7 @@ ShaderCompilerGLES2::ShaderCompilerGLES2() {
 	actions[VS::SHADER_CANVAS_ITEM].renames["INSTANCE_CUSTOM"] = "instance_custom";
 
 	actions[VS::SHADER_CANVAS_ITEM].renames["COLOR"] = "color";
+	actions[VS::SHADER_CANVAS_ITEM].renames["MODULATE"] = "final_modulate";
 	actions[VS::SHADER_CANVAS_ITEM].renames["NORMAL"] = "normal";
 	actions[VS::SHADER_CANVAS_ITEM].renames["NORMALMAP"] = "normal_map";
 	actions[VS::SHADER_CANVAS_ITEM].renames["NORMALMAP_DEPTH"] = "normal_depth";
@@ -924,6 +938,7 @@ ShaderCompilerGLES2::ShaderCompilerGLES2() {
 	actions[VS::SHADER_CANVAS_ITEM].renames["SHADOW_VEC"] = "shadow_vec";
 
 	actions[VS::SHADER_CANVAS_ITEM].usage_defines["COLOR"] = "#define COLOR_USED\n";
+	actions[VS::SHADER_CANVAS_ITEM].usage_defines["MODULATE"] = "#define MODULATE_USED\n";
 	actions[VS::SHADER_CANVAS_ITEM].usage_defines["SCREEN_TEXTURE"] = "#define SCREEN_TEXTURE_USED\n";
 	actions[VS::SHADER_CANVAS_ITEM].usage_defines["SCREEN_UV"] = "#define SCREEN_UV_USED\n";
 	actions[VS::SHADER_CANVAS_ITEM].usage_defines["SCREEN_PIXEL_SIZE"] = "@SCREEN_UV";

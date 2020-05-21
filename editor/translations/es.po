@@ -43,15 +43,15 @@
 # Dario <darlex259@gmail.com>, 2019.
 # Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2019.
 # Julián Luini <jluini@gmail.com>, 2020.
-# anonymous <noreply@weblate.org>, 2020.
 # Victor S. <victorstancioiu@gmail.com>, 2020.
 # henry rujano herrera <rujhen@gmail.com>, 2020.
+# Megamega53 <Christopher.Morales21@myhunter.cuny.edu>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: Godot Engine editor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-04-16 11:03+0000\n"
-"Last-Translator: anonymous <noreply@weblate.org>\n"
+"PO-Revision-Date: 2020-05-04 15:11+0000\n"
+"Last-Translator: Javier Ocampos <xavier.ocampos@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/godot-engine/"
 "godot/es/>\n"
 "Language: es\n"
@@ -59,7 +59,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.0.1-dev\n"
+"X-Generator: Weblate 4.1-dev\n"
 
 #: core/math/expression.cpp modules/gdscript/gdscript_functions.cpp
 #: modules/visual_script/visual_script_builtin_funcs.cpp
@@ -618,11 +618,11 @@ msgstr "Eliminar Selección"
 
 #: editor/animation_track_editor.cpp
 msgid "Go to Next Step"
-msgstr "Ir al Paso Siguiente"
+msgstr "Ir al Siguiente Paso"
 
 #: editor/animation_track_editor.cpp
 msgid "Go to Previous Step"
-msgstr "Ir al Paso Anterior"
+msgstr "Ir al Anterior Paso"
 
 #: editor/animation_track_editor.cpp
 msgid "Optimize Animation"
@@ -642,7 +642,7 @@ msgstr "Usar Curvas Bezier"
 
 #: editor/animation_track_editor.cpp
 msgid "Anim. Optimizer"
-msgstr "Optimizador de Animación"
+msgstr "Optimizar Animación"
 
 #: editor/animation_track_editor.cpp
 msgid "Max. Linear Error:"
@@ -845,7 +845,7 @@ msgstr "Eliminar"
 
 #: editor/connections_dialog.cpp
 msgid "Add Extra Call Argument:"
-msgstr "Añadir un Argumento de Llamada Extra:"
+msgstr "Añadir Argumento de Llamada Extra:"
 
 #: editor/connections_dialog.cpp
 msgid "Extra Call Arguments:"
@@ -2044,7 +2044,7 @@ msgstr ""
 
 #: editor/editor_help.cpp
 msgid "Method Descriptions"
-msgstr "Descripción de Métodos"
+msgstr "Descripciones de Métodos"
 
 #: editor/editor_help.cpp
 msgid ""
@@ -2692,7 +2692,7 @@ msgstr "Posición del Dock"
 
 #: editor/editor_node.cpp
 msgid "Distraction Free Mode"
-msgstr "Modo sin distracciones"
+msgstr "Modo Sin Distracciones"
 
 #: editor/editor_node.cpp
 msgid "Toggle distraction-free mode."
@@ -2716,11 +2716,11 @@ msgstr "Copiar Texto"
 
 #: editor/editor_node.cpp
 msgid "Next tab"
-msgstr "Pestaña siguiente"
+msgstr "Siguiente pestaña"
 
 #: editor/editor_node.cpp
 msgid "Previous tab"
-msgstr "Pestaña anterior"
+msgstr "Anterior pestaña"
 
 #: editor/editor_node.cpp
 msgid "Filter Files..."
@@ -2994,13 +2994,12 @@ msgid "Q&A"
 msgstr "Preguntas y respuestas"
 
 #: editor/editor_node.cpp
-#, fuzzy
 msgid "Report a Bug"
-msgstr "Reimportar"
+msgstr "Reportar un Bug"
 
 #: editor/editor_node.cpp
 msgid "Send Docs Feedback"
-msgstr ""
+msgstr "Enviar Feedback de la Documentación"
 
 #: editor/editor_node.cpp editor/plugins/asset_library_editor_plugin.cpp
 msgid "Community"
@@ -3012,7 +3011,7 @@ msgstr "Acerca de"
 
 #: editor/editor_node.cpp
 msgid "Play the project."
-msgstr "Ejecutar el proyecto."
+msgstr "Reproducir el proyecto."
 
 #: editor/editor_node.cpp
 msgid "Play"
@@ -4060,9 +4059,8 @@ msgid "Reimport"
 msgstr "Reimportar"
 
 #: editor/import_dock.cpp
-#, fuzzy
 msgid "Save Scenes, Re-Import, and Restart"
-msgstr "Guardar escenas, reimportar y reiniciar"
+msgstr "Guardar Escenas, Reimportar y Reiniciar"
 
 #: editor/import_dock.cpp
 msgid "Changing the type of an imported file requires editor restart."
@@ -5274,8 +5272,8 @@ msgid ""
 "When active, moving Control nodes changes their anchors instead of their "
 "margins."
 msgstr ""
-"Cuando esté activo, moviendo los nodos de Control cambiará sus anclas en "
-"lugar de sus márgenes."
+"Cuando está activo, el movimiento de los nodos de Control cambian sus "
+"anclajes en lugar de sus márgenes."
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Top Left"
@@ -5431,7 +5429,7 @@ msgstr ""
 #: editor/plugins/texture_region_editor_plugin.cpp
 #: editor/plugins/tile_set_editor_plugin.cpp scene/gui/graph_edit.cpp
 msgid "Zoom Reset"
-msgstr "Resetear el Zoom"
+msgstr "Resetear Zoom"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -5459,17 +5457,17 @@ msgstr "Alt + Clic Derecho: Selección en listado de solapamientos"
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Move Mode"
-msgstr "Modo Movimiento"
+msgstr "Modo de Movimiento"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rotate Mode"
-msgstr "Modo Rotación"
+msgstr "Modo de Rotación"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Scale Mode"
-msgstr "Modo Escalado"
+msgstr "Modo de Escalado"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 #: editor/plugins/spatial_editor_plugin.cpp
@@ -5491,7 +5489,7 @@ msgstr "Modo desplazamiento lateral"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Ruler Mode"
-msgstr "Modo Regla"
+msgstr "Modo de Regla"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Toggle smart snapping."
@@ -5682,7 +5680,7 @@ msgstr "Clave de animación y Opciones de Pose"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Insert Key (Existing Tracks)"
-msgstr "Insertar clave (pistas existentes)"
+msgstr "Insertar Clave (Pistas Existentes)"
 
 #: editor/plugins/canvas_item_editor_plugin.cpp
 msgid "Copy Pose"
@@ -6038,7 +6036,7 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Create Single Convex Collision Sibling"
-msgstr "Crear Colisión Convexa Única Hermana"
+msgstr "Crear Collider Convexo Único Hermano"
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid ""
@@ -6050,7 +6048,7 @@ msgstr ""
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid "Create Multiple Convex Collision Siblings"
-msgstr "Crear Múltiples Colisiones Convexas Hermanas"
+msgstr "Crear Múltiples Collider Convexos Hermanos"
 
 #: editor/plugins/mesh_instance_editor_plugin.cpp
 msgid ""
@@ -6858,7 +6856,7 @@ msgstr "Guardar Todo"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Soft Reload Script"
-msgstr "Recargar parcialmente el script"
+msgstr "Recargar Parcialmente el Script"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "Copy Script Path"
@@ -6866,7 +6864,7 @@ msgstr "Copiar Ruta del Script"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "History Previous"
-msgstr "Previo en Historial"
+msgstr "Previo en el Historial"
 
 #: editor/plugins/script_editor_plugin.cpp
 msgid "History Next"
@@ -6903,11 +6901,11 @@ msgstr "Ejecutar"
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Step Into"
-msgstr "Step Into"
+msgstr "Entrar En"
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Step Over"
-msgstr "Step Over"
+msgstr "Salir de Aquí"
 
 #: editor/plugins/script_editor_plugin.cpp editor/script_editor_debugger.cpp
 msgid "Break"
@@ -7115,15 +7113,15 @@ msgstr "Eliminar Espacios Sobrantes al Final"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Convert Indent to Spaces"
-msgstr "Convertir Indentación en Espacios"
+msgstr "Convertir Sangría en Espacios"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Convert Indent to Tabs"
-msgstr "Convertir Indentación en Tabulaciones"
+msgstr "Convertir Sangría en Tabulaciones"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Auto Indent"
-msgstr "Autoindentar"
+msgstr "Auto Sangría"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Find in Files..."
@@ -7143,7 +7141,7 @@ msgstr "Ir al Siguiente Marcador"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Go to Previous Bookmark"
-msgstr "Ir al Marcador Anterior"
+msgstr "Ir al Anterior Marcador"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Remove All Bookmarks"
@@ -7160,19 +7158,19 @@ msgstr "Ir a Línea..."
 #: editor/plugins/script_text_editor.cpp
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Toggle Breakpoint"
-msgstr "Act./Desact. Breakpoint"
+msgstr "Cambiar Punto de Ruptura"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Remove All Breakpoints"
-msgstr "Eliminar Todos los Breakpoints"
+msgstr "Eliminar Todos los Puntos de Ruptura"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Go to Next Breakpoint"
-msgstr "Ir al Siguiente Breakpoint"
+msgstr "Ir al Siguiente Punto de Ruptura"
 
 #: editor/plugins/script_text_editor.cpp
 msgid "Go to Previous Breakpoint"
-msgstr "Ir al Breakpoint Anterior"
+msgstr "Ir al Anterior Punto de Ruptura"
 
 #: editor/plugins/shader_editor_plugin.cpp
 msgid ""
@@ -7352,11 +7350,11 @@ msgstr "Detrás"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Align Transform with View"
-msgstr "Alinear Transform con Vista"
+msgstr "Alinear la Transformación con la Vista"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Align Rotation with View"
-msgstr "Alinear Rotación con Vista"
+msgstr "Alinear la Rotación con la Vista"
 
 #: editor/plugins/spatial_editor_plugin.cpp editor/scene_tree_dock.cpp
 msgid "No parent to instance a child at."
@@ -7367,9 +7365,8 @@ msgid "This operation requires a single selected node."
 msgstr "Esta operación requiere un solo nodo seleccionado."
 
 #: editor/plugins/spatial_editor_plugin.cpp
-#, fuzzy
 msgid "Auto Orthogonal Enabled"
-msgstr "Ortogonal"
+msgstr "Auto Ortogonal Activado"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Lock View Rotation"
@@ -7441,7 +7438,7 @@ msgstr "Vista Libre Frontal"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Backwards"
-msgstr "Vista Libre Posterior"
+msgstr "Vista Libre Trasera"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Freelook Up"
@@ -7511,7 +7508,7 @@ msgstr "Vista Superior"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Rear View"
-msgstr "Vista Posterior"
+msgstr "Vista Trasera"
 
 #: editor/plugins/spatial_editor_plugin.cpp
 msgid "Front View"
@@ -8129,7 +8126,7 @@ msgstr "Asignar un recurso TileSet a este TileMap para usas sus tiles."
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid "Paint Tile"
-msgstr "Dibujar tile"
+msgstr "Dibujar Tile"
 
 #: editor/plugins/tile_map_editor_plugin.cpp
 msgid ""
@@ -8237,35 +8234,35 @@ msgstr "Índice Z"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Region Mode"
-msgstr "Modo Región"
+msgstr "Modo de Región"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Collision Mode"
-msgstr "Modo Colisión"
+msgstr "Modo de Colisión"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Occlusion Mode"
-msgstr "Modo Oclusión"
+msgstr "Modo de Oclusión"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Navigation Mode"
-msgstr "Modo Navegación"
+msgstr "Modo de Navegación"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Bitmask Mode"
-msgstr "Modo Bitmask"
+msgstr "Modo de Bitmask"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Priority Mode"
-msgstr "Modo Prioridad"
+msgstr "Modo de Prioridad"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Icon Mode"
-msgstr "Modo Icono"
+msgstr "Modo de Icono"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Z Index Mode"
-msgstr "Modo Índice Z"
+msgstr "Modo de Índice Z"
 
 #: editor/plugins/tile_set_editor_plugin.cpp
 msgid "Copy bitmask."
@@ -9995,6 +9992,17 @@ msgstr ""
 "Actualmente no tienes ningún proyecto.\n"
 "¿Quieres explorar proyectos de ejemplo oficiales en la Biblioteca de Assets?"
 
+#: editor/project_manager.cpp
+msgid ""
+"The search box filters projects by name and last path component.\n"
+"To filter projects by name and full path, the query must contain at least "
+"one `/` character."
+msgstr ""
+"La casilla de búsqueda filtra los proyectos por nombre y el último "
+"componente de la ruta.\n"
+"Para filtrar los proyectos por nombre y ruta completa, la consulta debe "
+"contener al menos un carácter `/`."
+
 #: editor/project_settings_editor.cpp
 msgid "Key "
 msgstr "Tecla "
@@ -10988,6 +10996,8 @@ msgid ""
 "Note: Built-in scripts have some limitations and can't be edited using an "
 "external editor."
 msgstr ""
+"Nota: Los scripts integrados tienen algunas limitaciones y no pueden ser "
+"editados usando un editor externo."
 
 #: editor/script_create_dialog.cpp
 msgid "Class Name:"
@@ -11108,6 +11118,10 @@ msgstr "Lista de uso de memoria de video por recurso:"
 #: editor/script_editor_debugger.cpp
 msgid "Total:"
 msgstr "Total:"
+
+#: editor/script_editor_debugger.cpp
+msgid "Export list to a CSV file"
+msgstr "Exportar lista a un archivo CSV"
 
 #: editor/script_editor_debugger.cpp
 msgid "Resource Path"
@@ -11443,7 +11457,7 @@ msgstr "Eliminar Rotación del Cursor"
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Paste Selects"
-msgstr "Pegar Selecciona"
+msgstr "Pegar Seleccionados"
 
 #: modules/gridmap/grid_map_editor_plugin.cpp
 msgid "Clear Selection"
@@ -11880,7 +11894,7 @@ msgstr "Crear Función"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Refresh Graph"
-msgstr "Actualizar Gráfico"
+msgstr "Refrescar Gráfico"
 
 #: modules/visual_script/visual_script_editor.cpp
 msgid "Edit Member"
@@ -12801,6 +12815,8 @@ msgstr ""
 #: scene/main/viewport.cpp
 msgid "Viewport size must be greater than 0 to render anything."
 msgstr ""
+"El tamaño del Viewport debe ser mayor que 0 para poder renderizar cualquier "
+"cosa."
 
 #: scene/resources/visual_shader_nodes.cpp
 msgid "Invalid source for preview."

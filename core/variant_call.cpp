@@ -35,6 +35,7 @@
 #include "core/crypto/crypto_core.h"
 #include "core/io/compression.h"
 #include "core/object.h"
+#include "core/object_rc.h"
 #include "core/os/os.h"
 #include "core/script_language.h"
 
@@ -1094,22 +1095,18 @@ void Variant::call_ptr(const StringName &p_method, const Variant **p_args, int p
 
 	if (type == Variant::OBJECT) {
 		//call object
-		Object *obj = _get_obj().obj;
+		Object *obj = _OBJ_PTR(*this);
 		if (!obj) {
+#ifdef DEBUG_ENABLED
+			if (ScriptDebugger::get_singleton() && _get_obj().rc && !ObjectDB::get_instance(_get_obj().rc->instance_id)) {
+				WARN_PRINT("Attempted call on a deleted object.");
+			}
+#endif
 			r_error.error = CallError::CALL_ERROR_INSTANCE_IS_NULL;
 			return;
 		}
-#ifdef DEBUG_ENABLED
-		if (ScriptDebugger::get_singleton() && _get_obj().ref.is_null()) {
-			//only if debugging!
-			if (!ObjectDB::instance_validate(obj)) {
-				r_error.error = CallError::CALL_ERROR_INSTANCE_IS_NULL;
-				return;
-			}
-		}
 
-#endif
-		ret = _get_obj().obj->call(p_method, p_args, p_argcount, r_error);
+		ret = obj->call(p_method, p_args, p_argcount, r_error);
 
 		//else if (type==Variant::METHOD) {
 
@@ -1214,6 +1211,8 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 			}
 			case RECT2: return (Rect2(*p_args[0]));
 			case VECTOR3: return (Vector3(*p_args[0]));
+			case TRANSFORM2D:
+				return (Transform2D(p_args[0]->operator Transform2D()));
 			case PLANE: return (Plane(*p_args[0]));
 			case QUAT: return (p_args[0]->operator Quat());
 			case AABB:
@@ -1275,18 +1274,16 @@ Variant Variant::construct(const Variant::Type p_type, const Variant **p_args, i
 bool Variant::has_method(const StringName &p_method) const {
 
 	if (type == OBJECT) {
-		Object *obj = operator Object *();
-		if (!obj)
-			return false;
+		Object *obj = _OBJ_PTR(*this);
+		if (!obj) {
 #ifdef DEBUG_ENABLED
-		if (ScriptDebugger::get_singleton()) {
-			if (ObjectDB::instance_validate(obj)) {
-#endif
-				return obj->has_method(p_method);
-#ifdef DEBUG_ENABLED
+			if (ScriptDebugger::get_singleton() && _get_obj().rc && !ObjectDB::get_instance(_get_obj().rc->instance_id)) {
+				WARN_PRINT("Attempted method check on a deleted object.");
 			}
-		}
 #endif
+			return false;
+		}
+		return obj->has_method(p_method);
 	}
 
 	const _VariantCall::TypeFunc &tf = _VariantCall::type_funcs[type];

@@ -268,12 +268,12 @@ void ProjectSettings::_get_property_list(List<PropertyInfo> *p_list) const {
 	}
 }
 
-bool ProjectSettings::_load_resource_pack(const String &p_pack, bool p_replace_files, const String &p_destination) {
+bool ProjectSettings::_load_resource_pack(const String &p_pack, bool p_replace_files) {
 
 	if (PackedData::get_singleton()->is_disabled())
 		return false;
 
-	bool ok = PackedData::get_singleton()->add_pack(p_pack, p_replace_files, p_destination) == OK;
+	bool ok = PackedData::get_singleton()->add_pack(p_pack, p_replace_files) == OK;
 
 	if (!ok)
 		return false;
@@ -362,40 +362,29 @@ Error ProjectSettings::_setup(const String &p_path, const String &p_main_pack, b
 		// We need to test both possibilities as extensions for Linux binaries are optional
 		// (so both 'mygame.bin' and 'mygame' should be able to find 'mygame.pck').
 
-		bool found = false;
-
 		String exec_dir = exec_path.get_base_dir();
 		String exec_filename = exec_path.get_file();
 		String exec_basename = exec_filename.get_basename();
 
-		// Try to load data pack at the location of the executable
-		// As mentioned above, we have two potential names to attempt
-
-		if (_load_resource_pack(exec_dir.plus_file(exec_basename + ".pck")) ||
-				_load_resource_pack(exec_dir.plus_file(exec_filename + ".pck"))) {
-			found = true;
-		} else {
-			// If we couldn't find them next to the executable, we attempt
-			// the current working directory. Same story, two tests.
-			if (_load_resource_pack(exec_basename + ".pck") ||
-					_load_resource_pack(exec_filename + ".pck")) {
-				found = true;
-			}
-		}
+		// Attempt with PCK bundled into executable
+		bool found = _load_resource_pack(exec_path);
 
 #ifdef OSX_ENABLED
-		// Attempt to load PCK from macOS .app bundle resources
 		if (!found) {
-			if (_load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().plus_file(exec_basename + ".pck"))) {
-				found = true;
-			}
+			// Attempt to load PCK from macOS .app bundle resources
+			found = _load_resource_pack(OS::get_singleton()->get_bundle_resource_dir().plus_file(exec_basename + ".pck"));
 		}
 #endif
 
-		// Attempt with PCK bundled into executable
 		if (!found) {
-			if (_load_resource_pack(exec_path)) {
-				found = true;
+			// Try to load data pack at the location of the executable
+			// As mentioned above, we have two potential names to attempt
+			found = _load_resource_pack(exec_dir.plus_file(exec_basename + ".pck")) || _load_resource_pack(exec_dir.plus_file(exec_filename + ".pck"));
+
+			if (!found) {
+				// If we couldn't find them next to the executable, we attempt
+				// the current working directory. Same story, two tests.
+				found = _load_resource_pack(exec_basename + ".pck") || _load_resource_pack(exec_filename + ".pck");
 			}
 		}
 
@@ -990,7 +979,7 @@ void ProjectSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("localize_path", "path"), &ProjectSettings::localize_path);
 	ClassDB::bind_method(D_METHOD("globalize_path", "path"), &ProjectSettings::globalize_path);
 	ClassDB::bind_method(D_METHOD("save"), &ProjectSettings::save);
-	ClassDB::bind_method(D_METHOD("load_resource_pack", "pack", "replace_files", "destination"), &ProjectSettings::_load_resource_pack, DEFVAL(true), DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("load_resource_pack", "pack", "replace_files"), &ProjectSettings::_load_resource_pack, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("property_can_revert", "name"), &ProjectSettings::property_can_revert);
 	ClassDB::bind_method(D_METHOD("property_get_revert", "name"), &ProjectSettings::property_get_revert);
 

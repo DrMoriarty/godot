@@ -666,7 +666,11 @@ void RasterizerStorageGLES3::texture_allocate(RID p_texture, int p_width, int p_
 			texture->images.resize(1);
 		} break;
 		case VS::TEXTURE_TYPE_EXTERNAL: {
+#ifdef ANDROID_ENABLED
 			texture->target = _GL_TEXTURE_EXTERNAL_OES;
+#else
+			texture->target = GL_TEXTURE_2D;
+#endif
 			texture->images.resize(0);
 		} break;
 		case VS::TEXTURE_TYPE_CUBEMAP: {
@@ -8137,6 +8141,8 @@ void RasterizerStorageGLES3::render_info_end_capture() {
 	info.snap.surface_switch_count = info.render.surface_switch_count - info.snap.surface_switch_count;
 	info.snap.shader_rebind_count = info.render.shader_rebind_count - info.snap.shader_rebind_count;
 	info.snap.vertices_count = info.render.vertices_count - info.snap.vertices_count;
+	info.snap._2d_item_count = info.render._2d_item_count - info.snap._2d_item_count;
+	info.snap._2d_draw_call_count = info.render._2d_draw_call_count - info.snap._2d_draw_call_count;
 }
 
 int RasterizerStorageGLES3::get_captured_render_info(VS::RenderInfo p_info) {
@@ -8162,6 +8168,12 @@ int RasterizerStorageGLES3::get_captured_render_info(VS::RenderInfo p_info) {
 		case VS::INFO_DRAW_CALLS_IN_FRAME: {
 			return info.snap.draw_call_count;
 		} break;
+		case VS::INFO_2D_ITEMS_IN_FRAME: {
+			return info.snap._2d_item_count;
+		} break;
+		case VS::INFO_2D_DRAW_CALLS_IN_FRAME: {
+			return info.snap._2d_draw_call_count;
+		} break;
 		default: {
 			return get_render_info(p_info);
 		}
@@ -8183,6 +8195,10 @@ int RasterizerStorageGLES3::get_render_info(VS::RenderInfo p_info) {
 			return info.render_final.surface_switch_count;
 		case VS::INFO_DRAW_CALLS_IN_FRAME:
 			return info.render_final.draw_call_count;
+		case VS::INFO_2D_ITEMS_IN_FRAME:
+			return info.render_final._2d_item_count;
+		case VS::INFO_2D_DRAW_CALLS_IN_FRAME:
+			return info.render_final._2d_draw_call_count;
 		case VS::INFO_USAGE_VIDEO_MEM_TOTAL:
 			return 0; //no idea
 		case VS::INFO_VIDEO_MEM_USED:
