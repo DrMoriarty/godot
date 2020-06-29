@@ -945,6 +945,8 @@ public:
 		icon = NULL;
 		icon_needs_reload = true;
 		hover = false;
+
+		set_focus_mode(FocusMode::FOCUS_ALL);
 	}
 
 	void set_is_favorite(bool fav) {

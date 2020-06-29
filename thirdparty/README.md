@@ -324,7 +324,7 @@ Collection of single-file libraries used in Godot components.
   * License: BSL-1.0
 - `fastlz.{c,h}`
   * Upstream: https://github.com/ariya/FastLZ
-  * Version: git (f121734, 2007)
+  * Version: 0.5.0 (4f20f54d46f5a6dd4fae4def134933369b7602d2, 2020)
   * License: MIT
 - `hq2x.{cpp,h}`
   * Upstream: https://github.com/brunexgeek/hqx
@@ -507,7 +507,7 @@ File extracted from upstream release tarball:
 ## xatlas
 
 - Upstream: https://github.com/jpcy/xatlas
-- Version: git (e12ea82, 2019)
+- Version: git (470576d3516f7e6d8b4554e7c941194a935969fd, 2020)
 - License: MIT
 
 Files extracted from upstream source:

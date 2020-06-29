@@ -593,7 +593,9 @@ void EditorNode::_fs_changed() {
 			preset.unref();
 		}
 		if (preset.is_null()) {
-			export_error = vformat("Invalid export preset name: %s.", preset_name);
+			export_error = vformat(
+					"Invalid export preset name: %s. Make sure `export_presets.cfg` is present in the current directory.",
+					preset_name);
 		} else {
 			Ref<EditorExportPlatform> platform = preset->get_platform();
 			if (platform.is_null()) {
@@ -2847,8 +2849,8 @@ void EditorNode::_update_debug_options() {
 	bool check_file_server = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_file_server", false);
 	bool check_debug_collisons = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_debug_collisons", false);
 	bool check_debug_navigation = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_debug_navigation", false);
-	bool check_live_debug = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_live_debug", false);
-	bool check_reload_scripts = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_reload_scripts", false);
+	bool check_live_debug = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_live_debug", true);
+	bool check_reload_scripts = EditorSettings::get_singleton()->get_project_metadata("debug_options", "run_reload_scripts", true);
 
 	if (check_deploy_remote) _menu_option_confirm(RUN_DEPLOY_REMOTE_DEBUG, true);
 	if (check_file_server) _menu_option_confirm(RUN_FILE_SERVER, true);
@@ -3426,13 +3428,13 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 	if (!new_scene) {
 
 		sdata.unref();
-		_dialog_display_load_error(lpath, ERR_FILE_NOT_FOUND);
+		_dialog_display_load_error(lpath, ERR_FILE_CORRUPT);
 		opening_prev = false;
 		if (prev != -1) {
 			set_current_scene(prev);
 			editor_data.remove_scene(idx);
 		}
-		return ERR_FILE_NOT_FOUND;
+		return ERR_FILE_CORRUPT;
 	}
 
 	if (p_set_inherited) {
@@ -3820,22 +3822,14 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_fallback) const {
 	ERR_FAIL_COND_V_MSG(p_class.empty(), NULL, "Class name cannot be empty.");
 
-	if (gui_base->has_icon(p_class, "EditorIcons")) {
-		return gui_base->get_icon(p_class, "EditorIcons");
-	}
-
 	if (ScriptServer::is_global_class(p_class)) {
-		String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(p_class);
-		Ref<ImageTexture> icon = _load_custom_class_icon(icon_path);
-		if (icon.is_valid()) {
-			return icon;
-		}
-
-		Ref<Script> script = ResourceLoader::load(ScriptServer::get_global_class_path(p_class), "Script");
+		Ref<ImageTexture> icon;
+		Ref<Script> script = EditorNode::get_editor_data().script_class_load_script(p_class);
+		StringName name = p_class;
 
 		while (script.is_valid()) {
-			String current_icon_path;
-			script->get_language()->get_global_class_name(script->get_path(), NULL, &current_icon_path);
+			name = EditorNode::get_editor_data().script_class_get_name(script->get_path());
+			String current_icon_path = EditorNode::get_editor_data().script_class_get_icon_path(name);
 			icon = _load_custom_class_icon(current_icon_path);
 			if (icon.is_valid()) {
 				return icon;
@@ -3844,7 +3838,7 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 		}
 
 		if (icon.is_null()) {
-			icon = gui_base->get_icon(ScriptServer::get_global_class_base(p_class), "EditorIcons");
+			icon = gui_base->get_icon(ScriptServer::get_global_class_base(name), "EditorIcons");
 		}
 
 		return icon;
@@ -3862,8 +3856,13 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 		}
 	}
 
-	if (p_fallback.length() && gui_base->has_icon(p_fallback, "EditorIcons"))
+	if (gui_base->has_icon(p_class, "EditorIcons")) {
+		return gui_base->get_icon(p_class, "EditorIcons");
+	}
+
+	if (p_fallback.length() && gui_base->has_icon(p_fallback, "EditorIcons")) {
 		return gui_base->get_icon(p_fallback, "EditorIcons");
+	}
 
 	return NULL;
 }
@@ -4945,7 +4944,7 @@ void EditorNode::set_distraction_free_mode(bool p_enter) {
 	}
 }
 
-bool EditorNode::get_distraction_free_mode() const {
+bool EditorNode::is_distraction_free_mode_enabled() const {
 	return distraction_free->is_pressed();
 }
 
@@ -6229,13 +6228,10 @@ EditorNode::EditorNode() {
 	p->add_check_shortcut(ED_SHORTCUT("editor/visible_navigation", TTR("Visible Navigation")), RUN_DEBUG_NAVIGATION);
 	p->set_item_tooltip(p->get_item_count() - 1, TTR("Navigation meshes and polygons will be visible on the running game if this option is turned on."));
 	p->add_separator();
-	//those are now on by default, since they are harmless
 	p->add_check_shortcut(ED_SHORTCUT("editor/sync_scene_changes", TTR("Sync Scene Changes")), RUN_LIVE_DEBUG);
 	p->set_item_tooltip(p->get_item_count() - 1, TTR("When this option is turned on, any changes made to the scene in the editor will be replicated in the running game.\nWhen used remotely on a device, this is more efficient with network filesystem."));
-	p->set_item_checked(p->get_item_count() - 1, true);
 	p->add_check_shortcut(ED_SHORTCUT("editor/sync_script_changes", TTR("Sync Script Changes")), RUN_RELOAD_SCRIPTS);
 	p->set_item_tooltip(p->get_item_count() - 1, TTR("When this option is turned on, any script that is saved will be reloaded on the running game.\nWhen used remotely on a device, this is more efficient with network filesystem."));
-	p->set_item_checked(p->get_item_count() - 1, true);
 	p->connect("id_pressed", this, "_menu_option");
 
 	menu_hb->add_spacer();
@@ -6784,6 +6780,7 @@ EditorNode::EditorNode() {
 	gui_base->add_child(load_error_dialog);
 
 	execute_outputs = memnew(RichTextLabel);
+	execute_outputs->set_selection_enabled(true);
 	execute_output_dialog = memnew(AcceptDialog);
 	execute_output_dialog->add_child(execute_outputs);
 	execute_output_dialog->set_title("");

@@ -2591,6 +2591,11 @@ void SceneTreeDock::_focus_node() {
 }
 
 void SceneTreeDock::attach_script_to_selected(bool p_extend) {
+	if (ScriptServer::get_language_count() == 0) {
+		EditorNode::get_singleton()->show_warning(TTR("Cannot attach a script: there are no languages registered.\nThis is probably because this editor was built with all language modules disabled."));
+		return;
+	}
+
 	if (!profile_allow_script_editing) {
 		return;
 	}
@@ -2691,7 +2696,9 @@ void SceneTreeDock::_remote_tree_selected() {
 
 void SceneTreeDock::_local_tree_selected() {
 
-	scene_tree->show();
+	if (!bool(EDITOR_GET("interface/editors/show_scene_tree_root_selection")) || get_tree()->get_edited_scene_root() != nullptr) {
+		scene_tree->show();
+	}
 	if (remote_tree)
 		remote_tree->hide();
 	edit_remote->set_pressed(false);
