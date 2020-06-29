@@ -431,7 +431,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/**",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = $identifier;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -457,7 +457,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/**",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = $identifier;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -348,21 +348,44 @@ void ResourceImporterTexture::_save_stex(const Ref<Image> &p_image, const String
 				image->compress(p_vram_compression, csource, p_lossy_quality);
 			}
 
-			// save image dimensions after compressing, because the compressor can resize it
-			f->store_16(image->get_width());
-			f->store_16(orig_width);
-			f->store_16(image->get_height());
-			f->store_16(orig_height);
-			f->store_32(p_texture_flags);
+			if(image->get_format() == Image::FORMAT_RGBA4444 && p_lossy_quality < 1.0) {
 
-			format |= image->get_format();
+				// VRAM packer can not pack this texture so we can at least make in lossy
+				f->store_16(orig_width);
+				f->store_16(0);
+				f->store_16(orig_height);
+				f->store_16(0);
+				f->store_32(p_texture_flags);
 
-			f->store_32(format);
+				format |= StreamTexture::FORMAT_BIT_LOSSY;
+				f->store_32(format);
+				f->store_32(1);
 
-			PoolVector<uint8_t> data = image->get_data();
-			int dl = data.size();
-			PoolVector<uint8_t>::Read r = data.read();
-			f->store_buffer(r.ptr(), dl);
+				PoolVector<uint8_t> data = Image::lossy_packer(image, p_lossy_quality);
+				int data_len = data.size();
+				f->store_32(data_len);
+
+				PoolVector<uint8_t>::Read r = data.read();
+				f->store_buffer(r.ptr(), data_len);
+
+			} else {
+
+				// save image dimensions after compressing, because the compressor can resize it
+				f->store_16(image->get_width());
+				f->store_16(orig_width);
+				f->store_16(image->get_height());
+				f->store_16(orig_height);
+				f->store_32(p_texture_flags);
+
+				format |= image->get_format();
+
+				f->store_32(format);
+
+				PoolVector<uint8_t> data = image->get_data();
+				int dl = data.size();
+				PoolVector<uint8_t>::Read r = data.read();
+				f->store_buffer(r.ptr(), dl);
+			}
 		} break;
 		case COMPRESS_UNCOMPRESSED: {
 

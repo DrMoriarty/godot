@@ -1869,6 +1869,9 @@ Image::AlphaMode Image::detect_alpha() const {
 		case FORMAT_DXT5: {
 			detected = true;
 		} break;
+		case FORMAT_RGBA4444: {
+			detected = true;
+		}
 		default: {
 		}
 	}
