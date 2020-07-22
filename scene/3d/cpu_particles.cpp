@@ -62,12 +62,13 @@ void CPUParticles::set_emitting(bool p_emitting) {
 void CPUParticles::set_amount(int p_amount) {
 
 	ERR_FAIL_COND_MSG(p_amount < 1, "Amount of particles must be greater than 0.");
-
+	int old_amount = particles.size();
+	if(p_amount > old_amount) old_amount = 0;
 	particles.resize(p_amount);
 	{
 		PoolVector<Particle>::Write w = particles.write();
 
-		for (int i = 0; i < p_amount; i++) {
+		for (int i = old_amount; i < p_amount; i++) {
 			w[i].active = false;
 			w[i].custom[3] = 0.0; // Make sure w component isn't garbage data
 		}
@@ -78,6 +79,7 @@ void CPUParticles::set_amount(int p_amount) {
 
 	particle_order.resize(p_amount);
 }
+
 void CPUParticles::set_lifetime(float p_lifetime) {
 
 	ERR_FAIL_COND_MSG(p_lifetime <= 0, "Particles lifetime must be greater than 0.");
@@ -476,7 +478,7 @@ void CPUParticles::_validate_property(PropertyInfo &property) const {
 		property.usage = 0;
 	}
 
-	if (property.name == "emission_sphere_radius" && emission_shape != EMISSION_SHAPE_SPHERE) {
+	if (property.name == "emission_sphere_radius" && (emission_shape != EMISSION_SHAPE_SPHERE || emission_shape != EMISSION_SHAPE_CIRCLE)) {
 		property.usage = 0;
 	}
 
@@ -744,6 +746,11 @@ void CPUParticles::_particles_process(float p_delta) {
 					float s = 2.0 * Math::randf() - 1.0, t = 2.0 * Math_PI * Math::randf();
 					float radius = emission_sphere_radius * Math::sqrt(1.0 - s * s);
 					p.transform.origin = Vector3(radius * Math::cos(t), radius * Math::sin(t), emission_sphere_radius * s);
+				} break;
+				case EMISSION_SHAPE_CIRCLE: {
+					float s = 2.0 * Math::randf() - 1.0, t = 2.0 * Math_PI * Math::randf();
+					float radius = emission_sphere_radius * Math::sqrt(1.0 - s * s);
+					p.transform.origin = Vector3(radius * Math::cos(t), 0.0, radius * Math::sin(t));
 				} break;
 				case EMISSION_SHAPE_BOX: {
 					p.transform.origin = Vector3(Math::randf() * 2.0 - 1.0, Math::randf() * 2.0 - 1.0, Math::randf() * 2.0 - 1.0) * emission_box_extents;
@@ -1401,7 +1408,7 @@ void CPUParticles::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_render_thread"), &CPUParticles::_update_render_thread);
 
 	ADD_GROUP("Emission Shape", "emission_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "emission_shape", PROPERTY_HINT_ENUM, "Point,Sphere,Box,Points,Directed Points"), "set_emission_shape", "get_emission_shape");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "emission_shape", PROPERTY_HINT_ENUM, "Point,Sphere,Circle,Box,Points,Directed Points"), "set_emission_shape", "get_emission_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "emission_sphere_radius", PROPERTY_HINT_RANGE, "0.01,128,0.01"), "set_emission_sphere_radius", "get_emission_sphere_radius");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "emission_box_extents"), "set_emission_box_extents", "get_emission_box_extents");
 	ADD_PROPERTY(PropertyInfo(Variant::POOL_VECTOR3_ARRAY, "emission_points"), "set_emission_points", "get_emission_points");
@@ -1489,6 +1496,7 @@ void CPUParticles::_bind_methods() {
 
 	BIND_ENUM_CONSTANT(EMISSION_SHAPE_POINT);
 	BIND_ENUM_CONSTANT(EMISSION_SHAPE_SPHERE);
+	BIND_ENUM_CONSTANT(EMISSION_SHAPE_CIRCLE);
 	BIND_ENUM_CONSTANT(EMISSION_SHAPE_BOX);
 	BIND_ENUM_CONSTANT(EMISSION_SHAPE_POINTS);
 	BIND_ENUM_CONSTANT(EMISSION_SHAPE_DIRECTED_POINTS);
