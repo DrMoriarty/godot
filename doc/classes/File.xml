@@ -20,6 +20,7 @@
 		    file.close()
 		    return content
 		[/codeblock]
+		In the example above, the file will be saved in the user data folder as specified in the [url=https://docs.godotengine.org/en/latest/tutorials/io/data_paths.html]Data paths[/url] documentation.
 	</description>
 	<tutorials>
 		<link>https://docs.godotengine.org/en/latest/getting_started/step_by_step/filesystem.html</link>
@@ -256,6 +257,7 @@
 			</argument>
 			<description>
 				Opens an encrypted file in write or read mode. You need to pass a binary key to encrypt/decrypt it.
+				[b]Note:[/b] The provided key must be 32 bytes long.
 			</description>
 		</method>
 		<method name="open_encrypted_with_pass">

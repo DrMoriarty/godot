@@ -1873,8 +1873,12 @@ void OS_OSX::alert(const String &p_alert, const String &p_title) {
 	[window setAlertStyle:NSAlertStyleWarning];
 
 	// Display it, then release
+	id key_window = [[NSApplication sharedApplication] keyWindow];
 	[window runModal];
 	[window release];
+	if (key_window) {
+		[key_window makeKeyAndOrderFront:nil];
+	}
 }
 
 Error OS_OSX::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
@@ -3135,7 +3139,7 @@ void OS_OSX::run() {
 			process_events(); // get rid of pending events
 			joypad_osx->process_joypads();
 
-			if (Main::iteration() == true) {
+			if (Main::iteration()) {
 				quit = true;
 			}
 		} @catch (NSException *exception) {
