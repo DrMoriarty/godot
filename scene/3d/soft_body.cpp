@@ -268,6 +268,7 @@ void SoftBody::_notification(int p_what) {
 			RID space = get_world()->get_space();
 			PhysicsServer::get_singleton()->soft_body_set_space(physics_rid, space);
 			prepare_physics_server();
+			transform_inited = false;
 		} break;
 		case NOTIFICATION_READY: {
 			if (!parent_collision_ignore.is_empty())
@@ -280,25 +281,25 @@ void SoftBody::_notification(int p_what) {
 				_reset_points_offsets();
 				return;
 			}
+			if(!transform_inited) {
+				PhysicsServer::get_singleton()->soft_body_set_transform(physics_rid, get_global_transform());
 
-			PhysicsServer::get_singleton()->soft_body_set_transform(physics_rid, get_global_transform());
-
-			set_notify_transform(false);
-			// Required to be top level with Transform at center of world in order to modify VisualServer only to support custom Transform
-			set_as_toplevel(true);
-			set_transform(Transform());
-			set_notify_transform(true);
+				set_notify_transform(false);
+				// Required to be top level with Transform at center of world in order to modify VisualServer only to support custom Transform
+				set_as_toplevel(true);
+				set_transform(Transform());
+				set_notify_transform(true);
+				transform_inited = true;
+			}
 
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
 
 			_update_pickable();
-
 		} break;
 		case NOTIFICATION_EXIT_WORLD: {
 
 			PhysicsServer::get_singleton()->soft_body_set_space(physics_rid, RID());
-
 		} break;
 	}
 

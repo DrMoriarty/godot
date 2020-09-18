@@ -96,6 +96,7 @@ private:
 
 	bool capture_input_on_drag;
 	bool ray_pickable;
+	bool transform_inited;
 
 	void _update_pickable();
 
