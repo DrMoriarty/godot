@@ -255,6 +255,7 @@ public:
 	BIND1RC(int, multimesh_get_instance_count, RID)
 
 	BIND2(multimesh_set_mesh, RID, RID)
+	BIND3(multimesh_instance_set_flags, RID, int, uint8_t)
 	BIND3(multimesh_instance_set_transform, RID, int, const Transform &)
 	BIND3(multimesh_instance_set_transform_2d, RID, int, const Transform2D &)
 	BIND3(multimesh_instance_set_color, RID, int, const Color &)

@@ -764,6 +764,7 @@ public:
 		VS::MultimeshCustomDataFormat custom_data_format;
 
 		Vector<float> data;
+		Vector<uint8_t> flags;
 
 		AABB aabb;
 
@@ -805,6 +806,7 @@ public:
 	virtual int multimesh_get_instance_count(RID p_multimesh) const;
 
 	virtual void multimesh_set_mesh(RID p_multimesh, RID p_mesh);
+	virtual void multimesh_instance_set_flags(RID p_multimesh, int p_index, uint8_t flags);
 	virtual void multimesh_instance_set_transform(RID p_multimesh, int p_index, const Transform &p_transform);
 	virtual void multimesh_instance_set_transform_2d(RID p_multimesh, int p_index, const Transform2D &p_transform);
 	virtual void multimesh_instance_set_color(RID p_multimesh, int p_index, const Color &p_color);

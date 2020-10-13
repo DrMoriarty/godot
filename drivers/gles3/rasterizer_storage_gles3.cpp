@@ -4564,6 +4564,7 @@ void RasterizerStorageGLES3::multimesh_allocate(RID p_multimesh, int p_instances
 		glDeleteBuffers(1, &multimesh->buffer);
 		multimesh->data.resize(0);
 		multimesh->buffer = 0;
+		multimesh->flags.resize(0);
 	}
 
 	multimesh->size = p_instances;
@@ -4596,6 +4597,12 @@ void RasterizerStorageGLES3::multimesh_allocate(RID p_multimesh, int p_instances
 		}
 
 		int format_floats = multimesh->color_floats + multimesh->xform_floats + multimesh->custom_data_floats;
+
+		multimesh->flags.resize(p_instances);
+
+		for (int i = 0; i < p_instances; i ++) {
+			multimesh->flags.write[i] = 0;
+		}
 
 		multimesh->data.resize(format_floats * p_instances);
 
@@ -4723,6 +4730,22 @@ void RasterizerStorageGLES3::multimesh_set_mesh(RID p_multimesh, RID p_mesh) {
 	if (!multimesh->update_list.in_list()) {
 		multimesh_update_list.add(&multimesh->update_list);
 	}
+}
+
+void RasterizerStorageGLES3::multimesh_instance_set_flags(RID p_multimesh, int p_index, uint8_t flags) {
+
+	MultiMesh *multimesh = multimesh_owner.getornull(p_multimesh);
+	ERR_FAIL_COND(!multimesh);
+	ERR_FAIL_INDEX(p_index, multimesh->size);
+
+	multimesh->flags.write[p_index] = flags;
+
+	//multimesh->dirty_data = true;
+	//multimesh->dirty_aabb = true;
+
+	//if (!multimesh->update_list.in_list()) {
+	//	multimesh_update_list.add(&multimesh->update_list);
+	//}
 }
 
 void RasterizerStorageGLES3::multimesh_instance_set_transform(RID p_multimesh, int p_index, const Transform &p_transform) {

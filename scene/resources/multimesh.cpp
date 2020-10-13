@@ -225,6 +225,11 @@ int MultiMesh::get_visible_instance_count() const {
 	return visible_instance_count;
 }
 
+void MultiMesh::set_instance_flags(int p_instance, uint8_t flags) {
+
+	VisualServer::get_singleton()->multimesh_instance_set_flags(multimesh, p_instance, flags);
+}
+
 void MultiMesh::set_instance_transform(int p_instance, const Transform &p_transform) {
 
 	VisualServer::get_singleton()->multimesh_instance_set_transform(multimesh, p_instance, p_transform);
@@ -325,6 +330,7 @@ void MultiMesh::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_instance_count"), &MultiMesh::get_instance_count);
 	ClassDB::bind_method(D_METHOD("set_visible_instance_count", "count"), &MultiMesh::set_visible_instance_count);
 	ClassDB::bind_method(D_METHOD("get_visible_instance_count"), &MultiMesh::get_visible_instance_count);
+	ClassDB::bind_method(D_METHOD("set_instance_flags", "instance", "flags"), &MultiMesh::set_instance_flags);
 	ClassDB::bind_method(D_METHOD("set_instance_transform", "instance", "transform"), &MultiMesh::set_instance_transform);
 	ClassDB::bind_method(D_METHOD("set_instance_transform_2d", "instance", "transform"), &MultiMesh::set_instance_transform_2d);
 	ClassDB::bind_method(D_METHOD("get_instance_transform", "instance"), &MultiMesh::get_instance_transform);
