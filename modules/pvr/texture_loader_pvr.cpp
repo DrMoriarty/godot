@@ -215,7 +215,7 @@ static void _compress_pvrtc4(Image *p_img) {
 			int ofs, size, w, h;
 			img->get_mipmap_offset_size_and_dimensions(i, ofs, size, w, h);
 			Javelin::RgbaBitmap bm(w, h);
-			void *dst = (void*)bm.GetData();
+			void *dst = (void *)bm.GetData();
 			copymem(dst, &r[ofs], size);
 			Javelin::ColorRgba<unsigned char> *dp = bm.GetData();
 			for (int j = 0; j < size / 4; j++) {
