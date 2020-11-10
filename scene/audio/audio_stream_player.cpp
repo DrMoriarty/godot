@@ -125,6 +125,7 @@ void AudioStreamPlayer::_mix_audio() {
 
 			//fade out to avoid pops
 			_mix_internal(true);
+			stream_playback->stop();
 		}
 
 		stream_playback->start(setseek);
@@ -158,6 +159,9 @@ void AudioStreamPlayer::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
 
+		if (stream_playback.is_valid()) {
+			stream_playback->stop();
+		}
 		AudioServer::get_singleton()->remove_callback(_mix_audios, this);
 	}
 
@@ -202,6 +206,9 @@ void AudioStreamPlayer::set_stream(Ref<AudioStream> p_stream) {
 	mix_buffer.resize(AudioServer::get_singleton()->thread_get_mix_buffer_size());
 
 	if (stream_playback.is_valid()) {
+		if (active) {
+			stream_playback->stop();
+		}
 		stream_playback.unref();
 		stream.unref();
 		active = false;

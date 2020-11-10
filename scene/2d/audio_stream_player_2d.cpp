@@ -156,6 +156,9 @@ void AudioStreamPlayer2D::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
 
+		if (stream_playback.is_valid()) {
+			stream_playback->stop();
+		}
 		AudioServer::get_singleton()->remove_callback(_mix_audios, this);
 	}
 
@@ -275,6 +278,9 @@ void AudioStreamPlayer2D::set_stream(Ref<AudioStream> p_stream) {
 	mix_buffer.resize(AudioServer::get_singleton()->thread_get_mix_buffer_size());
 
 	if (stream_playback.is_valid()) {
+		if (active) {
+			stream_playback->stop();
+		}
 		stream_playback.unref();
 		stream.unref();
 		active = false;
@@ -340,6 +346,7 @@ void AudioStreamPlayer2D::seek(float p_seconds) {
 void AudioStreamPlayer2D::stop() {
 
 	if (stream_playback.is_valid()) {
+		stream_playback->stop();
 		active = false;
 		set_physics_process_internal(false);
 		setplay = -1;
