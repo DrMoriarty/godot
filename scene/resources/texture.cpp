@@ -659,7 +659,7 @@ Error StreamTexture::_load_data(const String &p_path, int &tw, int &th, int &tw_
  				if (store_compressed) {
  					PoolVector<uint8_t> decompressed;
  					decompressed.resize(size);
- 					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_FASTLZ);
+					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_DEFLATE);
  					decompressed.resize(decompressed_size);
  					image->create(tw, th, false, format, decompressed);
  				} else {
@@ -716,7 +716,7 @@ Error StreamTexture::_load_data(const String &p_path, int &tw, int &th, int &tw_
 				if (store_compressed) {
  					PoolVector<uint8_t> decompressed;
  					decompressed.resize(total_size);
- 					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_FASTLZ);
+					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_DEFLATE);
  					decompressed.resize(decompressed_size);
  					image->create(sw, sh, true, format, decompressed);
  				} else {

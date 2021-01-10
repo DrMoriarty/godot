@@ -394,8 +394,8 @@ void ResourceImporterTexture::_save_stex(const Ref<Image> &p_image, const String
 
 				if (p_store_compressed) {
 					PoolVector<uint8_t> compressed;
-					compressed.resize(Compression::get_max_compressed_buffer_size(dl, Compression::MODE_FASTLZ));
-					int compressed_size = Compression::compress(compressed.write().ptr(), r.ptr(), dl, Compression::MODE_FASTLZ);
+					compressed.resize(Compression::get_max_compressed_buffer_size(dl, Compression::MODE_DEFLATE));
+					int compressed_size = Compression::compress(compressed.write().ptr(), r.ptr(), dl, Compression::MODE_DEFLATE);
 					f->store_buffer(compressed.read().ptr(), compressed_size);
 				} else {
 					f->store_buffer(r.ptr(), dl);
