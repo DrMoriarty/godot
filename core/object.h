@@ -511,8 +511,6 @@ private:
 	void _set_indexed_bind(const NodePath &p_name, const Variant &p_value);
 	Variant _get_indexed_bind(const NodePath &p_name) const;
 
-	void property_list_changed_notify();
-
 	friend class Reference;
 	uint32_t instance_binding_count;
 	void *_script_instance_bindings[MAX_SCRIPT_INSTANCE_BINDINGS];
@@ -551,6 +549,7 @@ protected:
 
 	void cancel_delete();
 
+	void property_list_changed_notify();
 	virtual void _changed_callback(Object *p_changed, const char *p_prop);
 
 	//Variant _call_bind(const StringName& p_name, const Variant& p_arg1 = Variant(), const Variant& p_arg2 = Variant(), const Variant& p_arg3 = Variant(), const Variant& p_arg4 = Variant());
@@ -683,7 +682,7 @@ public:
 	void call_multilevel(const StringName &p_name, VARIANT_ARG_LIST); // C++ helper
 
 	void notification(int p_notification, bool p_reversed = false);
-	String to_string();
+	virtual String to_string();
 
 	//used mainly by script, get and set all INCLUDING string
 	virtual Variant getvar(const Variant &p_key, bool *r_valid = NULL) const;

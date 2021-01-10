@@ -48,7 +48,7 @@
 #include <mach/mach_time.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #endif
@@ -136,7 +136,6 @@ void OS_Unix::initialize_core() {
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_FILESYSTEM);
-	//FileAccessBufferedFA<FileAccessUnix>::make_default();
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_FILESYSTEM);
@@ -156,7 +155,7 @@ void OS_Unix::finalize_core() {
 
 void OS_Unix::alert(const String &p_alert, const String &p_title) {
 
-	fprintf(stderr, "ERROR: %s\n", p_alert.utf8().get_data());
+	fprintf(stderr, "ALERT: %s: %s\n", p_title.utf8().get_data(), p_alert.utf8().get_data());
 }
 
 String OS_Unix::get_stdin_string(bool p_block) {
@@ -357,7 +356,7 @@ Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bo
 		int status;
 		waitpid(pid, &status, 0);
 		if (r_exitcode)
-			*r_exitcode = WEXITSTATUS(status);
+			*r_exitcode = WIFEXITED(status) ? WEXITSTATUS(status) : status;
 
 	} else {
 
@@ -509,7 +508,7 @@ String OS_Unix::get_executable_path() const {
 		return OS::get_executable_path();
 	}
 	return b;
-#elif defined(__OpenBSD__)
+#elif defined(__OpenBSD__) || defined(__NetBSD__)
 	char resolved_path[MAXPATHLEN];
 
 	realpath(OS::get_executable_path().utf8().get_data(), resolved_path);

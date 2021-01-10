@@ -102,10 +102,6 @@ void PathFollow::_update_transform(bool p_update_xyz_rot) {
 	if (!c.is_valid())
 		return;
 
-	if (delta_offset == 0) {
-		return;
-	}
-
 	float bl = c->get_baked_length();
 	if (bl == 0.0) {
 		return;
@@ -163,7 +159,7 @@ void PathFollow::_update_transform(bool p_update_xyz_rot) {
 
 		t.origin = pos;
 
-		if (p_update_xyz_rot) { // Only update rotation if some parameter has changed - i.e. not on addition to scene tree
+		if (p_update_xyz_rot && delta_offset != 0) { // Only update rotation if some parameter has changed - i.e. not on addition to scene tree.
 			Vector3 t_prev = (pos - c->interpolate_baked(offset - delta_offset, cubic)).normalized();
 			Vector3 t_cur = (c->interpolate_baked(offset + delta_offset, cubic) - pos).normalized();
 
@@ -264,16 +260,23 @@ String PathFollow::get_configuration_warning() const {
 	if (!is_visible_in_tree() || !is_inside_tree())
 		return String();
 
+	String warning = Spatial::get_configuration_warning();
 	if (!Object::cast_to<Path>(get_parent())) {
-		return TTR("PathFollow only works when set as a child of a Path node.");
+		if (warning != String()) {
+			warning += "\n\n";
+		}
+		warning += TTR("PathFollow only works when set as a child of a Path node.");
 	} else {
 		Path *path = Object::cast_to<Path>(get_parent());
 		if (path->get_curve().is_valid() && !path->get_curve()->is_up_vector_enabled() && rotation_mode == ROTATION_ORIENTED) {
-			return TTR("PathFollow's ROTATION_ORIENTED requires \"Up Vector\" to be enabled in its parent Path's Curve resource.");
+			if (warning != String()) {
+				warning += "\n\n";
+			}
+			warning += TTR("PathFollow's ROTATION_ORIENTED requires \"Up Vector\" to be enabled in its parent Path's Curve resource.");
 		}
 	}
 
-	return String();
+	return warning;
 }
 
 void PathFollow::_bind_methods() {
