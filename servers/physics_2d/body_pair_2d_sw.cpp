@@ -441,8 +441,8 @@ bool BodyPair2DSW::setup(real_t p_step) {
 			Vector2 crB(-B->get_angular_velocity() * c.rB.y, B->get_angular_velocity() * c.rB.x);
 			Vector2 dv = B->get_linear_velocity() + crB - A->get_linear_velocity() - crA;
 			c.bounce = c.bounce * dv.dot(c.normal);
-            c.absorbent = combine_absorbent(A, B) * p_step;
-            if(ABS(c.bounce) < c.absorbent) c.bounce = 0;
+			c.absorbent = combine_absorbent(A, B) * p_step;
+			if(ABS(c.bounce) < c.absorbent) c.bounce = 0;
 		}
 
 		do_process = true;
@@ -489,8 +489,8 @@ void BodyPair2DSW::solve(real_t p_step) {
 		B->apply_bias_impulse(c.rB, jb);
 
 		real_t jn = -(c.bounce + vn) * c.mass_normal;
-        //real_t absorbent = c.absorbent * p_step;
-        //if(ABS(jn) < absorbent) jn = 0;
+		//real_t absorbent = c.absorbent * p_step;
+		//if(ABS(jn) < absorbent) jn = 0;
 		real_t jnOld = c.acc_normal_impulse;
 		c.acc_normal_impulse = MAX(jnOld + jn, 0.0f);
 

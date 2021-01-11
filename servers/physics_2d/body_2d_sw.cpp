@@ -141,9 +141,9 @@ void Body2DSW::set_param(Physics2DServer::BodyParameter p_param, real_t p_value)
 
 			bounce = p_value;
 		} break;
-        case Physics2DServer::BODY_PARAM_ABSORBENT: {
-            absorbent = p_value;
-        } break;
+		case Physics2DServer::BODY_PARAM_ABSORBENT: {
+			absorbent = p_value;
+		} break;
 		case Physics2DServer::BODY_PARAM_FRICTION: {
 
 			friction = p_value;
