@@ -442,7 +442,7 @@ bool BodyPair2DSW::setup(real_t p_step) {
 			Vector2 dv = B->get_linear_velocity() + crB - A->get_linear_velocity() - crA;
 			c.bounce = c.bounce * dv.dot(c.normal);
 			c.absorbent = combine_absorbent(A, B) * p_step;
-			if(ABS(c.bounce) < c.absorbent) c.bounce = 0;
+			if (ABS(c.bounce) < c.absorbent) c.bounce = 0;
 		}
 
 		do_process = true;

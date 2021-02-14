@@ -3040,7 +3040,7 @@ void RasterizerStorageGLES2::multimesh_allocate(RID p_multimesh, int p_instances
 	multimesh->data.resize(format_floats * p_instances);
 	multimesh->flags.resize(p_instances);
 
-	for (int i = 0; i < p_instances; i ++) {
+	for (int i = 0; i < p_instances; i++) {
 		multimesh->flags.write[i] = 0;
 	}
 

@@ -656,15 +656,15 @@ Error StreamTexture::_load_data(const String &p_path, int &tw, int &th, int &tw_
 			{
 				PoolVector<uint8_t>::Write w = img_data.write();
 				int bytes = f->get_buffer(w.ptr(), size);
- 				if (store_compressed) {
- 					PoolVector<uint8_t> decompressed;
- 					decompressed.resize(size);
+				if (store_compressed) {
+					PoolVector<uint8_t> decompressed;
+					decompressed.resize(size);
 					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_DEFLATE);
- 					decompressed.resize(decompressed_size);
- 					image->create(tw, th, false, format, decompressed);
- 				} else {
- 					image->create(tw, th, false, format, img_data);
- 				}
+					decompressed.resize(decompressed_size);
+					image->create(tw, th, false, format, decompressed);
+				} else {
+					image->create(tw, th, false, format, img_data);
+				}
 			}
 
 			memdelete(f);
@@ -714,14 +714,14 @@ Error StreamTexture::_load_data(const String &p_path, int &tw, int &th, int &tw_
 					ERR_FAIL_V(ERR_FILE_CORRUPT);
 				}
 				if (store_compressed) {
- 					PoolVector<uint8_t> decompressed;
- 					decompressed.resize(total_size);
+					PoolVector<uint8_t> decompressed;
+					decompressed.resize(total_size);
 					int decompressed_size = Compression::decompress(decompressed.write().ptr(), decompressed.size(), img_data.read().ptr(), bytes, Compression::MODE_DEFLATE);
- 					decompressed.resize(decompressed_size);
- 					image->create(sw, sh, true, format, decompressed);
- 				} else {
- 					image->create(sw, sh, true, format, img_data);
- 				}
+					decompressed.resize(decompressed_size);
+					image->create(sw, sh, true, format, decompressed);
+				} else {
+					image->create(sw, sh, true, format, img_data);
+				}
 			}
 
 			return OK;

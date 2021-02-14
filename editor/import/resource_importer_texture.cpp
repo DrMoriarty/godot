@@ -179,8 +179,8 @@ bool ResourceImporterTexture::get_option_visibility(const String &p_option, cons
 			return false;
 		}
 	} else if (p_option == "compress/store_compressed") {
- 		int compress_mode = int(p_options["compress/mode"]);
- 		return compress_mode == COMPRESS_VIDEO_RAM;
+		int compress_mode = int(p_options["compress/mode"]);
+		return compress_mode == COMPRESS_VIDEO_RAM;
 	}
 
 	return true;
@@ -248,7 +248,7 @@ void ResourceImporterTexture::_save_stex(const Ref<Image> &p_image, const String
 	if (p_detect_normal)
 		format |= StreamTexture::FORMAT_BIT_DETECT_NORMAL;
 	if (p_store_compressed)
- 		format |= StreamTexture::FORMAT_BIT_STORE_COMPRESSED;
+		format |= StreamTexture::FORMAT_BIT_STORE_COMPRESSED;
 
 	if ((p_compress_mode == COMPRESS_LOSSLESS || p_compress_mode == COMPRESS_LOSSY) && p_image->get_format() > Image::FORMAT_RGBA8) {
 		p_compress_mode = COMPRESS_UNCOMPRESSED; //these can't go as lossy
@@ -355,7 +355,7 @@ void ResourceImporterTexture::_save_stex(const Ref<Image> &p_image, const String
 				image->compress(p_vram_compression, csource, p_lossy_quality);
 			}
 
-			if(image->get_format() == Image::FORMAT_RGBA4444 && p_lossy_quality < 1.0) {
+			if (image->get_format() == Image::FORMAT_RGBA4444 && p_lossy_quality < 1.0) {
 
 				// VRAM packer can not pack this texture so we can at least make it lossy
 				f->store_16(orig_width);

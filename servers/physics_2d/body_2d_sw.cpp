@@ -187,9 +187,9 @@ real_t Body2DSW::get_param(Physics2DServer::BodyParameter p_param) const {
 
 			return bounce;
 		}
-        case Physics2DServer::BODY_PARAM_ABSORBENT: {
-            return absorbent;
-        } 
+		case Physics2DServer::BODY_PARAM_ABSORBENT: {
+			return absorbent;
+		}
 		case Physics2DServer::BODY_PARAM_FRICTION: {
 
 			return friction;

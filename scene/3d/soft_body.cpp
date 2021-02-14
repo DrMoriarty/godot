@@ -281,7 +281,7 @@ void SoftBody::_notification(int p_what) {
 				_reset_points_offsets();
 				return;
 			}
-			if(!transform_inited) {
+			if (!transform_inited) {
 				PhysicsServer::get_singleton()->soft_body_set_transform(physics_rid, get_global_transform());
 
 				set_notify_transform(false);

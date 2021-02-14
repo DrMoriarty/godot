@@ -69,7 +69,7 @@ class BodyPair2DSW : public Constraint2DSW {
 		Vector2 rA, rB;
 		bool reused;
 		real_t bounce;
-        real_t absorbent;
+		real_t absorbent;
 	};
 
 	Vector2 offset_B; //use local A coordinates to avoid numerical issues on collision detection

@@ -1,31 +1,31 @@
 /*************************************************************************/
-/*	script_text_editor.cpp												 */
+/*  script_text_editor.cpp                                               */
 /*************************************************************************/
-/*						 This file is part of:							 */
-/*							 GODOT ENGINE								 */
-/*						https://godotengine.org							 */
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.                 */
 /* Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
-/* a copy of this software and associated documentation files (the		 */
-/* "Software"), to deal in the Software without restriction, including	 */
-/* without limitation the rights to use, copy, modify, merge, publish,	 */
-/* distribute, sublicense, and/or sell copies of the Software, and to	 */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
 /* permit persons to whom the Software is furnished to do so, subject to */
-/* the following conditions:											 */
-/*																		 */
-/* The above copyright notice and this permission notice shall be		 */
-/* included in all copies or substantial portions of the Software.		 */
-/*																		 */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,		 */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	 */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
 /* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY	 */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,	 */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE	 */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.				 */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
 #include "script_text_editor.h"
@@ -1407,99 +1407,98 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			}
 		} break;
 
-	case MOVE_CURSOR_FORWARD: {
+		case MOVE_CURSOR_FORWARD: {
 
-		if(tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size()-1)
-			tx->cursor_set_column(tx->cursor_get_column()+1);
-		else {
-			tx->cursor_set_line(tx->cursor_get_line()+1);
-			tx->cursor_set_column(0);
-		}
-	} break;
+			if (tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size() - 1)
+				tx->cursor_set_column(tx->cursor_get_column() + 1);
+			else {
+				tx->cursor_set_line(tx->cursor_get_line() + 1);
+				tx->cursor_set_column(0);
+			}
+		} break;
 
-	case MOVE_CURSOR_BACKWARD: {
+		case MOVE_CURSOR_BACKWARD: {
 
-		if(tx->cursor_get_column() > 0)
-			tx->cursor_set_column(tx->cursor_get_column()-1);
-		else {
-			tx->cursor_set_line(tx->cursor_get_line()-1);
-			tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
-		}
-	} break;
+			if (tx->cursor_get_column() > 0)
+				tx->cursor_set_column(tx->cursor_get_column() - 1);
+			else {
+				tx->cursor_set_line(tx->cursor_get_line() - 1);
+				tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
+			}
+		} break;
 
-	case MOVE_CURSOR_UP: {
+		case MOVE_CURSOR_UP: {
 
-		tx->cursor_set_line(tx->cursor_get_line()-1);
-	} break;
+			tx->cursor_set_line(tx->cursor_get_line() - 1);
+		} break;
 
-	case MOVE_CURSOR_DOWN: {
+		case MOVE_CURSOR_DOWN: {
 
-		tx->cursor_set_line(tx->cursor_get_line()+1);
-	} break;
+			tx->cursor_set_line(tx->cursor_get_line() + 1);
+		} break;
 
-	case MOVE_CURSOR_PAGE_UP: {
+		case MOVE_CURSOR_PAGE_UP: {
 
-		int line = tx->get_first_visible_line();
-		tx->set_line_as_last_visible(line);
-		tx->cursor_set_line(line);
-	} break;
-
-	case MOVE_CURSOR_PAGE_DOWN: {
-
-		int line = tx->get_last_visible_line();
-		tx->set_line_as_first_visible(line);
-		tx->cursor_set_line(line);
-	} break;
-
-	case SCROLL_TO_CURSOR: {
-
-		int line = tx->cursor_get_line();
-		if(line == tx->get_first_visible_line()) {
+			int line = tx->get_first_visible_line();
 			tx->set_line_as_last_visible(line);
-		} else if(line == (tx->get_last_visible_line() + tx->get_first_visible_line())/2 - 1) {
+			tx->cursor_set_line(line);
+		} break;
+
+		case MOVE_CURSOR_PAGE_DOWN: {
+
+			int line = tx->get_last_visible_line();
 			tx->set_line_as_first_visible(line);
-		} else {
-			tx->set_line_as_center_visible(line);
-		}
-	} break;
+			tx->cursor_set_line(line);
+		} break;
 
-	case EDIT_DELETE: {
+		case SCROLL_TO_CURSOR: {
 
-		if(tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size()-1)
-			tx->cursor_set_column(tx->cursor_get_column()+1);
-		else {
-			tx->cursor_set_line(tx->cursor_get_line()+1);
-			tx->cursor_set_column(0);
-		}
-		tx->backspace_at_cursor();
-	} break;
+			int line = tx->cursor_get_line();
+			if (line == tx->get_first_visible_line()) {
+				tx->set_line_as_last_visible(line);
+			} else if (line == (tx->get_last_visible_line() + tx->get_first_visible_line()) / 2 - 1) {
+				tx->set_line_as_first_visible(line);
+			} else {
+				tx->set_line_as_center_visible(line);
+			}
+		} break;
 
-	case EDIT_KILL: {
+		case EDIT_DELETE: {
 
-		int cursor_column = tx->cursor_get_column();
-		tx->select(tx->cursor_get_line(), tx->cursor_get_column(), tx->cursor_get_line(), tx->get_line(tx->cursor_get_line()).size());
-		tx->cut();
-		tx->cursor_set_column(cursor_column);
-	} break;
+			if (tx->cursor_get_column() < tx->get_line(tx->cursor_get_line()).size() - 1)
+				tx->cursor_set_column(tx->cursor_get_column() + 1);
+			else {
+				tx->cursor_set_line(tx->cursor_get_line() + 1);
+				tx->cursor_set_column(0);
+			}
+			tx->backspace_at_cursor();
+		} break;
 
-	case EDIT_BREAK_LINE: {
+		case EDIT_KILL: {
 
-		tx->insert_text_at_cursor("\n");
-		tx->cursor_set_line(tx->cursor_get_line()-1);
-		tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
-	} break;
+			int cursor_column = tx->cursor_get_column();
+			tx->select(tx->cursor_get_line(), tx->cursor_get_column(), tx->cursor_get_line(), tx->get_line(tx->cursor_get_line()).size());
+			tx->cut();
+			tx->cursor_set_column(cursor_column);
+		} break;
 
-	case EDIT_NEW_LINE: {
+		case EDIT_BREAK_LINE: {
 
-		//tx->insert_text_at_cursor("\n");
-		tx->new_line_with_intendation(false, false);
-	} break;
+			tx->insert_text_at_cursor("\n");
+			tx->cursor_set_line(tx->cursor_get_line() - 1);
+			tx->cursor_set_column(tx->get_line(tx->cursor_get_line()).size());
+		} break;
 
-	case EDIT_SET_MARK: {
-		
-		tx->activate_selection();
-	} break;
+		case EDIT_NEW_LINE: {
 
+			//tx->insert_text_at_cursor("\n");
+			tx->new_line_with_intendation(false, false);
+		} break;
+
+		case EDIT_SET_MARK: {
+
+			tx->activate_selection();
+		} break;
 	}
 }
 

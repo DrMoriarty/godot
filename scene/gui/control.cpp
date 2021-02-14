@@ -345,7 +345,6 @@ void Control::_get_property_list(List<PropertyInfo> *p_list) const {
 		theme = data.theme;
 	} else {
 		theme = Theme::get_default();
-
 	}
 
 	{

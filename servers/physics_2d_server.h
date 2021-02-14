@@ -429,7 +429,7 @@ public:
 	enum BodyParameter {
 		BODY_PARAM_BOUNCE,
 		BODY_PARAM_FRICTION,
-        BODY_PARAM_ABSORBENT,
+		BODY_PARAM_ABSORBENT,
 		BODY_PARAM_MASS, ///< unused for static, always infinite
 		BODY_PARAM_INERTIA, // read-only: computed from mass & shapes
 		BODY_PARAM_GRAVITY_SCALE,

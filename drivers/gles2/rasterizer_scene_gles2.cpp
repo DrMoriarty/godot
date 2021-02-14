@@ -1687,8 +1687,8 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 			const float *base_buffer = multi_mesh->data.ptr();
 
 			for (int i = 0; i < amount; i++) {
-				if(multi_mesh->flags.ptr()[i] & 0x01) continue; // hidden
-				
+				if (multi_mesh->flags.ptr()[i] & 0x01) continue; // hidden
+
 				const float *buffer = base_buffer + i * stride;
 
 				{

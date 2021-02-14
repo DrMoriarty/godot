@@ -63,7 +63,7 @@ void CPUParticles::set_amount(int p_amount) {
 
 	ERR_FAIL_COND_MSG(p_amount < 1, "Amount of particles must be greater than 0.");
 	int old_amount = particles.size();
-	if(p_amount > old_amount) old_amount = 0;
+	if (p_amount > old_amount) old_amount = 0;
 	particles.resize(p_amount);
 	{
 		PoolVector<Particle>::Write w = particles.write();

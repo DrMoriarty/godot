@@ -55,7 +55,7 @@ class Body2DSW : public CollisionObject2DSW {
 	real_t inertia;
 	real_t bounce;
 	real_t friction;
-    real_t absorbent;
+	real_t absorbent;
 
 	real_t _inv_mass;
 	real_t _inv_inertia;

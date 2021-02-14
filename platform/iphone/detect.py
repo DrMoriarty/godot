@@ -87,8 +87,8 @@ def configure(env):
 
     env["ENV"]["PATH"] = env["IPHONEPATH"] + "/Developer/usr/bin/:" + env["ENV"]["PATH"]
 
-    compiler_path = "xcrun --toolchain \"com.apple.dt.toolchain.XcodeDefault\" " # "$IPHONEPATH/usr/bin/${ios_triple}"
-    s_compiler_path = "xcrun --toolchain \"com.apple.dt.toolchain.XcodeDefault\" " # "$IPHONEPATH/Developer/usr/bin/"
+    compiler_path = 'xcrun --toolchain "com.apple.dt.toolchain.XcodeDefault" '  # "$IPHONEPATH/usr/bin/${ios_triple}"
+    s_compiler_path = 'xcrun --toolchain "com.apple.dt.toolchain.XcodeDefault" '  # "$IPHONEPATH/Developer/usr/bin/"
 
     ccache_path = os.environ.get("CCACHE")
     if ccache_path is None:
