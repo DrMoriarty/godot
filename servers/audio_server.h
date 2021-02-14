@@ -71,8 +71,8 @@ protected:
 #endif
 
 public:
-	double get_time_since_last_mix() const; //useful for video -> audio sync
-	double get_time_to_next_mix() const;
+	double get_time_since_last_mix(); //useful for video -> audio sync
+	double get_time_to_next_mix();
 
 	enum SpeakerMode {
 		SPEAKER_MODE_STEREO,
@@ -204,7 +204,7 @@ private:
 				last_mix_with_audio = 0;
 				used = false;
 				active = false;
-				peak_volume = AudioFrame(0, 0);
+				peak_volume = AudioFrame(AUDIO_MIN_PEAK_DB, AUDIO_MIN_PEAK_DB);
 			}
 		};
 

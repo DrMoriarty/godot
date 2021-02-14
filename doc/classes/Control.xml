@@ -16,6 +16,7 @@
 	<tutorials>
 		<link title="GUI tutorial index">https://docs.godotengine.org/en/3.2/tutorials/gui/index.html</link>
 		<link title="Custom drawing in 2D">https://docs.godotengine.org/en/3.2/tutorials/2d/custom_drawing_in_2d.html</link>
+		<link title="Control node gallery">https://docs.godotengine.org/en/latest/tutorials/ui/control_node_gallery.html</link>
 		<link title="All GUI Demos">https://github.com/godotengine/godot-demo-projects/tree/master/gui</link>
 	</tutorials>
 	<methods>
@@ -213,6 +214,20 @@
 				func drop_data(position, data):
 				    color = data["color"]
 				[/codeblock]
+			</description>
+		</method>
+		<method name="find_next_valid_focus" qualifiers="const">
+			<return type="Control">
+			</return>
+			<description>
+				Finds the next (below in the tree) [Control] that can receive the focus.
+			</description>
+		</method>
+		<method name="find_prev_valid_focus" qualifiers="const">
+			<return type="Control">
+			</return>
+			<description>
+				Finds the previous (above in the tree) [Control] that can receive the focus.
 			</description>
 		</method>
 		<method name="force_drag">

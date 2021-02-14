@@ -71,15 +71,20 @@ void AudioDriver::update_mix_time(int p_frames) {
 		_last_mix_time = OS::get_singleton()->get_ticks_usec();
 }
 
-double AudioDriver::get_time_since_last_mix() const {
-
-	return (OS::get_singleton()->get_ticks_usec() - _last_mix_time) / 1000000.0;
+double AudioDriver::get_time_since_last_mix() {
+	lock();
+	uint64_t last_mix_time = _last_mix_time;
+	unlock();
+	return (OS::get_singleton()->get_ticks_usec() - last_mix_time) / 1000000.0;
 }
 
-double AudioDriver::get_time_to_next_mix() const {
-
-	double total = (OS::get_singleton()->get_ticks_usec() - _last_mix_time) / 1000000.0;
-	double mix_buffer = _last_mix_frames / (double)get_mix_rate();
+double AudioDriver::get_time_to_next_mix() {
+	lock();
+	uint64_t last_mix_time = _last_mix_time;
+	uint64_t last_mix_frames = _last_mix_frames;
+	unlock();
+	double total = (OS::get_singleton()->get_ticks_usec() - last_mix_time) / 1000000.0;
+	double mix_buffer = last_mix_frames / (double)get_mix_rate();
 	return mix_buffer - total;
 }
 
@@ -406,9 +411,10 @@ void AudioServer::_mix_step() {
 		}
 
 		for (int k = 0; k < bus->channels.size(); k++) {
-
-			if (!bus->channels[k].active)
+			if (!bus->channels[k].active) {
+				bus->channels.write[k].peak_volume = AudioFrame(AUDIO_MIN_PEAK_DB, AUDIO_MIN_PEAK_DB);
 				continue;
+			}
 
 			AudioFrame *buf = bus->channels.write[k].buffer.ptrw();
 
@@ -441,7 +447,7 @@ void AudioServer::_mix_step() {
 				}
 			}
 
-			bus->channels.write[k].peak_volume = AudioFrame(Math::linear2db(peak.l + 0.0000000001), Math::linear2db(peak.r + 0.0000000001));
+			bus->channels.write[k].peak_volume = AudioFrame(Math::linear2db(peak.l + AUDIO_PEAK_OFFSET), Math::linear2db(peak.r + AUDIO_PEAK_OFFSET));
 
 			if (!bus->channels[k].used) {
 				//see if any audio is contained, because channel was not used

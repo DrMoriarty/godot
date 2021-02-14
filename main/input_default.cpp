@@ -783,10 +783,10 @@ void InputDefault::joy_axis(int p_device, int p_axis, const JoyAxis &p_value) {
 		jx.min = p_value.min;
 		jx.value = p_value.value < 0.5 ? 0.6 : 0.4;
 		joy_axis(p_device, p_axis, jx);
-	} else if (ABS(last) > 0.5 && last * p_value.value < 0) {
+	} else if (ABS(last) > 0.5 && last * p_value.value <= 0) {
 		JoyAxis jx;
 		jx.min = p_value.min;
-		jx.value = p_value.value < 0 ? 0.1 : -0.1;
+		jx.value = last > 0 ? 0.1 : -0.1;
 		joy_axis(p_device, p_axis, jx);
 	}
 
@@ -1078,7 +1078,7 @@ void InputDefault::_get_mapped_hat_events(const JoyDeviceMapping &mapping, int p
 }
 
 // string names of the SDL buttons in the same order as input_event.h godot buttons
-static const char *_joy_buttons[] = { "a", "b", "x", "y", "leftshoulder", "rightshoulder", "lefttrigger", "righttrigger", "leftstick", "rightstick", "back", "start", "dpup", "dpdown", "dpleft", "dpright", "guide", nullptr };
+static const char *_joy_buttons[] = { "a", "b", "x", "y", "leftshoulder", "rightshoulder", "lefttrigger", "righttrigger", "leftstick", "rightstick", "back", "start", "dpup", "dpdown", "dpleft", "dpright", "guide", "misc1", "paddle1", "paddle2", "paddle3", "paddle4", "touchpad", nullptr };
 static const char *_joy_axes[] = { "leftx", "lefty", "rightx", "righty", nullptr };
 
 JoystickList InputDefault::_get_output_button(String output) {
@@ -1284,6 +1284,12 @@ static const char *_buttons[JOY_BUTTON_MAX] = {
 	"DPAD Down",
 	"DPAD Left",
 	"DPAD Right"
+	"Misc 1",
+	"Paddle 1",
+	"Paddle 2",
+	"Paddle 3",
+	"Paddle 4",
+	"Touchpad",
 };
 
 static const char *_axes[JOY_AXIS_MAX] = {

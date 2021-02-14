@@ -117,7 +117,11 @@ public:
 		virtual SpatialPartitionID create(Instance *p_userdata, const AABB &p_aabb = AABB(), int p_subindex = 0, bool p_pairable = false, uint32_t p_pairable_type = 0, uint32_t pairable_mask = 1) = 0;
 		virtual void erase(SpatialPartitionID p_handle) = 0;
 		virtual void move(SpatialPartitionID p_handle, const AABB &p_aabb) = 0;
+		virtual void activate(SpatialPartitionID p_handle, const AABB &p_aabb) {}
+		virtual void deactivate(SpatialPartitionID p_handle) {}
+		virtual void force_collision_check(SpatialPartitionID p_handle) {}
 		virtual void update() {}
+		virtual void update_collisions() {}
 		virtual void set_pairable(SpatialPartitionID p_handle, bool p_pairable, uint32_t p_pairable_type, uint32_t p_pairable_mask) = 0;
 		virtual int cull_convex(const Vector<Plane> &p_convex, Instance **p_result_array, int p_result_max, uint32_t p_mask = 0xFFFFFFFF) = 0;
 		virtual int cull_aabb(const AABB &p_aabb, Instance **p_result_array, int p_result_max, int *p_subindex_array = nullptr, uint32_t p_mask = 0xFFFFFFFF) = 0;
@@ -163,7 +167,11 @@ public:
 		SpatialPartitionID create(Instance *p_userdata, const AABB &p_aabb = AABB(), int p_subindex = 0, bool p_pairable = false, uint32_t p_pairable_type = 0, uint32_t p_pairable_mask = 1);
 		void erase(SpatialPartitionID p_handle);
 		void move(SpatialPartitionID p_handle, const AABB &p_aabb);
+		void activate(SpatialPartitionID p_handle, const AABB &p_aabb);
+		void deactivate(SpatialPartitionID p_handle);
+		void force_collision_check(SpatialPartitionID p_handle);
 		void update();
+		void update_collisions();
 		void set_pairable(SpatialPartitionID p_handle, bool p_pairable, uint32_t p_pairable_type, uint32_t p_pairable_mask);
 		int cull_convex(const Vector<Plane> &p_convex, Instance **p_result_array, int p_result_max, uint32_t p_mask = 0xFFFFFFFF);
 		int cull_aabb(const AABB &p_aabb, Instance **p_result_array, int p_result_max, int *p_subindex_array = nullptr, uint32_t p_mask = 0xFFFFFFFF);

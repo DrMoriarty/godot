@@ -62,7 +62,7 @@ const Engine = (function () {
 			// Emscripten configuration.
 			config['thisProgram'] = me.executableName;
 			config['noExitRuntime'] = true;
-			config['dynamicLibraries'] = me.gdnativeLibs;
+			config['dynamicLibraries'] = [`${me.executableName}.side.wasm`].concat(me.gdnativeLibs);
 			Godot(config).then(function (module) {
 				module['initFS'](me.persistentPaths).then(function (fs_err) {
 					me.rtenv = module;
@@ -106,17 +106,6 @@ const Engine = (function () {
 			if (me.canvas.tabIndex < 0) {
 				me.canvas.tabIndex = 0;
 			}
-
-			// Disable right-click context menu.
-			me.canvas.addEventListener('contextmenu', function (ev) {
-				ev.preventDefault();
-			}, false);
-
-			// Until context restoration is implemented warn the user of context loss.
-			me.canvas.addEventListener('webglcontextlost', function (ev) {
-				alert('WebGL context lost, please reload the page'); // eslint-disable-line no-alert
-				ev.preventDefault();
-			}, false);
 
 			// Browser locale, or custom one if defined.
 			let locale = me.customLocale;

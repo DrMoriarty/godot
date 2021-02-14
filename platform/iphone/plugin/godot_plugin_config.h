@@ -67,6 +67,7 @@ struct PluginConfigIOS {
 	static const char *DEPENDENCIES_SYSTEM_KEY;
 	static const char *DEPENDENCIES_CAPABILITIES_KEY;
 	static const char *DEPENDENCIES_FILES_KEY;
+	static const char *DEPENDENCIES_LINKER_FLAGS;
 
 	static const char *PLIST_SECTION;
 
@@ -90,6 +91,8 @@ struct PluginConfigIOS {
 	Vector<String> files_to_copy;
 	Vector<String> capabilities;
 
+	Vector<String> linker_flags;
+
 	// Optional plist section
 	// Supports only string types for now
 	HashMap<String, String> plist;
@@ -108,6 +111,7 @@ const char *PluginConfigIOS::DEPENDENCIES_LINKED_KEY = "linked";
 const char *PluginConfigIOS::DEPENDENCIES_EMBEDDED_KEY = "embedded";
 const char *PluginConfigIOS::DEPENDENCIES_SYSTEM_KEY = "system";
 const char *PluginConfigIOS::DEPENDENCIES_CAPABILITIES_KEY = "capabilities";
+const char *PluginConfigIOS::DEPENDENCIES_LINKER_FLAGS = "linker_flags";
 const char *PluginConfigIOS::DEPENDENCIES_FILES_KEY = "files";
 
 const char *PluginConfigIOS::PLIST_SECTION = "plist";
@@ -185,22 +189,44 @@ static inline bool validate_plugin(PluginConfigIOS &plugin_config) {
 
 	bool fields_value = valid_name && valid_binary_name && valid_initialize && valid_deinitialize;
 
-	if (fields_value && FileAccess::exists(plugin_config.binary)) {
+	if (!fields_value) {
+		return false;
+	}
+
+	String plugin_extension = plugin_config.binary.get_extension().to_lower();
+
+	if ((plugin_extension == "a" && FileAccess::exists(plugin_config.binary)) ||
+			(plugin_extension == "xcframework" && DirAccess::exists(plugin_config.binary))) {
 		plugin_config.valid_config = true;
 		plugin_config.supports_targets = false;
-	} else if (fields_value) {
+	} else {
 		String file_path = plugin_config.binary.get_base_dir();
 		String file_name = plugin_config.binary.get_basename().get_file();
-		String release_file_name = file_path.plus_file(file_name + ".release.a");
-		String debug_file_name = file_path.plus_file(file_name + ".debug.a");
+		String file_extension = plugin_config.binary.get_extension();
+		String release_file_name = file_path.plus_file(file_name + ".release." + file_extension);
+		String debug_file_name = file_path.plus_file(file_name + ".debug." + file_extension);
 
-		if (FileAccess::exists(release_file_name) && FileAccess::exists(debug_file_name)) {
+		if ((plugin_extension == "a" && FileAccess::exists(release_file_name) && FileAccess::exists(debug_file_name)) ||
+				(plugin_extension == "xcframework" && DirAccess::exists(release_file_name) && DirAccess::exists(debug_file_name))) {
 			plugin_config.valid_config = true;
 			plugin_config.supports_targets = true;
 		}
 	}
 
 	return plugin_config.valid_config;
+}
+
+static inline String get_plugin_main_binary(PluginConfigIOS &plugin_config, bool p_debug) {
+	if (!plugin_config.supports_targets) {
+		return plugin_config.binary;
+	}
+
+	String plugin_binary_dir = plugin_config.binary.get_base_dir();
+	String plugin_name_prefix = plugin_config.binary.get_basename().get_file();
+	String plugin_extension = plugin_config.binary.get_extension();
+	String plugin_file = plugin_name_prefix + "." + (p_debug ? "debug" : "release") + "." + plugin_extension;
+
+	return plugin_binary_dir.plus_file(plugin_file);
 }
 
 static inline uint64_t get_plugin_modification_time(const PluginConfigIOS &plugin_config, const String &config_path) {
@@ -256,6 +282,8 @@ static inline PluginConfigIOS load_plugin_config(Ref<ConfigFile> config_file, co
 		plugin_config.files_to_copy = resolve_local_dependencies(config_base_dir, files);
 
 		plugin_config.capabilities = config_file->get_value(PluginConfigIOS::DEPENDENCIES_SECTION, PluginConfigIOS::DEPENDENCIES_CAPABILITIES_KEY, Vector<String>());
+
+		plugin_config.linker_flags = config_file->get_value(PluginConfigIOS::DEPENDENCIES_SECTION, PluginConfigIOS::DEPENDENCIES_LINKER_FLAGS, Vector<String>());
 	}
 
 	if (config_file->has_section(PluginConfigIOS::PLIST_SECTION)) {

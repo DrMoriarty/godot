@@ -875,6 +875,10 @@ void VisualScriptEditor::_update_graph(int p_only_id) {
 		}
 	}
 	_update_graph_connections();
+
+	float graph_minimap_opacity = EditorSettings::get_singleton()->get("editors/visual_editors/minimap_opacity");
+	graph->set_minimap_opacity(graph_minimap_opacity);
+
 	// use default_func instead of default_func for now I think that should be good stop gap solution to ensure not breaking anything
 	graph->call_deferred("set_scroll_ofs", script->get_function_scroll(default_func) * EDSCALE);
 	updating_graph = false;
@@ -4027,16 +4031,25 @@ void VisualScriptEditor::_comment_node_resized(const Vector2 &p_new_size, int p_
 	if (!gn)
 		return;
 
+	Vector2 new_size = p_new_size;
+	if (graph->is_using_snap()) {
+		Vector2 snap = Vector2(graph->get_snap(), graph->get_snap());
+		Vector2 min_size = (gn->get_minimum_size() + (snap * 0.5)).snapped(snap);
+		new_size = new_size.snapped(snap);
+		new_size.x = MAX(new_size.x, min_size.x);
+		new_size.y = MAX(new_size.y, min_size.y);
+	}
+
 	updating_graph = true;
 
 	graph->set_block_minimum_size_adjust(true); //faster resize
 
 	undo_redo->create_action(TTR("Resize Comment"), UndoRedo::MERGE_ENDS);
-	undo_redo->add_do_method(vsc.ptr(), "set_size", p_new_size / EDSCALE);
+	undo_redo->add_do_method(vsc.ptr(), "set_size", new_size / EDSCALE);
 	undo_redo->add_undo_method(vsc.ptr(), "set_size", vsc->get_size());
 	undo_redo->commit_action();
 
-	gn->set_custom_minimum_size(p_new_size);
+	gn->set_custom_minimum_size(new_size);
 	gn->set_size(Size2(1, 1));
 	graph->set_block_minimum_size_adjust(false);
 	updating_graph = false;
@@ -4785,6 +4798,8 @@ VisualScriptEditor::VisualScriptEditor() {
 	graph->connect("duplicate_nodes_request", this, "_on_nodes_duplicate");
 	graph->connect("gui_input", this, "_graph_gui_input");
 	graph->set_drag_forwarding(this);
+	float graph_minimap_opacity = EditorSettings::get_singleton()->get("editors/visual_editors/minimap_opacity");
+	graph->set_minimap_opacity(graph_minimap_opacity);
 	graph->hide();
 	graph->connect("scroll_offset_changed", this, "_graph_ofs_changed");
 

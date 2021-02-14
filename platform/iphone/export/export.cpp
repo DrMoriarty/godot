@@ -1224,22 +1224,19 @@ Error EditorExportPlatformIOS::_export_ios_plugins(const Ref<EditorExportPreset>
 	Vector<String> added_embedded_dependenciy_names;
 	HashMap<String, String> plist_values;
 
+	Set<String> plugin_linker_flags;
+
 	Error err;
 
 	for (int i = 0; i < enabled_plugins.size(); i++) {
 		PluginConfigIOS plugin = enabled_plugins[i];
 
 		// Export plugin binary.
-		if (!plugin.supports_targets) {
-			err = _copy_asset(dest_dir, plugin.binary, nullptr, true, true, r_exported_assets);
-		} else {
-			String plugin_binary_dir = plugin.binary.get_base_dir();
-			String plugin_name_prefix = plugin.binary.get_basename().get_file();
-			String plugin_file = plugin_name_prefix + "." + (p_debug ? "debug" : "release") + ".a";
-			String result_file_name = plugin.binary.get_file();
-
-			err = _copy_asset(dest_dir, plugin_binary_dir.plus_file(plugin_file), &result_file_name, true, true, r_exported_assets);
-		}
+		String plugin_main_binary = get_plugin_main_binary(plugin, p_debug);
+		String plugin_binary_result_file = plugin.binary.get_file();
+		// We shouldn't embed .xcframework that contains static libraries.
+		// Static libraries are not embedded anyway.
+		err = _copy_asset(dest_dir, plugin_main_binary, &plugin_binary_result_file, true, false, r_exported_assets);
 
 		ERR_FAIL_COND_V(err, err);
 
@@ -1293,6 +1290,13 @@ Error EditorExportPlatformIOS::_export_ios_plugins(const Ref<EditorExportPreset>
 			}
 
 			p_config_data.capabilities.push_back(capability);
+		}
+
+		// Linker flags
+		// Checking duplicates
+		for (int j = 0; j < plugin.linker_flags.size(); j++) {
+			String linker_flag = plugin.linker_flags[j];
+			plugin_linker_flags.insert(linker_flag);
 		}
 
 		// Plist
@@ -1375,6 +1379,27 @@ Error EditorExportPlatformIOS::_export_ios_plugins(const Ref<EditorExportPreset>
 
 		p_config_data.cpp_code += plugin_cpp_code.format(plugin_format, "$_");
 	}
+
+	// Update Linker Flag Values
+	{
+		String result_linker_flags = " ";
+		for (Set<String>::Element *E = plugin_linker_flags.front(); E; E = E->next()) {
+			const String &flag = E->get();
+
+			if (flag.length() == 0) {
+				continue;
+			}
+
+			if (result_linker_flags.length() > 0) {
+				result_linker_flags += ' ';
+			}
+
+			result_linker_flags += flag;
+		}
+		result_linker_flags = result_linker_flags.replace("\"", "\\\"");
+		p_config_data.linker_flags += result_linker_flags;
+	}
+
 	return OK;
 }
 

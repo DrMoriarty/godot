@@ -56,12 +56,14 @@ public:
 
 		bool shrink_textures_x2;
 		bool use_fast_texture_filter;
+		bool use_anisotropic_filter;
 		bool use_skeleton_software;
 		bool use_lightmap_filter_bicubic;
 
 		int max_vertex_texture_image_units;
 		int max_texture_image_units;
 		int max_texture_size;
+		int max_viewport_dimensions[2];
 
 		// TODO implement wireframe in GLES2
 		// bool generate_wireframes;
@@ -81,6 +83,8 @@ public:
 
 		bool use_rgba_2d_shadows;
 		bool use_rgba_3d_shadows;
+
+		float anisotropic_level;
 
 		bool support_32_bits_indices;
 		bool support_write_depth;

@@ -25,7 +25,7 @@ def get_opts():
         ("osxcross_sdk", "OSXCross SDK version", "darwin14"),
         ("MACOS_SDK_PATH", "Path to the macOS SDK", ""),
         EnumVariable("macports_clang", "Build using Clang from MacPorts", "no", ("no", "5.0", "devel")),
-        EnumVariable("debug_symbols", "Add debugging symbols to release/release_debug builds", "yes", ("yes", "no")),
+        BoolVariable("debug_symbols", "Add debugging symbols to release/release_debug builds", True),
         BoolVariable("separate_debug_symbols", "Create a separate file containing debugging symbols", False),
         BoolVariable("use_ubsan", "Use LLVM/GCC compiler undefined behavior sanitizer (UBSAN)", False),
         BoolVariable("use_asan", "Use LLVM/GCC compiler address sanitizer (ASAN))", False),
@@ -41,27 +41,25 @@ def configure(env):
     ## Build type
 
     if env["target"] == "release":
-        if env["debug_symbols"] != "full":
-            if env["optimize"] == "speed":  # optimize for speed (default)
-                env.Prepend(CCFLAGS=["-O3", "-fomit-frame-pointer", "-ftree-vectorize"])
-            else:  # optimize for size
-                env.Prepend(CCFLAGS=["-Os", "-ftree-vectorize"])
-            if env["arch"] != "arm64":
-                env.Prepend(CCFLAGS=["-msse2"])
+        if env["optimize"] == "speed":  # optimize for speed (default)
+            env.Prepend(CCFLAGS=["-O3", "-fomit-frame-pointer", "-ftree-vectorize"])
+        else:  # optimize for size
+            env.Prepend(CCFLAGS=["-Os", "-ftree-vectorize"])
+        if env["arch"] != "arm64":
+            env.Prepend(CCFLAGS=["-msse2"])
 
-        if env["debug_symbols"] == "yes":
+        if env["debug_symbols"]:
             env.Prepend(CCFLAGS=["-g2"])
 
     elif env["target"] == "release_debug":
-        if env["debug_symbols"] != "full":
-            if env["optimize"] == "speed":  # optimize for speed (default)
-                env.Prepend(CCFLAGS=["-O2"])
-            else:  # optimize for size
-                env.Prepend(CCFLAGS=["-Os"])
+        if env["optimize"] == "speed":  # optimize for speed (default)
+            env.Prepend(CCFLAGS=["-O2"])
+        else:  # optimize for size
+            env.Prepend(CCFLAGS=["-Os"])
 
         env.Prepend(CPPDEFINES=["DEBUG_ENABLED"])
 
-        if env["debug_symbols"] == "yes":
+        if env["debug_symbols"]:
             env.Prepend(CCFLAGS=["-g2"])
 
     elif env["target"] == "debug":

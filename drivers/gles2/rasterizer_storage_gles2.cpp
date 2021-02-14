@@ -79,6 +79,9 @@ GLuint RasterizerStorageGLES2::system_fbo = 0;
 
 #define _EXT_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
 
+#define _GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define _GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+
 #define _RED_OES 0x1903
 
 #define _DEPTH_COMPONENT24_OES 0x81A6
@@ -555,6 +558,13 @@ void RasterizerStorageGLES2::texture_allocate(RID p_texture, int p_width, int p_
 	texture->width = p_width;
 	texture->height = p_height;
 	texture->format = p_format;
+
+	if (texture->width > config.max_texture_size || texture->height > config.max_texture_size) {
+		WARN_PRINTS("Cannot create texture larger than maximum hardware supported size of " + itos(config.max_texture_size) + ". Setting size to maximum.");
+		texture->width = MIN(texture->width, config.max_texture_size);
+		texture->height = MIN(texture->height, config.max_texture_size);
+	}
+
 	texture->flags = p_flags;
 	texture->stored_cube_sides = 0;
 	texture->type = p_type;
@@ -747,6 +757,16 @@ void RasterizerStorageGLES2::texture_set_data(RID p_texture, const Ref<Image> &p
 		//glTexParameterf( texture->target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
 		glTexParameterf(texture->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(texture->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+
+	if (config.use_anisotropic_filter) {
+
+		if (texture->flags & VS::TEXTURE_FLAG_ANISOTROPIC_FILTER) {
+
+			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
+		} else {
+			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+		}
 	}
 
 	int mipmaps = ((texture->flags & VS::TEXTURE_FLAG_MIPMAPS) && img->has_mipmaps()) ? img->get_mipmap_count() + 1 : 1;
@@ -955,6 +975,16 @@ void RasterizerStorageGLES2::texture_set_flags(RID p_texture, uint32_t p_flags) 
 		//glTexParameterf( texture->target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
 		glTexParameterf(texture->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(texture->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+
+	if (config.use_anisotropic_filter) {
+
+		if (texture->flags & VS::TEXTURE_FLAG_ANISOTROPIC_FILTER) {
+
+			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, config.anisotropic_level);
+		} else {
+			glTexParameterf(texture->target, _GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+		}
 	}
 
 	if ((texture->flags & VS::TEXTURE_FLAG_MIPMAPS) && !texture->ignore_mipmaps) {
@@ -4738,6 +4768,12 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 		return;
 	}
 
+	if (rt->width > config.max_viewport_dimensions[0] || rt->height > config.max_viewport_dimensions[1]) {
+		WARN_PRINTS("Cannot create render target larger than maximum hardware supported size of (" + itos(config.max_viewport_dimensions[0]) + ", " + itos(config.max_viewport_dimensions[1]) + "). Setting size to maximum.");
+		rt->width = MIN(rt->width, config.max_viewport_dimensions[0]);
+		rt->height = MIN(rt->height, config.max_viewport_dimensions[1]);
+	}
+
 	GLuint color_internal_format;
 	GLuint color_format;
 	GLuint color_type = GL_UNSIGNED_BYTE;
@@ -6090,6 +6126,13 @@ void RasterizerStorageGLES2::initialize() {
 	config.rgtc_supported = config.extensions.has("GL_EXT_texture_compression_rgtc") || config.extensions.has("GL_ARB_texture_compression_rgtc") || config.extensions.has("EXT_texture_compression_rgtc");
 	config.bptc_supported = config.extensions.has("GL_ARB_texture_compression_bptc") || config.extensions.has("EXT_texture_compression_bptc");
 
+	config.anisotropic_level = 1.0;
+	config.use_anisotropic_filter = config.extensions.has("GL_EXT_texture_filter_anisotropic");
+	if (config.use_anisotropic_filter) {
+		glGetFloatv(_GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &config.anisotropic_level);
+		config.anisotropic_level = MIN(int(ProjectSettings::get_singleton()->get("rendering/quality/filters/anisotropic_filter_level")), config.anisotropic_level);
+	}
+
 	//determine formats for depth textures (or renderbuffers)
 	if (config.support_depth_texture) {
 		// Will use texture for depth
@@ -6167,6 +6210,7 @@ void RasterizerStorageGLES2::initialize() {
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &config.max_vertex_texture_image_units);
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &config.max_texture_image_units);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &config.max_texture_size);
+	glGetIntegerv(GL_MAX_VIEWPORT_DIMS, config.max_viewport_dimensions);
 
 	// the use skeleton software path should be used if either float texture is not supported,
 	// OR max_vertex_texture_image_units is zero

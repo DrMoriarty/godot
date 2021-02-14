@@ -1670,9 +1670,10 @@ String::String(const StrRange &p_range) {
 }
 
 int String::hex_to_int(bool p_with_prefix) const {
-
-	if (p_with_prefix && length() < 3)
+	int len = length();
+	if (len == 0 || (p_with_prefix && len < 3)) {
 		return 0;
+	}
 
 	const CharType *s = ptr();
 
@@ -1755,9 +1756,10 @@ int64_t String::hex_to_int64(bool p_with_prefix) const {
 }
 
 int64_t String::bin_to_int64(bool p_with_prefix) const {
-
-	if (p_with_prefix && length() < 3)
+	int len = length();
+	if (len == 0 || (p_with_prefix && len < 3)) {
 		return 0;
+	}
 
 	const CharType *s = ptr();
 
@@ -2708,35 +2710,49 @@ int String::rfindn(const String &p_str, int p_from) const {
 }
 
 bool String::ends_with(const String &p_string) const {
-
-	int pos = find_last(p_string);
-	if (pos == -1)
+	int l = p_string.length();
+	if (l > length()) {
 		return false;
-	return pos + p_string.length() == length();
+	}
+
+	if (l == 0) {
+		return true;
+	}
+
+	const CharType *p = &p_string[0];
+	const CharType *s = &operator[](length() - l);
+
+	for (int i = 0; i < l; i++) {
+		if (p[i] != s[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool String::begins_with(const String &p_string) const {
-
-	if (p_string.length() > length())
-		return false;
-
 	int l = p_string.length();
-	if (l == 0)
-		return true;
-
-	const CharType *src = &p_string[0];
-	const CharType *str = &operator[](0);
-
-	int i = 0;
-	for (; i < l; i++) {
-
-		if (src[i] != str[i])
-			return false;
+	if (l > length()) {
+		return false;
 	}
 
-	// only if i == l the p_string matches the beginning
-	return i == l;
+	if (l == 0) {
+		return true;
+	}
+
+	const CharType *p = &p_string[0];
+	const CharType *s = &operator[](0);
+
+	for (int i = 0; i < l; i++) {
+		if (p[i] != s[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }
+
 bool String::begins_with(const char *p_string) const {
 
 	int l = length();
