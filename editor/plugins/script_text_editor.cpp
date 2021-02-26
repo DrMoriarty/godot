@@ -1446,7 +1446,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 
 		case MOVE_CURSOR_PAGE_DOWN: {
 
-			int line = tx->get_last_visible_line();
+			int line = tx->get_last_full_visible_line();
 			tx->set_line_as_first_visible(line);
 			tx->cursor_set_line(line);
 		} break;
@@ -1456,7 +1456,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 			int line = tx->cursor_get_line();
 			if (line == tx->get_first_visible_line()) {
 				tx->set_line_as_last_visible(line);
-			} else if (line == (tx->get_last_visible_line() + tx->get_first_visible_line()) / 2 - 1) {
+			} else if (line == (tx->get_last_full_visible_line() + tx->get_first_visible_line()) / 2 - 1) {
 				tx->set_line_as_first_visible(line);
 			} else {
 				tx->set_line_as_center_visible(line);

@@ -456,11 +456,6 @@ private:
 	int get_char_count();
 
 	double get_scroll_pos_for_line(int p_line, int p_wrap_index = 0) const;
-	void set_line_as_first_visible(int p_line, int p_wrap_index = 0);
-	void set_line_as_center_visible(int p_line, int p_wrap_index = 0);
-	void set_line_as_last_visible(int p_line, int p_wrap_index = 0);
-	int get_first_visible_line() const;
-	int get_last_full_visible_line() const;
 	int get_last_full_visible_line_wrap_index() const;
 	double get_visible_rows_offset() const;
 	double get_v_scroll_offset() const;
@@ -613,7 +608,7 @@ public:
 	void set_line_as_center_visible(int p_line, int p_wrap_index = 0);
 	void set_line_as_last_visible(int p_line, int p_wrap_index = 0);
 	int get_first_visible_line() const;
-	int get_last_visible_line() const;
+	int get_last_full_visible_line() const;
 	void set_line_as_hidden(int p_line, bool p_hidden);
 	bool is_line_hidden(int p_line) const;
 	void fold_all_lines();

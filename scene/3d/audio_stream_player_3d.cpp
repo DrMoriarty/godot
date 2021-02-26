@@ -644,9 +644,6 @@ void AudioStreamPlayer3D::set_stream(Ref<AudioStream> p_stream) {
 	mix_buffer.resize(AudioServer::get_singleton()->thread_get_mix_buffer_size());
 
 	if (stream_playback.is_valid()) {
-		if (active) {
-			stream_playback->stop();
-		}
 		stream_playback.unref();
 		stream.unref();
 		active.clear();
