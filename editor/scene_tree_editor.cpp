@@ -1129,7 +1129,7 @@ void SceneTreeEditor::set_connecting_signal(bool p_enable) {
 void SceneTreeEditor::_bind_methods() {
 
 	ClassDB::bind_method("_tree_changed", &SceneTreeEditor::_tree_changed);
-	ClassDB::bind_method("_update_tree", &SceneTreeEditor::_update_tree);
+	ClassDB::bind_method(D_METHOD("_update_tree", "scroll_to_selected"), &SceneTreeEditor::_update_tree, DEFVAL(false));
 	ClassDB::bind_method("_node_removed", &SceneTreeEditor::_node_removed);
 	ClassDB::bind_method("_node_renamed", &SceneTreeEditor::_node_renamed);
 	ClassDB::bind_method("_selected_changed", &SceneTreeEditor::_selected_changed);
@@ -1228,7 +1228,7 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 	blocked = 0;
 
 	update_timer = memnew(Timer);
-	update_timer->connect("timeout", this, "_update_tree");
+	update_timer->connect("timeout", this, "_update_tree", varray(false));
 	update_timer->set_one_shot(true);
 	update_timer->set_wait_time(0.5);
 	add_child(update_timer);

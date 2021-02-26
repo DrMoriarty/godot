@@ -248,6 +248,14 @@
 		<member name="application/run/disable_stdout" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], disables printing to standard output in an exported build.
 		</member>
+		<member name="application/run/flush_stdout_on_print" type="bool" setter="" getter="" default="false">
+			If [code]true[/code], flushes the standard output stream every time a line is printed. This affects both terminal logging and file logging.
+			When running a project, this setting must be enabled if you want logs to be collected by service managers such as systemd/journalctl. This setting is disabled by default on release builds, since flushing on every printed line will negatively affect performance if lots of lines are printed in a rapid succession. Also, if this setting is enabled, logged files will still be written successfully if the application crashes or is otherwise killed by the user (without being closed "normally").
+			[b]Note:[/b] Regardless of this setting, the standard error stream ([code]stderr[/code]) is always flushed when a line is printed to it.
+		</member>
+		<member name="application/run/flush_stdout_on_print.debug" type="bool" setter="" getter="" default="true">
+			Debug build override for [member application/run/flush_stdout_on_print], as performance is less important during debugging.
+		</member>
 		<member name="application/run/frame_delay_msec" type="int" setter="" getter="" default="0">
 			Forces a delay between frames in the main loop (in milliseconds). This may be useful if you plan to disable vertical synchronization.
 		</member>
@@ -420,6 +428,9 @@
 		</member>
 		<member name="debug/shapes/collision/contact_color" type="Color" setter="" getter="" default="Color( 1, 0.2, 0.1, 0.8 )">
 			Color of the contact points between collision shapes, visible when "Visible Collision Shapes" is enabled in the Debug menu.
+		</member>
+		<member name="debug/shapes/collision/draw_2d_outlines" type="bool" setter="" getter="" default="true">
+			Sets whether 2D physics will display collision outlines in game when "Visible Collision Shapes" is enabled in the Debug menu.
 		</member>
 		<member name="debug/shapes/collision/max_contacts_displayed" type="int" setter="" getter="" default="10000">
 			Maximum number of contact points between collision shapes to display when "Visible Collision Shapes" is enabled in the Debug menu.
@@ -1036,12 +1047,10 @@
 			Enabling this setting uses the legacy method to draw batches containing only one rect. The legacy method is faster (approx twice as fast), but can cause flicker on some systems. In order to directly compare performance with the non-batching renderer you can set this to true, but it is recommended to turn this off unless you can guarantee your target hardware will work with this method.
 		</member>
 		<member name="rendering/batching/options/use_batching" type="bool" setter="" getter="" default="true">
-			Turns batching on and off. Batching increases performance by reducing the amount of graphics API drawcalls.
-			[b]Note:[/b] Currently only effective when using the GLES2 renderer.
+			Turns 2D batching on and off. Batching increases performance by reducing the amount of graphics API drawcalls.
 		</member>
 		<member name="rendering/batching/options/use_batching_in_editor" type="bool" setter="" getter="" default="true">
-			Switches on batching within the editor.
-			[b]Note:[/b] Currently only effective when using the GLES2 renderer.
+			Switches on 2D batching within the editor.
 		</member>
 		<member name="rendering/batching/parameters/batch_buffer_size" type="int" setter="" getter="" default="16384">
 			Size of buffer reserved for batched vertices. Larger size enables larger batches, but there are diminishing returns for the memory used. This should only have a minor effect on performance.
@@ -1120,6 +1129,8 @@
 			Not available in GLES3 when [member rendering/batching/options/use_batching] is off.
 		</member>
 		<member name="rendering/quality/2d/use_camera_snap" type="bool" setter="" getter="" default="false">
+			If [code]true[/code], forces snapping of 2D viewports to the nearest whole coordinate.
+			Can reduce unwanted camera relative movement in pixel art styles.
 		</member>
 		<member name="rendering/quality/2d/use_nvidia_rect_flicker_workaround" type="bool" setter="" getter="" default="false">
 			Some NVIDIA GPU drivers have a bug which produces flickering issues for the [code]draw_rect[/code] method, especially as used in [TileMap]. Refer to [url=https://github.com/godotengine/godot/issues/9913]GitHub issue 9913[/url] for details.
@@ -1253,6 +1264,7 @@
 		</member>
 		<member name="rendering/quality/shadows/filter_mode" type="int" setter="" getter="" default="1">
 			Shadow filter mode. Higher-quality settings result in smoother shadows that flicker less when moving. "Disabled" is the fastest option, but also has the lowest quality. "PCF5" is smoother but is also slower. "PCF13" is the smoothest option, but is also the slowest.
+			[b]Note:[/b] When using the GLES2 backend, the "PCF13" option actually uses 16 samples to emulate linear filtering in the shader. This results in a shadow appearance similar to the one produced by the GLES3 backend.
 		</member>
 		<member name="rendering/quality/shadows/filter_mode.mobile" type="int" setter="" getter="" default="0">
 			Lower-end override for [member rendering/quality/shadows/filter_mode] on mobile devices, due to performance concerns or driver support.
