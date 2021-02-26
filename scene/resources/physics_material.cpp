@@ -47,7 +47,7 @@ void PhysicsMaterial::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "friction", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_friction", "get_friction");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "rough"), "set_rough", "is_rough");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "bounce", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_bounce", "get_bounce");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "absorbent"), "set_absorbent", "get_absorbent");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "absorbent"), "set_absorbent", "get_absorbent");
 }
 
 void PhysicsMaterial::set_friction(real_t p_val) {
