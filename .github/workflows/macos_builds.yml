@@ -61,7 +61,7 @@ jobs:
 
   macos-template:
     runs-on: "macos-latest"
-    name: Template (target=release, tools=no)
+    name: Template (target=release/release_debug, tools=no)
 
     steps:
       - uses: actions/checkout@v2
@@ -99,11 +99,18 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons target=release tools=no
+          scons platform=osx tools=no target=release arch=x86_64
+          scons platform=osx tools=no target=release arch=arm64
+          scons platform=osx tools=no target=release_debug arch=x86_64
+          scons platform=osx tools=no target=release_debug arch=arm64
           ls -l bin/
+          mkdir misc/dist/osx_template.app/Contents/MacOS
+          lipo -create -output misc/dist/osx_template.app/Contents/MacOS/godot_osx_release.64 bin/godot.osx.opt.arm64 bin/godot.osx.opt.x86_64
+          lipo -create -output misc/dist/osx_template.app/Contents/MacOS/godot_osx_debug.64 bin/godot.osx.opt.debug.arm64 bin/godot.osx.opt.debug.x86_64
 
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ github.job }}
-          path: bin/*
+          path: misc/dist/osx_template.app
           retention-days: 14
+

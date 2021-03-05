@@ -105,7 +105,10 @@ jobs:
       env:
         SCONS_CACHE: /.scons_cache/
       run: |
-        scons target=release tools=no
+        scons target=release tools=no bits=64
+        scons target=release tools=no bits=32
+        scons target=release_debug tools=no bits=64
+        scons target=release_debug tools=no bits=32
         ls -l bin/
 
     - uses: actions/upload-artifact@v2
