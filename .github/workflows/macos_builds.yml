@@ -99,10 +99,10 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=osx tools=no target=release arch=x86_64
-          scons platform=osx tools=no target=release arch=arm64
-          scons platform=osx tools=no target=release_debug arch=x86_64
-          scons platform=osx tools=no target=release_debug arch=arm64
+          scons tools=no target=release arch=x86_64
+          scons tools=no target=release arch=arm64
+          scons tools=no target=release_debug arch=x86_64
+          scons tools=no target=release_debug arch=arm64
           ls -l bin/
           mkdir misc/dist/osx_template.app/Contents/MacOS
           lipo -create -output misc/dist/osx_template.app/Contents/MacOS/godot_osx_release.64 bin/godot.osx.opt.arm64 bin/godot.osx.opt.x86_64
