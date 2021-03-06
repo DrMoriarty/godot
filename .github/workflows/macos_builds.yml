@@ -107,10 +107,12 @@ jobs:
           mkdir misc/dist/osx_template.app/Contents/MacOS
           lipo -create -output misc/dist/osx_template.app/Contents/MacOS/godot_osx_release.64 bin/godot.osx.opt.arm64 bin/godot.osx.opt.x86_64
           lipo -create -output misc/dist/osx_template.app/Contents/MacOS/godot_osx_debug.64 bin/godot.osx.opt.debug.arm64 bin/godot.osx.opt.debug.x86_64
+          rm bin/*
+          cp -r misc/dist/osx_template.app bin/
 
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ github.job }}
-          path: misc/dist/osx_template.app
+          path: bin/*
           retention-days: 14
 
