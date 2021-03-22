@@ -61,11 +61,15 @@ elif platform_arg == "javascript":
     # Use generic POSIX build toolchain for Emscripten.
     custom_tools = ["cc", "c++", "ar", "link", "textfile", "zip"]
 
+# We let SCons build its default ENV as it includes OS-specific things which we don't
+# want to have to pull in manually.
+# Then we prepend PATH to make it take precedence, while preserving SCons' own entries.
 env_base = Environment(tools=custom_tools)
-if "TERM" in os.environ:
+env_base.PrependENVPath("PATH", os.getenv("PATH"))
+env_base.PrependENVPath("PKG_CONFIG_PATH", os.getenv("PKG_CONFIG_PATH"))
+if "TERM" in os.environ:  # Used for colored output.
     env_base["ENV"]["TERM"] = os.environ["TERM"]
-env_base.AppendENVPath("PATH", os.getenv("PATH"))
-env_base.AppendENVPath("PKG_CONFIG_PATH", os.getenv("PKG_CONFIG_PATH"))
+
 env_base.disabled_modules = []
 env_base.use_ptrcall = False
 env_base.module_version_string = ""
@@ -95,7 +99,7 @@ env_base.SConsignFile(".sconsign{0}.dblite".format(pickle.HIGHEST_PROTOCOL))
 
 customs = ["custom.py"]
 
-profile = methods.get_cmdline_bool("profile", False)
+profile = ARGUMENTS.get("profile", "")
 if profile:
     if os.path.isfile(profile):
         customs.append(profile)
@@ -111,7 +115,7 @@ opts.Add(BoolVariable("tools", "Build the tools (a.k.a. the Godot editor)", True
 opts.Add(EnumVariable("target", "Compilation target", "debug", ("debug", "release_debug", "release")))
 opts.Add("arch", "Platform-dependent architecture (arm/arm64/x86/x64/mips/...)", "")
 opts.Add(EnumVariable("bits", "Target platform bits", "default", ("default", "32", "64")))
-opts.Add(EnumVariable("optimize", "Optimization type", "speed", ("speed", "size")))
+opts.Add(EnumVariable("optimize", "Optimization type", "speed", ("speed", "size", "none")))
 opts.Add(BoolVariable("production", "Set defaults to build Godot for use in production", False))
 opts.Add(BoolVariable("use_lto", "Use link-time optimization", False))
 
@@ -243,13 +247,16 @@ for path in module_search_paths:
         # Built-in modules don't have nested modules,
         # so save the time it takes to parse directories.
         modules = methods.detect_modules(path, recursive=False)
-    else:  # External.
+    else:  # Custom.
         modules = methods.detect_modules(path, env_base["custom_modules_recursive"])
+        # Provide default include path for both the custom module search `path`
+        # and the base directory containing custom modules, as it may be different
+        # from the built-in "modules" name (e.g. "custom_modules/summator/summator.h"),
+        # so it can be referenced simply as `#include "summator/summator.h"`
+        # independently of where a module is located on user's filesystem.
+        env_base.Prepend(CPPPATH=[path, os.path.dirname(path)])
     # Note: custom modules can override built-in ones.
     modules_detected.update(modules)
-    include_path = os.path.dirname(path)
-    if include_path:
-        env_base.Prepend(CPPPATH=[include_path])
 
 # Add module options
 for name, path in modules_detected.items():

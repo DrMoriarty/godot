@@ -798,6 +798,8 @@ Dictionary _OS::get_time(bool utc) const {
  * @return epoch calculated
  */
 int64_t _OS::get_unix_time_from_datetime(Dictionary datetime) const {
+	// if datetime is an empty Dictionary throws an error
+	ERR_FAIL_COND_V_MSG(datetime.empty(), 0, "Invalid datetime Dictionary: Dictionary is empty");
 
 	// Bunch of conversion constants
 	static const unsigned int SECONDS_PER_MINUTE = 60;
@@ -1021,7 +1023,7 @@ struct _OSCoreBindImg {
 void _OS::print_all_textures_by_size() {
 
 	List<_OSCoreBindImg> imgs;
-	int total = 0;
+	uint64_t total = 0;
 	{
 		List<Ref<Resource> > rsrc;
 		ResourceCache::get_cached_resources(&rsrc);

@@ -3203,11 +3203,11 @@ void Tree::item_selected(int p_column, TreeItem *p_item) {
 
 void Tree::item_deselected(int p_column, TreeItem *p_item) {
 	if (selected_item == p_item) {
-		selected_item = NULL;
-	}
+		selected_item = nullptr;
 
-	if (selected_col == p_column) {
-		selected_col = -1;
+		if (selected_col == p_column) {
+			selected_col = -1;
+		}
 	}
 
 	if (select_mode == SELECT_MULTI || select_mode == SELECT_SINGLE) {
@@ -3370,9 +3370,13 @@ int Tree::get_column_width(int p_column) const {
 	if (!columns[p_column].expand)
 		return columns[p_column].min_width;
 
+	int expand_area = get_size().width;
+
 	Ref<StyleBox> bg = cache.bg;
 
-	int expand_area = get_size().width - (bg->get_margin(MARGIN_LEFT) + bg->get_margin(MARGIN_RIGHT));
+	if (bg.is_valid()) {
+		expand_area -= bg->get_margin(MARGIN_LEFT) + bg->get_margin(MARGIN_RIGHT);
+	}
 
 	if (v_scroll->is_visible_in_tree())
 		expand_area -= v_scroll->get_combined_minimum_size().width;
