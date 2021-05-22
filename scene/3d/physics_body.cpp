@@ -442,12 +442,8 @@ struct _RigidBodyInOut {
 };
 
 void RigidBody::_direct_state_changed(Object *p_state) {
-
-#ifdef DEBUG_ENABLED
 	state = Object::cast_to<PhysicsDirectBodyState>(p_state);
-#else
-	state = (PhysicsDirectBodyState *)p_state; //trust it
-#endif
+	ERR_FAIL_COND_MSG(!state, "Method '_direct_state_changed' must receive a valid PhysicsDirectBodyState object as argument");
 
 	set_ignore_transform_notification(true);
 	set_global_transform(state->get_transform());
@@ -461,6 +457,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 	if (get_script_instance())
 		get_script_instance()->call("_integrate_forces", state);
 	set_ignore_transform_notification(false);
+	_on_transform_changed();
 
 	if (contact_monitor) {
 
@@ -2220,19 +2217,15 @@ void PhysicalBone::_direct_state_changed(Object *p_state) {
 
 	/// Update bone transform
 
-	PhysicsDirectBodyState *state;
-
-#ifdef DEBUG_ENABLED
-	state = Object::cast_to<PhysicsDirectBodyState>(p_state);
-#else
-	state = (PhysicsDirectBodyState *)p_state; //trust it
-#endif
+	PhysicsDirectBodyState *state = Object::cast_to<PhysicsDirectBodyState>(p_state);
+	ERR_FAIL_COND_MSG(!state, "Method '_direct_state_changed' must receive a valid PhysicsDirectBodyState object as argument");
 
 	Transform global_transform(state->get_transform());
 
 	set_ignore_transform_notification(true);
 	set_global_transform(global_transform);
 	set_ignore_transform_notification(false);
+	_on_transform_changed();
 
 	// Update skeleton
 	if (parent_skeleton) {
